@@ -1,0 +1,15 @@
+CREATE INDEX idx_projects_owner ON projects(owner_id);
+CREATE INDEX idx_projects_slug ON projects(slug);
+CREATE INDEX idx_projects_visibility ON projects(visibility);
+CREATE INDEX idx_projects_collab_status ON projects(collaboration_status);
+CREATE INDEX idx_project_members_project ON project_members(project_id);
+CREATE INDEX idx_project_members_user ON project_members(user_id);
+CREATE INDEX idx_chapters_project ON chapters(project_id);
+CREATE INDEX idx_chapter_versions_chapter ON chapter_versions(chapter_id);
+CREATE INDEX idx_applications_project ON applications(project_id);
+CREATE INDEX idx_applications_applicant ON applications(applicant_id);
+CREATE INDEX idx_applications_status ON applications(status);
+CREATE INDEX idx_notifications_user ON notifications(user_id, read);
+CREATE INDEX idx_brainstorm_project ON brainstorm_notes(project_id);
+CREATE INDEX idx_chars_project ON character_profiles(project_id);
+CREATE INDEX idx_timeline_project ON timeline_events(project_id, order_index);
