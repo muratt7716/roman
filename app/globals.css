@@ -1,45 +1,101 @@
+@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-display: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Lora', serif;
 
+  --color-background: hsl(240 8% 5%);
+  --color-foreground: hsl(60 9% 97%);
+  --color-surface: hsl(240 8% 8%);
+  --color-surface-2: hsl(240 7% 11%);
+  --color-card: hsl(240 8% 8%);
+  --color-card-foreground: hsl(60 9% 97%);
+  --color-primary: hsl(262 83% 58%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-accent: hsl(263 67% 75%);
+  --color-accent-foreground: hsl(240 8% 5%);
+  --color-muted: hsl(240 7% 11%);
+  --color-muted-foreground: hsl(240 5% 64%);
+  --color-border: hsl(240 6% 18%);
+  --color-destructive: hsl(0 72% 51%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-success: hsl(160 84% 39%);
+  --color-ring: hsl(262 83% 58%);
+
+  --radius-lg: 0.5rem;
+  --radius-md: calc(var(--radius-lg) - 2px);
+  --radius-sm: calc(var(--radius-lg) - 4px);
+
+  --animate-fade-up: fade-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* shadcn CSS variables (hsl format for compatibility) */
 @layer base {
   :root {
     --background: 240 8% 5%;
     --foreground: 60 9% 97%;
-    --surface: 240 8% 8%;
-    --surface-2: 240 7% 11%;
     --card: 240 8% 8%;
     --card-foreground: 60 9% 97%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 60 9% 97%;
     --primary: 262 83% 58%;
     --primary-foreground: 0 0% 100%;
-    --accent: 263 67% 75%;
-    --accent-foreground: 240 8% 5%;
+    --secondary: 240 7% 11%;
+    --secondary-foreground: 60 9% 97%;
     --muted: 240 7% 11%;
     --muted-foreground: 240 5% 64%;
-    --border: 240 6% 18%;
+    --accent: 263 67% 75%;
+    --accent-foreground: 240 8% 5%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --success: 160 84% 39%;
+    --border: 240 6% 18%;
+    --input: 240 6% 18%;
     --ring: 262 83% 58%;
     --radius: 0.5rem;
   }
 }
 
 @layer base {
-  * { @apply border-border; }
-  body {
-    @apply bg-background text-foreground font-sans antialiased;
+  * {
+    border-color: hsl(var(--border));
   }
-  h1, h2 { @apply font-display; }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2 {
+    font-family: var(--font-display);
+  }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/[0.03] backdrop-blur-sm border border-white/[0.08];
+    background-color: rgb(255 255 255 / 0.03);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgb(255 255 255 / 0.08);
   }
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+    background: linear-gradient(to right, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+  .bg-surface { background-color: var(--color-surface); }
+  .bg-surface-2 { background-color: var(--color-surface-2); }
 }
