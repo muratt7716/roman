@@ -3,13 +3,14 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { PenLine, LogOut, User, Bell } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
 import type { Profile } from '@/types'
 
 interface NavbarProps {
@@ -37,37 +38,47 @@ export function Navbar({ profile }: NavbarProps) {
         <div className="flex items-center gap-2">
           {profile ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/explore">Keşfet</Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/notifications" aria-label="Bildirimler">
-                  <Bell className="w-4 h-4" />
-                </Link>
-              </Button>
+              <Link
+                href="/explore"
+                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+              >
+                Keşfet
+              </Link>
+              <Link
+                href="/notifications"
+                aria-label="Bildirimler"
+                className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
+              >
+                <Bell className="w-4 h-4" />
+              </Link>
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full" aria-label="Hesap menüsü">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={profile.avatar_url ?? undefined} />
-                      <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                        {profile.display_name?.[0] ?? profile.username[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
+                <DropdownMenuTrigger
+                  render={
+                    <button
+                      className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'rounded-full')}
+                      aria-label="Hesap menüsü"
+                    />
+                  }
+                >
+                  <Avatar className="w-8 h-8">
+                    <AvatarImage src={profile.avatar_url ?? undefined} />
+                    <AvatarFallback className="bg-primary/20 text-primary text-xs">
+                      {profile.display_name?.[0] ?? profile.username[0]}
+                    </AvatarFallback>
+                  </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-surface border-border">
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard" className="cursor-pointer">Dashboard</Link>
+                  <DropdownMenuItem>
+                    <Link href="/dashboard" className="flex w-full cursor-pointer">Dashboard</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/u/${profile.username}`} className="cursor-pointer">
+                  <DropdownMenuItem>
+                    <Link href={`/u/${profile.username}`} className="flex w-full cursor-pointer items-center">
                       <User className="w-4 h-4 mr-2" /> Profil
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings" className="cursor-pointer">Ayarlar</Link>
+                  <DropdownMenuItem>
+                    <Link href="/settings" className="flex w-full cursor-pointer">Ayarlar</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={signOut} className="text-destructive cursor-pointer">
@@ -78,15 +89,24 @@ export function Navbar({ profile }: NavbarProps) {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/explore">Keşfet</Link>
-              </Button>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">Giriş Yap</Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/signup">Başla</Link>
-              </Button>
+              <Link
+                href="/explore"
+                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+              >
+                Keşfet
+              </Link>
+              <Link
+                href="/login"
+                className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }))}
+              >
+                Giriş Yap
+              </Link>
+              <Link
+                href="/signup"
+                className={cn(buttonVariants({ size: 'sm' }))}
+              >
+                Başla
+              </Link>
             </>
           )}
         </div>

@@ -1,5 +1,6 @@
 import { type LucideIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
   icon: LucideIcon
@@ -24,9 +25,9 @@ export function EmptyState({ icon: Icon, title, description, action }: EmptyStat
       </div>
       {action && (
         action.href ? (
-          <Button asChild size="sm">
-            <a href={action.href}>{action.label}</a>
-          </Button>
+          <a href={action.href} className={cn(buttonVariants({ size: 'sm' }))}>
+            {action.label}
+          </a>
         ) : (
           <Button size="sm" onClick={action.onClick}>{action.label}</Button>
         )
