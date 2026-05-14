@@ -1,36 +1,175 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# ✍️ Writer Squad
 
-First, run the development server:
+**Yazarların buluştuğu, birlikte roman yazdığı kolaboratif platform.**
+
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.6-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase)](https://supabase.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.x-38BDF8?style=flat-square&logo=tailwindcss)](https://tailwindcss.com)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=flat-square&logo=vercel)](https://vercel.com)
+
+</div>
+
+---
+
+## 📖 Proje Hakkında
+
+**Writer Squad**, yazarların bir araya gelerek ortak roman projeleri oluşturduğu, bölüm bölüm yazdığı ve birbirinin yazılarını geliştirdiği modern bir kolaborasyon platformudur.
+
+Bir roman fikrin mi var ama yalnız yazmak zor mu geliyor? Farklı yazarların seslerini bir araya getirerek eşsiz hikayeler yaratmak mı istiyorsun? Writer Squad tam da bu ihtiyaç için tasarlandı.
+
+---
+
+## ✨ Özellikler
+
+### 👥 Kolaborasyon
+- **Proje Oluşturma** — Yeni roman projeleri başlat, ekip üyelerini davet et
+- **Başvuru Sistemi** — Açık projelere başvur, yazarlar ekibini seç
+- **Rol Yönetimi** — Proje sahibi ve ortak yazar rolleri
+- **Davet Sistemi** — Yazarları doğrudan projeye davet et
+
+### 📝 Yazım Araçları
+- **Zengin Metin Editörü** — Tiptap tabanlı, profesyonel yazım deneyimi
+  - Kalın, italik, altı çizili, üst/alt simge
+  - Font ailesi ve renk seçimi
+  - Metin hizalama
+  - Bağlantı ekleme
+  - Karakter sayacı
+- **Bölüm Yönetimi** — Sürüm geçmişi ile bölümleri yönet
+- **Öneri Sistemi** — Bölümlere yorum ve düzenleme önerileri sun
+- **Durum Takibi** — `draft → review → final` akışı
+
+### 🗂️ Proje Araçları
+- **Beyin Fırtınası Panosu** — Arsa, karakter, dünya inşası notları
+- **Karakter Profilleri** — Detaylı karakter sayfaları oluştur
+- **Zaman Çizelgesi** — Olayları kronolojik olarak takip et
+
+### 🔔 Sosyal
+- **Bildirim Sistemi** — Başvurular, yorumlar ve davetler için anlık bildirimler
+- **Yazar Profilleri** — Portfolio bağlantısı ve yazım durumu
+- **Keşfet** — Katılmak için açık projeleri bul
+
+---
+
+## 🛠️ Teknoloji Yığını
+
+| Katman | Teknoloji |
+|---|---|
+| **Framework** | Next.js 16 (App Router) |
+| **Dil** | TypeScript 5 |
+| **Veritabanı** | Supabase (PostgreSQL) |
+| **Auth** | Supabase Auth |
+| **Storage** | Supabase Storage |
+| **Editör** | Tiptap 3 |
+| **UI** | shadcn/ui + Tailwind CSS 4 |
+| **Animasyon** | Framer Motion |
+| **Form** | React Hook Form + Zod |
+| **State** | Zustand |
+| **Deploy** | Vercel |
+
+---
+
+## 🚀 Kurulum
+
+### Gereksinimler
+- Node.js 18+
+- npm / yarn / pnpm
+- Supabase hesabı
+
+### 1. Repoyu Klonla
+
+```bash
+git clone https://github.com/muratt7716/roman.git
+cd roman
+```
+
+### 2. Bağımlılıkları Yükle
+
+```bash
+npm install
+```
+
+### 3. Environment Variables
+
+`.env.local` dosyası oluştur:
+
+```bash
+cp .env.local.example .env.local
+```
+
+`.env.local` içini doldur:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+### 4. Veritabanı Kurulumu
+
+Supabase SQL Editor'a `supabase/schema.sql` dosyasının içeriğini yapıştır ve çalıştır.
+
+### 5. Geliştirme Sunucusunu Başlat
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tarayıcıda [http://localhost:3000](http://localhost:3000) adresini aç.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Proje Yapısı
 
-## Learn More
+```
+roman/
+├── app/
+│   ├── (app)/              # Kimlik doğrulaması gereken sayfalar
+│   │   ├── dashboard/      # Ana panel
+│   │   ├── projects/       # Proje detay & editör
+│   │   ├── notifications/  # Bildirimler
+│   │   └── settings/       # Kullanıcı ayarları
+│   ├── (auth)/             # Giriş / kayıt sayfaları
+│   └── (public)/           # Genel erişimli sayfalar
+├── components/             # Yeniden kullanılabilir UI bileşenleri
+├── lib/                    # Yardımcı fonksiyonlar & Supabase client
+├── stores/                 # Zustand global state
+├── types/                  # TypeScript tip tanımları
+├── supabase/
+│   └── schema.sql          # Tam veritabanı şeması
+└── public/                 # Statik dosyalar
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🗄️ Veritabanı Şeması
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+profiles          → Yazar profilleri
+projects          → Roman projeleri
+project_members   → Proje üyelikleri
+project_invites   → Davetler
+chapters          → Bölümler
+chapter_versions  → Sürüm geçmişi
+chapter_suggestions → Düzenleme önerileri
+applications      → Proje başvuruları
+brainstorm_notes  → Beyin fırtınası notları
+character_profiles→ Karakter sayfaları
+timeline_events   → Zaman çizelgesi olayları
+notifications     → Bildirimler
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📜 Lisans
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Bu proje özel kullanım içindir. Tüm haklar saklıdır.
+
+---
+
+<div align="center">
+
+**Writer Squad** — *Hikayeler birlikte yazılır.*
+
+</div>
