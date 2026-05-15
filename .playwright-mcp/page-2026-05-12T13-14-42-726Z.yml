@@ -1,0 +1,113 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - complementary [ref=e37]:
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Proje
+            - paragraph [ref=e40]: semud
+          - navigation "Proje navigasyonu" [ref=e41]:
+            - link "Genel Bakış" [active] [ref=e42] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/overview
+              - img [ref=e43]
+              - text: Genel Bakış
+            - link "Yaz" [ref=e44] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write
+              - img [ref=e45]
+              - text: Yaz
+            - link "Fikirler" [ref=e47] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/brainstorm
+              - img [ref=e48]
+              - text: Fikirler
+            - link "Karakterler" [ref=e50] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/wiki
+              - img [ref=e51]
+              - text: Karakterler
+            - link "Zaman Çizelgesi" [ref=e56] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/timeline
+              - img [ref=e57]
+              - text: Zaman Çizelgesi
+            - link "Geçmiş" [ref=e60] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/history
+              - img [ref=e61]
+              - text: Geçmiş
+          - link "← Dashboard" [ref=e64] [cursor=pointer]:
+            - /url: /dashboard
+        - main [ref=e65]:
+          - generic [ref=e221]:
+            - generic [ref=e222]:
+              - generic [ref=e223]:
+                - heading "semud" [level=1] [ref=e224]
+                - paragraph [ref=e225]: SONUN BAŞLADIĞI AN Gök, katran gibi karardı. Rüzgârın sesi önce fısıltılarla başladı, sonra iniltilere dönüştü. Sıcak toprak çatırdarken, kum tanecikleri havalanıp gökyüzüne savruldu. Bu diyarın toprakları bir zamanlar bereketle yoğrulmuş, devasa sütunlarla süslenmişti. İnsanlar saraylarında, bağlarında, pazar yerlerinde günlük telaşlarına gömülmüşken, felaket sessizce yaklaşıyordu. Derken, çığlıklar koptu. Ufukta beliren kara bulutlar hızla yayıldı, göğü kaplayan bir perde gibi şehrin üzerine çöktü. Rüzgârın gücü arttıkça, kum fırtınası surları dövüyor, devasa taş sütunları cılız bir dal parçası gibi gökyüzüne savuruyordu. Hayvanlar ürkerek sağa sola kaçışıyor, anneler çocuklarını kucaklayarak kapılara koşuyordu. Ama artık ne kapılar bir sığınak ne de taş duvarlar birer kalkan olabilirdi. Yedi gece, sekiz gün… Fırtına bir öfke gibi esti, göz gözü görmez oldu. İnsanlar, nefes almak için birbirlerine sarılıyor, fakat kum boğazlarına doluyor, ciğerlerine saplanıyordu. Yerin derinlerinden gelen bir uğultu, yaklaşan kıyametin habercisiydi. Fırtınanın kudreti ağaçları köklerinden sökerken, evleri paramparça ediyordu. Devasa bedenleriyle övünen, kendilerini yeryüzünün efendisi sanan bu diyarın insanları, birer birer fırtınaya kapılıp göğe savruldu. O anın içinde zaman kavramı yitip gitmişti. Gün ve gece, ışık ve karanlık birbirine karıştı. Çığlıklar, rüzgârın uğultusuna karışarak yok oldu. Gökyüzü, gazapla aydınlandı ve sonra tekrar karardı. Sonunda, her şey sustu. Kum fırtınasının çekildiği yerde sessizlik vardı. Bir zamanlar ihtişamlı sarayların olduğu topraklar artık bir mezara dönüşmüştü. Ne bir ses, ne bir nefes, ne de bir yaşam belirtisi kalmıştı. Ad kavmi, gururla inşa ettiği şehirlerin altında, rüzgârın bile unuttuğu bir hatıraya dönüşmüştü. Ve çöl, sırlarını saklayarak yoluna devam etti.
+              - button "Projeyi Yayınla" [ref=e227] [cursor=pointer]:
+                - img [ref=e228]
+                - text: Projeyi Yayınla
+            - generic [ref=e231]:
+              - generic [ref=e232]:
+                - paragraph [ref=e233]: "1"
+                - paragraph [ref=e234]: Üye
+              - generic [ref=e235]:
+                - paragraph [ref=e236]: "4"
+                - paragraph [ref=e237]: Kelime
+              - generic [ref=e238]:
+                - paragraph [ref=e239]: "0"
+                - paragraph [ref=e240]: Bekleyen
+            - generic [ref=e241]:
+              - heading "Katkı Analizi" [level=2] [ref=e242]:
+                - img [ref=e243]
+                - text: Katkı Analizi
+              - generic [ref=e246]:
+                - generic [ref=e247]:
+                  - generic [ref=e249]: m
+                  - generic [ref=e250]: mmuratb77
+                  - generic [ref=e251]: Baş Yazar
+                - generic [ref=e252]: 4 kelime · %100.0
+            - generic [ref=e255]:
+              - heading "Tehlikeli Bölge" [level=2] [ref=e256]
+              - generic [ref=e257]:
+                - generic [ref=e258]:
+                  - paragraph [ref=e259]: Projeyi Sil
+                  - paragraph [ref=e260]: Tüm bölümler, versiyon geçmişi ve ekip verileri kalıcı olarak silinir.
+                - button "Projeyi Sil" [ref=e261] [cursor=pointer]:
+                  - img [ref=e262]
+                  - text: Projeyi Sil
+            - generic [ref=e265]:
+              - heading "Ekip (1)" [level=2] [ref=e266]:
+                - img [ref=e267]
+                - text: Ekip (1)
+              - generic [ref=e273]:
+                - generic [ref=e275]: m
+                - generic [ref=e276]:
+                  - paragraph [ref=e277]: mmuratb77
+                  - paragraph [ref=e278]: Baş Yazar
+                - generic [ref=e279]:
+                  - paragraph [ref=e280]: "4"
+                  - paragraph [ref=e281]: kelime
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e103] [cursor=pointer]:
+    - img [ref=e104]
+  - alert [ref=e107]: Proje Genel Bakış — Kalem Birliği

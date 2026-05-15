@@ -1,0 +1,62 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+          - link "Yazarlar" [ref=e13] [cursor=pointer]:
+            - /url: /writers
+          - link "Giriş Yap" [ref=e14] [cursor=pointer]:
+            - /url: /login
+          - link "Başla" [ref=e15] [cursor=pointer]:
+            - /url: /signup
+    - main [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - img [ref=e21]
+            - heading "Yazarlar" [level=1] [ref=e26]
+          - paragraph [ref=e27]: Kalem Birliği topluluğunun yaratıcı yazarları.
+        - generic [ref=e28]:
+          - link "Tümü" [ref=e29] [cursor=pointer]:
+            - /url: /writers
+          - link "İşbirliğine Açık" [ref=e30] [cursor=pointer]:
+            - /url: /writers?status=open
+            - text: İşbirliğine Açık
+          - link "Aktif Yazıyor" [ref=e32] [cursor=pointer]:
+            - /url: /writers?status=active
+          - link "Meşgul" [ref=e33] [cursor=pointer]:
+            - /url: /writers?status=busy
+        - paragraph [ref=e34]: 1 yazar bulundu
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - link "m" [ref=e39] [cursor=pointer]:
+                - /url: /u/anduril
+                - generic [ref=e41]: m
+              - generic [ref=e42]:
+                - link "mmuratb77" [ref=e43] [cursor=pointer]:
+                  - /url: /u/anduril
+                - paragraph [ref=e44]: "@anduril"
+            - generic [ref=e45]: İşbirliğine Açık
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - paragraph [ref=e48]: "1"
+              - paragraph [ref=e49]: Proje Sahibi
+            - generic [ref=e50]:
+              - paragraph [ref=e51]: "0"
+              - paragraph [ref=e52]: Katkı
+          - generic [ref=e54]: Tarihi
+          - generic [ref=e55]:
+            - link "Profil" [ref=e56] [cursor=pointer]:
+              - /url: /u/anduril
+            - link "Giriş Yap" [ref=e57] [cursor=pointer]:
+              - /url: /login
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e63] [cursor=pointer]:
+    - img [ref=e64]

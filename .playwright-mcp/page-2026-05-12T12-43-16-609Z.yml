@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+          - link "Yazarlar" [ref=e13] [cursor=pointer]:
+            - /url: /writers
+          - link "Giriş Yap" [ref=e14] [cursor=pointer]:
+            - /url: /login
+          - link "Başla" [ref=e15] [cursor=pointer]:
+            - /url: /signup
+    - main [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e20]: Yazarlara Özel Platform — Beta
+          - heading "Hikâyeler Birlikte Yazılmak İçin" [level=1] [ref=e22]:
+            - text: Hikâyeler Birlikte
+            - text: Yazılmak İçin
+          - paragraph [ref=e23]: Dünyanın dört bir yanından yazarları bir araya getiren gerçek zamanlı işbirliği platformu. Hikâyenizi birlikte inşa edin.
+          - generic [ref=e24]:
+            - link "Ücretsiz Başla" [ref=e25] [cursor=pointer]:
+              - /url: /signup
+              - text: Ücretsiz Başla
+              - img
+            - link "Projeleri Keşfet" [ref=e26] [cursor=pointer]:
+              - /url: /explore
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - paragraph [ref=e34]: 10K+
+            - paragraph [ref=e35]: Yazar
+          - generic [ref=e36]:
+            - paragraph [ref=e37]: 2.4M
+            - paragraph [ref=e38]: Kelime Yazıldı
+          - generic [ref=e39]:
+            - paragraph [ref=e40]: 840+
+            - paragraph [ref=e41]: Aktif Proje
+          - generic [ref=e42]:
+            - paragraph [ref=e43]: 4.9★
+            - paragraph [ref=e44]: Ortalama Puan
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - paragraph [ref=e48]: Platform Özellikleri
+            - heading "Yazarlık için tasarlandı" [level=2] [ref=e49]
+            - paragraph [ref=e50]: Her özellik, birlikte yazmanın getirdiği zorlukları çözmek için kurgulandı.
+          - generic [ref=e51]:
+            - generic [ref=e52]:
+              - img [ref=e54]
+              - heading "Gerçek Zamanlı İşbirliği" [level=3] [ref=e59]
+              - paragraph [ref=e60]: Ekibinizle aynı anda yazın. Kimin ne yazdığını canlı olarak takip edin. Çatışma yok, sadece yaratıcılık.
+            - generic [ref=e61]:
+              - img [ref=e63]
+              - heading "Rol Tabanlı Yazarlık" [level=3] [ref=e67]
+              - paragraph [ref=e68]: Her yazar kendi rolünde uzmanlaşır. Diyalog yazarı, dünya inşacısı, lore uzmanı — hepsi bir arada.
+            - generic [ref=e69]:
+              - img [ref=e71]
+              - heading "Canlı Hikâye Evreni" [level=3] [ref=e73]
+              - paragraph [ref=e74]: Karakter wiki, zaman çizelgesi ve beyin fırtınası panosu ile hikâye evreninizi canlı tutun.
+            - generic [ref=e75]:
+              - img [ref=e77]
+              - heading "Akıllı Sürüm Takibi" [level=3] [ref=e79]
+              - paragraph [ref=e80]: Her kaydetme bir versiyon oluşturur. İstediğiniz noktaya dönün. Hiçbir kelimeyi kaybetmeyin.
+            - generic [ref=e81]:
+              - img [ref=e83]
+              - heading "Başvuru Sistemi" [level=3] [ref=e85]
+              - paragraph [ref=e86]: Harika yazarları keşfedin. Projelerinize en iyi ekip arkadaşlarını seçin. Portfolyo ile başvurun.
+            - generic [ref=e87]:
+              - img [ref=e89]
+              - heading "Yayınlama Akışı" [level=3] [ref=e91]
+              - paragraph [ref=e92]: Projeniz hazır olduğunda dünyayla paylaşın. Okuyucular için zarif bir okuma deneyimi.
+        - generic [ref=e94]:
+          - heading "Hikâyeni yazmaya bugün başla" [level=2] [ref=e95]
+          - paragraph [ref=e96]: Yüzlerce yazar seni bekliyor. Ekibini kur, projeyi oluştur, yazmaya başla.
+          - link "Ücretsiz Hesap Oluştur" [ref=e98] [cursor=pointer]:
+            - /url: /signup
+            - text: Ücretsiz Hesap Oluştur
+            - img
+          - paragraph [ref=e99]: Kredi kartı gerekmez · Sonsuza kadar ücretsiz plan
+        - generic [ref=e101]:
+          - generic [ref=e102]:
+            - img [ref=e103]
+            - generic [ref=e105]: Kalem Birliği
+          - paragraph [ref=e106]: © 2026 Kalem Birliği. Tüm hakları saklıdır.
+          - generic [ref=e107]:
+            - link "Keşfet" [ref=e108] [cursor=pointer]:
+              - /url: /explore
+            - link "Giriş" [ref=e109] [cursor=pointer]:
+              - /url: /login
+            - link "Kayıt Ol" [ref=e110] [cursor=pointer]:
+              - /url: /signup
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e116] [cursor=pointer]:
+    - img [ref=e117]

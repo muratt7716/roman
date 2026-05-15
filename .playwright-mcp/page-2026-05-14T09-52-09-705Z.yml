@@ -1,0 +1,108 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - complementary [ref=e37]:
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Proje
+            - paragraph [ref=e40]: GİZLİ ZİHİN
+          - navigation "Proje navigasyonu" [ref=e41]:
+            - link "Genel Bakış" [ref=e42] [cursor=pointer]:
+              - /url: /projects/574b2554-c1bc-42bd-b985-d28ea7ce8dbf/overview
+              - img [ref=e43]
+              - text: Genel Bakış
+            - link "Yaz" [ref=e44] [cursor=pointer]:
+              - /url: /projects/574b2554-c1bc-42bd-b985-d28ea7ce8dbf/write
+              - img [ref=e45]
+              - text: Yaz
+            - link "Fikirler" [ref=e47] [cursor=pointer]:
+              - /url: /projects/574b2554-c1bc-42bd-b985-d28ea7ce8dbf/brainstorm
+              - img [ref=e48]
+              - text: Fikirler
+            - link "Karakterler" [ref=e50] [cursor=pointer]:
+              - /url: /projects/574b2554-c1bc-42bd-b985-d28ea7ce8dbf/wiki
+              - img [ref=e51]
+              - text: Karakterler
+            - link "Zaman Çizelgesi" [ref=e56] [cursor=pointer]:
+              - /url: /projects/574b2554-c1bc-42bd-b985-d28ea7ce8dbf/timeline
+              - img [ref=e57]
+              - text: Zaman Çizelgesi
+            - link "Geçmiş" [ref=e60] [cursor=pointer]:
+              - /url: /projects/574b2554-c1bc-42bd-b985-d28ea7ce8dbf/history
+              - img [ref=e61]
+              - text: Geçmiş
+          - link "← Dashboard" [ref=e64] [cursor=pointer]:
+            - /url: /dashboard
+        - main [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]:
+                - heading "GİZLİ ZİHİN" [level=1] [ref=e69]
+                - paragraph
+              - button "Taslağa Al" [ref=e71] [cursor=pointer]:
+                - img [ref=e72]
+                - text: Taslağa Al
+            - generic [ref=e75]:
+              - img [ref=e76]
+              - text: Bu proje yayınlandı — herkes okuyabilir.
+              - link "Okuma sayfasını gör →" [ref=e79] [cursor=pointer]:
+                - /url: /projects/gizli-zihin-cd8l
+            - generic [ref=e80]:
+              - heading "Kapak Görseli" [level=2] [ref=e81]
+              - generic [ref=e82]:
+                - generic [ref=e84] [cursor=pointer]:
+                  - img [ref=e85]
+                  - generic [ref=e89]: Kapak görseli yükle
+                - paragraph [ref=e90]: JPG, PNG veya WebP · Maks. 10 MB
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - paragraph [ref=e93]: "0"
+                - paragraph [ref=e94]: Üye
+              - generic [ref=e95]:
+                - paragraph [ref=e96]: "3.503"
+                - paragraph [ref=e97]: Kelime
+              - generic [ref=e98]:
+                - paragraph [ref=e99]: "0"
+                - paragraph [ref=e100]: Bekleyen
+            - heading "Katkı Analizi" [level=2] [ref=e102]:
+              - img [ref=e103]
+              - text: Katkı Analizi
+            - generic [ref=e105]:
+              - heading "Tehlikeli Bölge" [level=2] [ref=e106]
+              - generic [ref=e107]:
+                - generic [ref=e108]:
+                  - paragraph [ref=e109]: Projeyi Sil
+                  - paragraph [ref=e110]: Tüm bölümler, versiyon geçmişi ve ekip verileri kalıcı olarak silinir.
+                - button "Projeyi Sil" [ref=e111] [cursor=pointer]:
+                  - img [ref=e112]
+                  - text: Projeyi Sil
+            - heading "Ekip (0)" [level=2] [ref=e116]:
+              - img [ref=e117]
+              - text: Ekip (0)
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e127] [cursor=pointer]:
+    - img [ref=e128]

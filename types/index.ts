@@ -4,7 +4,9 @@ export type ProjectVisibility = 'draft' | 'open' | 'closed' | 'published'
 export type CollaborationStatus = 'recruiting' | 'active' | 'completed'
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected'
 export type ChapterStatus = 'draft' | 'review' | 'final'
-export type NotificationType = 'application' | 'acceptance' | 'rejection' | 'comment' | 'mention'
+export type NotificationType = 'application' | 'acceptance' | 'rejection' | 'comment' | 'mention' | 'invite' | 'suggestion'
+export type SuggestionStatus = 'pending' | 'accepted' | 'rejected'
+export type InviteStatus = 'pending' | 'accepted' | 'declined'
 export type BrainstormNoteType = 'plot' | 'character' | 'lore' | 'relationship' | 'sticky'
 
 export interface Profile {
@@ -15,6 +17,18 @@ export interface Profile {
   avatar_url: string | null
   portfolio_url: string | null
   reputation_score: number
+  writing_status?: 'active' | 'open' | 'busy'
+  created_at: string
+}
+
+export interface ProjectInvite {
+  id: string
+  project_id: string
+  inviter_id: string
+  invitee_id: string
+  role_id: string
+  message: string | null
+  status: InviteStatus
   created_at: string
 }
 
@@ -160,4 +174,14 @@ export interface ApplicationWithApplicant extends Application {
 export interface MemberWithProfile extends ProjectMember {
   profile: Profile
   role: ProjectRole
+}
+
+export interface ChapterSuggestion {
+  id: string
+  chapter_id: string
+  author_id: string
+  content: string
+  note: string | null
+  status: SuggestionStatus
+  created_at: string
 }

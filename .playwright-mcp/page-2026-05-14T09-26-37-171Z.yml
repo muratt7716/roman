@@ -1,0 +1,80 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - paragraph [ref=e38]: Bu senin projen
+          - generic [ref=e39]:
+            - link "Yazı Odası" [ref=e40] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write
+              - img [ref=e41]
+              - text: Yazı Odası
+            - link "Yönet" [ref=e43] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/overview
+              - img [ref=e44]
+              - text: Yönet
+        - generic [ref=e47]:
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - generic [ref=e50]:
+                - generic [ref=e51]: Tarihi
+                - generic [ref=e52]: Üye Aranıyor
+              - heading "semud" [level=1] [ref=e53]
+            - generic [ref=e54]:
+              - generic [ref=e56]: m
+              - generic [ref=e57]:
+                - paragraph [ref=e58]: mmuratb77
+                - paragraph [ref=e59]: Proje Sahibi
+            - generic [ref=e60]:
+              - heading "Özet" [level=2] [ref=e61]
+              - paragraph [ref=e62]: SONUN BAŞLADIĞI AN Gök, katran gibi karardı. Rüzgârın sesi önce fısıltılarla başladı, sonra iniltilere dönüştü. Sıcak toprak çatırdarken, kum tanecikleri havalanıp gökyüzüne savruldu. Bu diyarın toprakları bir zamanlar bereketle yoğrulmuş, devasa sütunlarla süslenmişti. İnsanlar saraylarında, bağlarında, pazar yerlerinde günlük telaşlarına gömülmüşken, felaket sessizce yaklaşıyordu. Derken, çığlıklar koptu. Ufukta beliren kara bulutlar hızla yayıldı, göğü kaplayan bir perde gibi şehrin üzerine çöktü. Rüzgârın gücü arttıkça, kum fırtınası surları dövüyor, devasa taş sütunları cılız bir dal parçası gibi gökyüzüne savuruyordu. Hayvanlar ürkerek sağa sola kaçışıyor, anneler çocuklarını kucaklayarak kapılara koşuyordu. Ama artık ne kapılar bir sığınak ne de taş duvarlar birer kalkan olabilirdi. Yedi gece, sekiz gün… Fırtına bir öfke gibi esti, göz gözü görmez oldu. İnsanlar, nefes almak için birbirlerine sarılıyor, fakat kum boğazlarına doluyor, ciğerlerine saplanıyordu. Yerin derinlerinden gelen bir uğultu, yaklaşan kıyametin habercisiydi. Fırtınanın kudreti ağaçları köklerinden sökerken, evleri paramparça ediyordu. Devasa bedenleriyle övünen, kendilerini yeryüzünün efendisi sanan bu diyarın insanları, birer birer fırtınaya kapılıp göğe savruldu. O anın içinde zaman kavramı yitip gitmişti. Gün ve gece, ışık ve karanlık birbirine karıştı. Çığlıklar, rüzgârın uğultusuna karışarak yok oldu. Gökyüzü, gazapla aydınlandı ve sonra tekrar karardı. Sonunda, her şey sustu. Kum fırtınasının çekildiği yerde sessizlik vardı. Bir zamanlar ihtişamlı sarayların olduğu topraklar artık bir mezara dönüşmüştü. Ne bir ses, ne bir nefes, ne de bir yaşam belirtisi kalmıştı. Ad kavmi, gururla inşa ettiği şehirlerin altında, rüzgârın bile unuttuğu bir hatıraya dönüşmüştü. Ve çöl, sırlarını saklayarak yoluna devam etti.
+            - generic [ref=e63]:
+              - heading "Ekip (1)" [level=2] [ref=e64]:
+                - img [ref=e65]
+                - text: Ekip (1)
+              - generic [ref=e71]:
+                - generic [ref=e73]: m
+                - paragraph [ref=e75]: mmuratb77
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - generic [ref=e79]:
+                  - img [ref=e80]
+                  - text: Kelime Sayısı
+                - generic [ref=e82]: "0"
+              - generic [ref=e83]:
+                - generic [ref=e84]:
+                  - img [ref=e85]
+                  - text: Oluşturulma
+                - generic [ref=e87]: 11.05.2026
+            - generic [ref=e88]:
+              - paragraph [ref=e89]: Bu projenin üyesisin
+              - link "Yazma Odasına Git" [ref=e90] [cursor=pointer]:
+                - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e96] [cursor=pointer]:
+    - img [ref=e97]

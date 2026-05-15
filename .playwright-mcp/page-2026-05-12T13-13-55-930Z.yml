@@ -1,0 +1,115 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - complementary [ref=e37]:
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Proje
+            - paragraph [ref=e40]: semud
+          - navigation "Proje navigasyonu" [ref=e41]:
+            - link "Genel Bakış" [ref=e42] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/overview
+              - img [ref=e43]
+              - text: Genel Bakış
+            - link "Yaz" [ref=e44] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write
+              - img [ref=e45]
+              - text: Yaz
+            - link "Fikirler" [ref=e47] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/brainstorm
+              - img [ref=e48]
+              - text: Fikirler
+            - link "Karakterler" [ref=e50] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/wiki
+              - img [ref=e51]
+              - text: Karakterler
+            - link "Zaman Çizelgesi" [ref=e56] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/timeline
+              - img [ref=e57]
+              - text: Zaman Çizelgesi
+            - link "Geçmiş" [ref=e60] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/history
+              - img [ref=e61]
+              - text: Geçmiş
+          - link "← Dashboard" [ref=e64] [cursor=pointer]:
+            - /url: /dashboard
+        - main [ref=e65]:
+          - generic [ref=e108]:
+            - generic [ref=e109]:
+              - heading "a" [level=1] [ref=e110]
+              - generic [ref=e111]:
+                - link "1 öneri var" [ref=e112] [cursor=pointer]:
+                  - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write/16e3bfea-28b7-4c99-8410-799e884ef7e1/suggestions-list
+                  - img [ref=e113]
+                  - text: 1 öneri var
+                - link "Öneri Yap" [ref=e115] [cursor=pointer]:
+                  - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write/16e3bfea-28b7-4c99-8410-799e884ef7e1/suggest
+                  - img [ref=e116]
+                  - text: Öneri Yap
+            - generic [ref=e118]:
+              - generic [ref=e119]: Otomatik kaydediliyor
+              - generic [ref=e121]: 0 kelime
+              - generic "mmuratb77" [ref=e123]: M
+            - generic [ref=e124]:
+              - generic [ref=e126]:
+                - generic [ref=e127]:
+                  - button [ref=e128] [cursor=pointer]:
+                    - img [ref=e129]
+                  - button [ref=e131] [cursor=pointer]:
+                    - img [ref=e132]
+                  - button [ref=e134] [cursor=pointer]:
+                    - img [ref=e135]
+                  - button [ref=e139] [cursor=pointer]:
+                    - img [ref=e140]
+                  - button [ref=e142] [cursor=pointer]:
+                    - img [ref=e143]
+                  - button [ref=e145] [cursor=pointer]:
+                    - img [ref=e146]
+                  - button [ref=e150] [cursor=pointer]:
+                    - img [ref=e151]
+                  - button [ref=e152] [cursor=pointer]:
+                    - img [ref=e153]
+                  - button [ref=e156] [cursor=pointer]:
+                    - img [ref=e157]
+                  - button [ref=e160] [cursor=pointer]:
+                    - img [ref=e161]
+                - generic [ref=e165]:
+                  - separator [ref=e166]
+                  - paragraph [ref=e167]
+              - generic [ref=e168]:
+                - generic [ref=e169]:
+                  - img [ref=e170]
+                  - generic [ref=e172]: Yorumlar
+                - paragraph [ref=e174]: Henüz yorum yok
+                - generic [ref=e175]:
+                  - textbox "Yorum ekle..." [ref=e176]
+                  - button [disabled] [ref=e177]:
+                    - img [ref=e178]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e103] [cursor=pointer]:
+    - img [ref=e104]
+  - alert [ref=e107]

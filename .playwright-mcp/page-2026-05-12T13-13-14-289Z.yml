@@ -1,0 +1,95 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - complementary [ref=e37]:
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Proje
+            - paragraph [ref=e40]: semud
+          - navigation "Proje navigasyonu" [ref=e41]:
+            - link "Genel Bakış" [ref=e42] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/overview
+              - img [ref=e43]
+              - text: Genel Bakış
+            - link "Yaz" [ref=e44] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write
+              - img [ref=e45]
+              - text: Yaz
+            - link "Fikirler" [ref=e47] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/brainstorm
+              - img [ref=e48]
+              - text: Fikirler
+            - link "Karakterler" [ref=e50] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/wiki
+              - img [ref=e51]
+              - text: Karakterler
+            - link "Zaman Çizelgesi" [ref=e56] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/timeline
+              - img [ref=e57]
+              - text: Zaman Çizelgesi
+            - link "Geçmiş" [ref=e60] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/history
+              - img [ref=e61]
+              - text: Geçmiş
+          - link "← Dashboard" [ref=e64] [cursor=pointer]:
+            - /url: /dashboard
+        - main [ref=e65]:
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]:
+                - heading "Yazı Odası" [level=1] [ref=e69]
+                - paragraph [ref=e70]: 1 bölüm · 0 kelime
+              - generic [ref=e71]:
+                - link "Dışa Aktar" [ref=e72] [cursor=pointer]:
+                  - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write/export
+                  - img [ref=e73]
+                  - text: Dışa Aktar
+                - button "Yeni Bölüm" [ref=e76] [cursor=pointer]:
+                  - img
+                  - text: Yeni Bölüm
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - button "Yukarı taşı" [disabled] [ref=e80]:
+                  - img [ref=e81]
+                - button "Aşağı taşı" [disabled] [ref=e83]:
+                  - img [ref=e84]
+              - link "01 a 0 kelime Taslak" [ref=e86] [cursor=pointer]:
+                - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write/16e3bfea-28b7-4c99-8410-799e884ef7e1
+                - generic [ref=e87]: "01"
+                - generic [ref=e88]:
+                  - paragraph [ref=e89]: a
+                  - paragraph [ref=e90]: 0 kelime
+                - generic [ref=e91]:
+                  - img [ref=e92]
+                  - text: Taslak
+              - link "1" [ref=e95] [cursor=pointer]:
+                - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write/16e3bfea-28b7-4c99-8410-799e884ef7e1/suggestions-list
+                - img [ref=e96]
+                - text: "1"
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e103] [cursor=pointer]:
+    - img [ref=e104]

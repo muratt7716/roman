@@ -1,0 +1,47 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e40]
+            - heading "Yazarlar" [level=1] [ref=e45]
+          - paragraph [ref=e46]: Kalem Birliği topluluğunun yaratıcı yazarları.
+        - generic [ref=e47]:
+          - link "Tümü" [ref=e48] [cursor=pointer]:
+            - /url: /writers
+          - link "İşbirliğine Açık" [ref=e49] [cursor=pointer]:
+            - /url: /writers?status=open
+            - text: İşbirliğine Açık
+          - link "Aktif Yazıyor" [ref=e51] [cursor=pointer]:
+            - /url: /writers?status=active
+          - link "Meşgul" [ref=e52] [cursor=pointer]:
+            - /url: /writers?status=busy
+        - generic [ref=e53]: Bu filtrede yazar bulunamadı.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e59] [cursor=pointer]:
+    - img [ref=e60]

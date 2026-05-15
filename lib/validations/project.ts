@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 export const createProjectSchema = z.object({
   title: z.string().min(3, 'Başlık en az 3 karakter olmalı').max(100),
-  genre: z.string().min(1, 'Tür seçimi zorunludur'),
-  synopsis: z.string().min(50, 'Özet en az 50 karakter olmalı').max(1000),
+  genre: z.string().optional(),
+  synopsis: z.string().max(10000).optional(),
   tags: z.array(z.string()).max(10, 'En fazla 10 etiket eklenebilir'),
   target_word_count: z.number().min(1000).max(1000000).optional(),
   visibility: z.enum(['draft', 'open', 'closed', 'published']).default('draft'),

@@ -1,0 +1,72 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - img [ref=e40]
+            - heading "Yazarlar" [level=1] [ref=e45]
+          - paragraph [ref=e46]: Kalem Birliği topluluğunun yaratıcı yazarları.
+        - generic [ref=e47]:
+          - link "Tümü" [ref=e48] [cursor=pointer]:
+            - /url: /writers
+          - link "İşbirliğine Açık" [ref=e49] [cursor=pointer]:
+            - /url: /writers?status=open
+            - text: İşbirliğine Açık
+          - link "Aktif Yazıyor" [ref=e51] [cursor=pointer]:
+            - /url: /writers?status=active
+          - link "Meşgul" [ref=e52] [cursor=pointer]:
+            - /url: /writers?status=busy
+        - paragraph [ref=e53]: 1 yazar bulundu
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57]:
+              - link "m" [ref=e58] [cursor=pointer]:
+                - /url: /u/anduril
+                - generic [ref=e60]: m
+              - generic [ref=e61]:
+                - link "mmuratb77" [ref=e62] [cursor=pointer]:
+                  - /url: /u/anduril
+                - paragraph [ref=e63]: "@anduril"
+            - generic [ref=e64]: İşbirliğine Açık
+          - paragraph [ref=e65]: Test biyografi — site incelemesi
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - paragraph [ref=e68]: "2"
+              - paragraph [ref=e69]: Proje Sahibi
+            - generic [ref=e70]:
+              - paragraph [ref=e71]: "1"
+              - paragraph [ref=e72]: Katkı
+          - generic [ref=e74]: Baş Yazar
+          - generic [ref=e75]:
+            - generic [ref=e76]: Diğer
+            - generic [ref=e77]: Tarihi
+          - link "Profil" [ref=e79] [cursor=pointer]:
+            - /url: /u/anduril
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e85] [cursor=pointer]:
+    - img [ref=e86]

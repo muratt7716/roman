@@ -9,15 +9,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const [{ data: profile }, { count: unreadCount }] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
+  ])
 
   return (
     <div className="min-h-dvh">
-      <Navbar profile={profile as Profile} />
+      <Navbar profile={profile as Profile} unreadCount={unreadCount ?? 0} />
       <main className="pt-14">
         {children}
       </main>

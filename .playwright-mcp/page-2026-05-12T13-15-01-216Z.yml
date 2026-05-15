@@ -1,0 +1,111 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - complementary [ref=e37]:
+          - generic [ref=e38]:
+            - paragraph [ref=e39]: Proje
+            - paragraph [ref=e40]: semud
+          - navigation "Proje navigasyonu" [ref=e41]:
+            - link "Genel Bakış" [ref=e42] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/overview
+              - img [ref=e43]
+              - text: Genel Bakış
+            - link "Yaz" [ref=e44] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/write
+              - img [ref=e45]
+              - text: Yaz
+            - link "Fikirler" [ref=e47] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/brainstorm
+              - img [ref=e48]
+              - text: Fikirler
+            - link "Karakterler" [ref=e50] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/wiki
+              - img [ref=e51]
+              - text: Karakterler
+            - link "Zaman Çizelgesi" [ref=e56] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/timeline
+              - img [ref=e57]
+              - text: Zaman Çizelgesi
+            - link "Geçmiş" [active] [ref=e60] [cursor=pointer]:
+              - /url: /projects/7c7165f0-b4a8-4523-9dea-fdaaebe91162/history
+              - img [ref=e61]
+              - text: Geçmiş
+          - link "← Dashboard" [ref=e64] [cursor=pointer]:
+            - /url: /dashboard
+        - main [ref=e65]:
+          - generic [ref=e282]:
+            - generic [ref=e283]:
+              - img [ref=e284]
+              - heading "Versiyon Geçmişi" [level=1] [ref=e287]
+            - generic [ref=e288]:
+              - generic [ref=e289]:
+                - generic [ref=e290]:
+                  - generic [ref=e291]:
+                    - paragraph [ref=e292]: a
+                    - paragraph [ref=e293]: mmuratb77 · 0 kelime
+                  - time [ref=e294]: 12 May 2026 04:04
+                - paragraph
+              - generic [ref=e295]:
+                - generic [ref=e296]:
+                  - generic [ref=e297]:
+                    - paragraph [ref=e298]: a
+                    - paragraph [ref=e299]: mmuratb77 · 1 kelime
+                  - time [ref=e300]: 12 May 2026 04:04
+                - paragraph [ref=e301]: fzcscxzczx
+              - generic [ref=e302]:
+                - generic [ref=e303]:
+                  - generic [ref=e304]:
+                    - paragraph [ref=e305]: a
+                    - paragraph [ref=e306]: mmuratb77 · 1 kelime
+                  - time [ref=e307]: 12 May 2026 04:04
+                - paragraph [ref=e308]: fzcscxzczx
+              - generic [ref=e309]:
+                - generic [ref=e310]:
+                  - generic [ref=e311]:
+                    - paragraph [ref=e312]: a
+                    - paragraph [ref=e313]: mmuratb77 · 1 kelime
+                  - time [ref=e314]: 12 May 2026 04:04
+                - paragraph [ref=e315]: fzcscxzczx
+              - generic [ref=e316]:
+                - generic [ref=e317]:
+                  - generic [ref=e318]:
+                    - paragraph [ref=e319]: a
+                    - paragraph [ref=e320]: mmuratb77 · 1 kelime
+                  - time [ref=e321]: 12 May 2026 04:04
+                - paragraph [ref=e322]: fzcscxzczx
+              - generic [ref=e323]:
+                - generic [ref=e324]:
+                  - generic [ref=e325]:
+                    - paragraph [ref=e326]: a
+                    - paragraph [ref=e327]: mmuratb77 · 0 kelime
+                  - time [ref=e328]: 12 May 2026 04:03
+                - paragraph
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e103] [cursor=pointer]:
+    - img [ref=e104]
+  - alert [ref=e107]: Kalem Birliği — Birlikte Yaz

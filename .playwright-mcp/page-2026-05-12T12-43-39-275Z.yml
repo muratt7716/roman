@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - heading "Tekrar hoş geldin" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Hikayeye devam et
+    - button "Google ile giriş yap" [ref=e8] [cursor=pointer]:
+      - img
+      - text: Google ile giriş yap
+    - generic [ref=e13]: veya
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: Email
+        - textbox "Email" [ref=e17]
+      - generic [ref=e18]:
+        - generic [ref=e19]: Şifre
+        - textbox "Şifre" [ref=e20]
+      - button "Giriş Yap" [ref=e21] [cursor=pointer]
+    - paragraph [ref=e22]:
+      - text: Hesabın yok mu?
+      - link "Kayıt ol" [ref=e23] [cursor=pointer]:
+        - /url: /signup
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e29] [cursor=pointer]:
+    - img [ref=e30]
+  - alert [ref=e33]

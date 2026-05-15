@@ -1,0 +1,66 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - heading "Yeni Proje Oluştur" [level=1] [ref=e38]
+          - paragraph [ref=e39]: Ekibini kur, hikayeni yaz.
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - generic [ref=e44]: "1"
+            - generic [ref=e47]: "2"
+            - generic [ref=e50]: "3"
+            - generic [ref=e51]: Temel Bilgiler
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - generic [ref=e54]: Proje Başlığı *
+              - textbox "Proje Başlığı *" [ref=e55]:
+                - /placeholder: örn. Gölge Krallığı
+            - generic [ref=e56]:
+              - generic [ref=e57]:
+                - text: Tür
+                - generic [ref=e58]: (isteğe bağlı)
+              - combobox "Tür (isteğe bağlı)" [ref=e59]:
+                - option "Tür seçin" [selected]
+                - option "Fantastik"
+                - option "Bilim Kurgu"
+                - option "Romantik"
+                - option "Gerilim"
+                - option "Macera"
+                - option "Tarihi"
+                - option "Distopya"
+                - option "Diğer"
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - text: Özet
+                - generic [ref=e62]: (isteğe bağlı)
+              - textbox "Özet (isteğe bağlı)" [ref=e63]:
+                - /placeholder: Projenin kısa açıklaması... Sonra da ekleyebilirsin.
+            - button "Devam Et" [ref=e64] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e70] [cursor=pointer]:
+    - img [ref=e71]

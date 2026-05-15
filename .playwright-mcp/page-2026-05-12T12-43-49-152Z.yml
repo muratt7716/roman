@@ -1,0 +1,55 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+          - link "Yazarlar" [ref=e13] [cursor=pointer]:
+            - /url: /writers
+          - link "Giriş Yap" [ref=e14] [cursor=pointer]:
+            - /url: /login
+          - link "Başla" [ref=e15] [cursor=pointer]:
+            - /url: /signup
+    - main [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]:
+            - generic [ref=e21]:
+              - generic [ref=e22]: Tarihi
+              - generic [ref=e23]: Üye Aranıyor
+            - heading "semud" [level=1] [ref=e24]
+          - generic [ref=e25]:
+            - generic [ref=e27]: m
+            - generic [ref=e28]:
+              - paragraph [ref=e29]: mmuratb77
+              - paragraph [ref=e30]: Proje Sahibi
+          - generic [ref=e31]:
+            - heading "Özet" [level=2] [ref=e32]
+            - paragraph [ref=e33]: SONUN BAŞLADIĞI AN Gök, katran gibi karardı. Rüzgârın sesi önce fısıltılarla başladı, sonra iniltilere dönüştü. Sıcak toprak çatırdarken, kum tanecikleri havalanıp gökyüzüne savruldu. Bu diyarın toprakları bir zamanlar bereketle yoğrulmuş, devasa sütunlarla süslenmişti. İnsanlar saraylarında, bağlarında, pazar yerlerinde günlük telaşlarına gömülmüşken, felaket sessizce yaklaşıyordu. Derken, çığlıklar koptu. Ufukta beliren kara bulutlar hızla yayıldı, göğü kaplayan bir perde gibi şehrin üzerine çöktü. Rüzgârın gücü arttıkça, kum fırtınası surları dövüyor, devasa taş sütunları cılız bir dal parçası gibi gökyüzüne savuruyordu. Hayvanlar ürkerek sağa sola kaçışıyor, anneler çocuklarını kucaklayarak kapılara koşuyordu. Ama artık ne kapılar bir sığınak ne de taş duvarlar birer kalkan olabilirdi. Yedi gece, sekiz gün… Fırtına bir öfke gibi esti, göz gözü görmez oldu. İnsanlar, nefes almak için birbirlerine sarılıyor, fakat kum boğazlarına doluyor, ciğerlerine saplanıyordu. Yerin derinlerinden gelen bir uğultu, yaklaşan kıyametin habercisiydi. Fırtınanın kudreti ağaçları köklerinden sökerken, evleri paramparça ediyordu. Devasa bedenleriyle övünen, kendilerini yeryüzünün efendisi sanan bu diyarın insanları, birer birer fırtınaya kapılıp göğe savruldu. O anın içinde zaman kavramı yitip gitmişti. Gün ve gece, ışık ve karanlık birbirine karıştı. Çığlıklar, rüzgârın uğultusuna karışarak yok oldu. Gökyüzü, gazapla aydınlandı ve sonra tekrar karardı. Sonunda, her şey sustu. Kum fırtınasının çekildiği yerde sessizlik vardı. Bir zamanlar ihtişamlı sarayların olduğu topraklar artık bir mezara dönüşmüştü. Ne bir ses, ne bir nefes, ne de bir yaşam belirtisi kalmıştı. Ad kavmi, gururla inşa ettiği şehirlerin altında, rüzgârın bile unuttuğu bir hatıraya dönüşmüştü. Ve çöl, sırlarını saklayarak yoluna devam etti.
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]:
+              - generic [ref=e37]:
+                - img [ref=e38]
+                - text: Kelime Sayısı
+              - generic [ref=e40]: "0"
+            - generic [ref=e41]:
+              - generic [ref=e42]:
+                - img [ref=e43]
+                - text: Oluşturulma
+              - generic [ref=e45]: 11.05.2026
+          - generic [ref=e46]:
+            - heading "Açık Roller" [level=3] [ref=e47]
+            - generic [ref=e48]:
+              - paragraph [ref=e49]: Başvurmak için giriş yapmalısın.
+              - link "Giriş Yap" [ref=e50] [cursor=pointer]:
+                - /url: /login
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e56] [cursor=pointer]:
+    - img [ref=e57]
+  - alert [ref=e60]

@@ -1,0 +1,77 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: m
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - heading "Ayarlar" [level=1] [ref=e38]
+          - paragraph [ref=e39]: Profil bilgilerini ve yazarlık durumunu yönet.
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - heading "Profil Bilgileri" [level=2] [ref=e42]
+            - generic [ref=e43]:
+              - generic [ref=e44]: Kullanıcı Adı
+              - textbox "Kullanıcı Adı" [disabled]: anduril
+              - paragraph [ref=e45]: Kullanıcı adı değiştirilemez.
+            - generic [ref=e46]:
+              - generic [ref=e47]: Görünen Ad
+              - textbox "Görünen Ad" [ref=e48]:
+                - /placeholder: Adın nasıl görünsün?
+                - text: mmuratb77
+            - generic [ref=e49]:
+              - generic [ref=e50]: Biyografi
+              - textbox "Biyografi" [ref=e51]:
+                - /placeholder: Kendinden kısaca bahset. Hangi türleri yazıyorsun, ne kadar süredir yazarlık yapıyorsun?
+              - paragraph [ref=e52]: 0/500
+            - generic [ref=e53]:
+              - generic [ref=e54]: Portfolyo URL
+              - textbox "Portfolyo URL" [ref=e55]:
+                - /placeholder: https://...
+          - generic [ref=e56]:
+            - generic [ref=e57]:
+              - heading "Yazarlık Durumu" [level=2] [ref=e58]
+              - paragraph [ref=e59]: Diğer yazarlar seni Yazarlar Rehberi'nde bu durumla görür.
+            - generic [ref=e60]:
+              - generic [ref=e61] [cursor=pointer]:
+                - radio "İşbirliğine Açık Yeni projelere katılmaya hazırım" [checked] [ref=e62]
+                - generic [ref=e64]:
+                  - paragraph [ref=e65]: İşbirliğine Açık
+                  - paragraph [ref=e66]: Yeni projelere katılmaya hazırım
+                - img [ref=e67]
+              - generic [ref=e69] [cursor=pointer]:
+                - radio "Aktif Yazıyor Şu an bir projede yoğun çalışıyorum" [ref=e70]
+                - generic [ref=e72]:
+                  - paragraph [ref=e73]: Aktif Yazıyor
+                  - paragraph [ref=e74]: Şu an bir projede yoğun çalışıyorum
+              - generic [ref=e75] [cursor=pointer]:
+                - radio "Meşgul Şu an müsait değilim" [ref=e76]
+                - generic [ref=e78]:
+                  - paragraph [ref=e79]: Meşgul
+                  - paragraph [ref=e80]: Şu an müsait değilim
+          - button "Kaydet" [ref=e81] [cursor=pointer]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e87] [cursor=pointer]:
+    - img [ref=e88]
