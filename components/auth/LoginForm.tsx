@@ -28,7 +28,15 @@ export function LoginForm() {
       password: data.password,
     })
     if (error) {
-      setServerError('Email veya şifre hatalı.')
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        setServerError('E-posta adresin henüz onaylanmamış. Gelen kutunu kontrol et ve onay linkine tıkla.')
+      } else if (error.message.toLowerCase().includes('invalid') || error.message.toLowerCase().includes('credentials')) {
+        setServerError('Email veya şifre hatalı.')
+      } else if (error.message.toLowerCase().includes('too many')) {
+        setServerError('Çok fazla deneme yapıldı. Lütfen birkaç dakika bekle.')
+      } else {
+        setServerError('Giriş yapılamadı: ' + error.message)
+      }
       return
     }
     router.push('/dashboard')
