@@ -312,7 +312,16 @@ CREATE POLICY "roles_delete_owner"  ON project_roles FOR DELETE USING (is_projec
 
 -- Project Members
 CREATE POLICY "members_select_member" ON project_members FOR SELECT USING (is_project_owner(project_id) OR is_project_member(project_id));
-CREATE POLICY "members_insert_owner"  ON project_members FOR INSERT WITH CHECK (is_project_owner(project_id));
+CREATE POLICY "members_insert_owner"  ON project_members FOR INSERT WITH CHECK (
+  is_project_owner(project_id) OR (
+    user_id = auth.uid() AND EXISTS (
+      SELECT 1 FROM project_invites
+      WHERE project_invites.project_id = project_members.project_id
+        AND project_invites.invitee_id = auth.uid()
+        AND project_invites.status = 'pending'
+    )
+  )
+);
 CREATE POLICY "members_delete_owner"  ON project_members FOR DELETE USING (is_project_owner(project_id));
 
 -- Project Invites

@@ -59,6 +59,24 @@ Yazarlar için işbirlikli hikaye yazma platformu. Turkish-language collaborativ
   - `https://dtcwlvoggjxvuwvkjpip.supabase.co`
 - Google OAuth test modunda — production için "Publish App" gerekiyor
 
+### Davet Kabul Edilemiyor (409 / RLS Hatası)
+- **Neden:** `project_members` INSERT politikası yalnızca `is_project_owner()` kontrolü yapıyor. Davet kabul eden kullanıcı (invitee) kendisini üye eklemeye çalışırken proje sahibi olmadığı için RLS engeller.
+- **Çözüm:** Politikaya "pending invite sahibi de kendini ekleyebilir" koşulu eklendi:
+  ```sql
+  DROP POLICY IF EXISTS "members_insert_owner" ON project_members;
+  CREATE POLICY "members_insert_owner" ON project_members FOR INSERT WITH CHECK (
+    is_project_owner(project_id) OR (
+      user_id = auth.uid() AND EXISTS (
+        SELECT 1 FROM project_invites
+        WHERE project_invites.project_id = project_members.project_id
+          AND project_invites.invitee_id = auth.uid()
+          AND project_invites.status = 'pending'
+      )
+    )
+  );
+  ```
+- **Etkilenen dosya:** `supabase/schema.sql` (members_insert_owner politikası) + Supabase Dashboard > SQL Editor'da çalıştırılmalı
+
 ### Versiyon Şişmesi (TipTap Editor)
 - Autosave debounce: **30 saniye** (eski 2s)
 - Yeni version sadece `wordDiff >= 20` VEYA ilk kayıt ise oluşturuluyor
