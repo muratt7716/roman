@@ -17,11 +17,23 @@ export default async function PublicLayout({ children }: { children: React.React
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
       ])
-      profile = data as Profile | null
+
+      // Profil DB'de yoksa auth bilgisinden fallback oluştur
+      profile = (data as Profile | null) ?? {
+        id: user.id,
+        username: user.email?.split('@')[0] ?? 'kullanici',
+        display_name: user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? null,
+        bio: null,
+        avatar_url: user.user_metadata?.avatar_url ?? null,
+        portfolio_url: null,
+        writing_status: 'open',
+        reputation_score: 0,
+        created_at: user.created_at,
+      }
       unreadCount = count ?? 0
     }
   } catch {
-    // Supabase not configured yet
+    // Supabase yapılandırılmamış
   }
 
   return (
