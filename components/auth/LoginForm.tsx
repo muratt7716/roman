@@ -23,7 +23,7 @@ export function LoginForm() {
 
   async function onSubmit(data: SignInInput) {
     setServerError(null)
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
     })
@@ -38,6 +38,22 @@ export function LoginForm() {
         setServerError('Giriş yapılamadı: ' + error.message)
       }
       return
+    }
+    // Profil yoksa oluştur (eski hesaplar veya trigger çalışmamış olabilir)
+    if (authData.user) {
+      const user = authData.user
+      const fallbackUsername = (
+        user.user_metadata?.username ??
+        user.email?.split('@')[0] ??
+        'kullanici'
+      ).toLowerCase().replace(/[^a-z0-9_]/g, '') + '_' + user.id.slice(0, 4)
+
+      await supabase.from('profiles').upsert({
+        id: user.id,
+        username: fallbackUsername,
+        display_name: user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? null,
+        avatar_url: user.user_metadata?.avatar_url ?? null,
+      }, { onConflict: 'id', ignoreDuplicates: true })
     }
     router.push('/dashboard')
     router.refresh()
