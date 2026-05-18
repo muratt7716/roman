@@ -37,7 +37,7 @@ export function SignupForm() {
         : 'Bir hata oluştu. Lütfen tekrar dene.')
       return
     }
-    if (authData.user) {
+    if (authData.user && authData.session) {
       await supabase.from('profiles').upsert({
         id: authData.user.id,
         username: data.username.toLowerCase().replace(/[^a-z0-9_]/g, ''),

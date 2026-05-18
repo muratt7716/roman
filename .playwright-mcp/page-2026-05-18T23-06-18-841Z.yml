@@ -1,0 +1,25 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e39]:
+    - generic [ref=e40]:
+      - heading "Tekrar hoş geldin" [level=1] [ref=e41]
+      - paragraph [ref=e42]: Hikayeye devam et
+    - button "Google ile giriş yap" [ref=e43] [cursor=pointer]:
+      - img
+      - text: Google ile giriş yap
+    - generic [ref=e48]: veya
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - generic [ref=e51]: Email
+        - textbox "Email" [ref=e52]
+      - generic [ref=e53]:
+        - generic [ref=e54]: Şifre
+        - textbox "Şifre" [ref=e55]
+      - button "Giriş Yap" [ref=e56] [cursor=pointer]
+    - paragraph [ref=e57]:
+      - text: Hesabın yok mu?
+      - link "Kayıt ol" [ref=e58] [cursor=pointer]:
+        - /url: /signup
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e34] [cursor=pointer]:
+    - img [ref=e35]
+  - alert [ref=e38]: Giriş Yap — Kalem Birliği

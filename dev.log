@@ -1,0 +1,19 @@
+
+> roman@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 44396, using available port 3001 instead.
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.1.102:3001
+- Environments: .env.local
+✓ Ready in 870ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          44396
+- Dir:          C:\Users\Administrator\Desktop\roman
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 44396 /F to stop it.
+[?25h

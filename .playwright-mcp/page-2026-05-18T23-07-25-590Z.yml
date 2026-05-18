@@ -1,0 +1,174 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link [ref=e7] [cursor=pointer]:
+        - /url: .
+      - navigation [ref=e8]:
+        - generic [ref=e9]:
+          - link " Home" [ref=e10] [cursor=pointer]:
+            - /url: .
+            - generic [ref=e11]: 
+            - text: Home
+          - link " Donate" [ref=e12] [cursor=pointer]:
+            - /url: donate
+            - generic [ref=e13]: 
+            - text: Donate
+          - link " Domains" [ref=e14] [cursor=pointer]:
+            - /url: add-domain
+            - generic [ref=e15]: 
+            - text: Domains
+          - link " Random" [ref=e16] [cursor=pointer]:
+            - /url: email-generator
+            - generic [ref=e17]: 
+            - text: Random
+        - generic [ref=e22]:
+          - generic [ref=e23]:
+            - img "Temporary Email" [ref=e24]
+            - text: English
+          - generic [ref=e26]: 
+  - main [ref=e30]:
+    - generic [ref=e32]:
+      - generic [ref=e33]: testuser_kb_2024@yopmail.com
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - text: Alias
+          - button "" [ref=e36] [cursor=pointer]:
+            - generic [ref=e37]: 
+          - text: ":"
+        - generic [ref=e38]:
+          - emphasis [ref=e39]: alt.xk-a6vg73
+          - text: "@yopmail.com"
+        - button "" [ref=e41] [cursor=pointer]:
+          - generic [ref=e42]: 
+    - generic [ref=e43]:
+      - generic [ref=e45]:
+        - generic [ref=e46]:
+          - button "" [ref=e48] [cursor=pointer]:
+            - generic [ref=e49]: 
+          - button "" [disabled] [ref=e51]:
+            - generic [ref=e52]: 
+          - button "" [ref=e55] [cursor=pointer]:
+            - generic [ref=e56]: 
+          - generic [ref=e57]:
+            - button "" [disabled] [ref=e59]:
+              - generic [ref=e60]: 
+            - generic [ref=e61]: page 1
+            - button "" [disabled] [ref=e63]:
+              - generic [ref=e64]: 
+          - generic [ref=e66]: 1 mail
+          - button "" [ref=e68] [cursor=pointer]:
+            - generic [ref=e69]: 
+        - iframe [ref=e71]:
+          - generic [ref=f26e2]:
+            - generic [ref=f26e3]: today
+            - generic [ref=f26e4]:
+              - checkbox [ref=f26e6]
+              - button "2:06 Supabase Auth E-POSTANIZI DOĞRULAYIN" [ref=f26e7] [cursor=pointer]:
+                - generic [ref=f26e8]:
+                  - generic [ref=f26e9]: 2:06
+                  - generic [ref=f26e10]: Supabase Auth
+                - generic [ref=f26e11]: E-POSTANIZI DOĞRULAYIN
+      - iframe [active] [ref=e77]:
+        - generic [ref=f28e1]:
+          - banner [ref=f28e2]:
+            - generic [ref=f28e3]:
+              - generic [ref=f28e4]:
+                - button " Deliverability" [ref=f28e5] [cursor=pointer]:
+                  - generic [ref=f28e6]: 
+                  - generic [ref=f28e7]: Deliverability
+                - generic [ref=f28e8]:
+                  - button " Reply" [ref=f28e9] [cursor=pointer]:
+                    - generic [ref=f28e10]: 
+                    - generic [ref=f28e11]: Reply
+                  - button " Forward" [ref=f28e12] [cursor=pointer]:
+                    - generic [ref=f28e13]: 
+                    - generic [ref=f28e14]: Forward
+              - button " Print" [ref=f28e15] [cursor=pointer]:
+                - generic [ref=f28e16]: 
+                - generic [ref=f28e17]: Print
+              - button " Delete" [ref=f28e18] [cursor=pointer]:
+                - generic [ref=f28e19]: 
+                - generic [ref=f28e20]: Delete
+              - button "" [ref=f28e21] [cursor=pointer]:
+                - generic [ref=f28e22]: 
+            - generic [ref=f28e23]:
+              - generic [ref=f28e24]: E-POSTANIZI DOĞRULAYIN
+              - generic [ref=f28e25]:
+                - generic [ref=f28e26]: 
+                - generic [ref=f28e27]: Supabase Auth <noreply@mail.app.supabase.io>
+              - generic [ref=f28e28]:
+                - generic [ref=f28e29]: 
+                - generic [ref=f28e30]: Tuesday, May 19, 2026 2:06:20 AM
+          - main [ref=f28e31]:
+            - generic [ref=f28e34]:
+              - table [ref=f28e35]:
+                - rowgroup [ref=f28e36]:
+                  - 'row "K Kalem Birliği ✉ E-postanı Doğrula Kalem Birliği''ne hoş geldin! Hesabını etkinleştirmek için aşağıdaki butona tıkla. Hesabımı Onayla → Buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcına kopyala: https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback Bu bağlantı 24 saat geçerlidir. Eğer bu kaydı sen yapmadıysan bu e-postayı görmezden gelebilirsin. © 2025 Kalem Birliği · Birlikte yaz, birlikte büyü" [ref=f28e37]':
+                    - 'cell "K Kalem Birliği ✉ E-postanı Doğrula Kalem Birliği''ne hoş geldin! Hesabını etkinleştirmek için aşağıdaki butona tıkla. Hesabımı Onayla → Buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcına kopyala: https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback Bu bağlantı 24 saat geçerlidir. Eğer bu kaydı sen yapmadıysan bu e-postayı görmezden gelebilirsin. © 2025 Kalem Birliği · Birlikte yaz, birlikte büyü" [ref=f28e38]':
+                      - table [ref=f28e39]:
+                        - rowgroup [ref=f28e40]:
+                          - row "K Kalem Birliği" [ref=f28e41]:
+                            - cell "K Kalem Birliği" [ref=f28e42]:
+                              - table [ref=f28e43]:
+                                - rowgroup [ref=f28e44]:
+                                  - row "K Kalem Birliği" [ref=f28e45]:
+                                    - cell "K" [ref=f28e46]
+                                    - cell "Kalem Birliği" [ref=f28e47]
+                          - 'row "✉ E-postanı Doğrula Kalem Birliği''ne hoş geldin! Hesabını etkinleştirmek için aşağıdaki butona tıkla. Hesabımı Onayla → Buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcına kopyala: https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback Bu bağlantı 24 saat geçerlidir. Eğer bu kaydı sen yapmadıysan bu e-postayı görmezden gelebilirsin." [ref=f28e48]':
+                            - 'cell "✉ E-postanı Doğrula Kalem Birliği''ne hoş geldin! Hesabını etkinleştirmek için aşağıdaki butona tıkla. Hesabımı Onayla → Buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcına kopyala: https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback Bu bağlantı 24 saat geçerlidir. Eğer bu kaydı sen yapmadıysan bu e-postayı görmezden gelebilirsin." [ref=f28e49]':
+                              - table [ref=f28e50]:
+                                - rowgroup [ref=f28e51]:
+                                  - row "✉" [ref=f28e52]:
+                                    - cell "✉" [ref=f28e53]:
+                                      - generic [ref=f28e54]: ✉
+                              - table [ref=f28e55]:
+                                - rowgroup [ref=f28e56]:
+                                  - row "E-postanı Doğrula" [ref=f28e57]:
+                                    - cell "E-postanı Doğrula" [ref=f28e58]:
+                                      - heading "E-postanı Doğrula" [level=1] [ref=f28e59]
+                                  - row "Kalem Birliği'ne hoş geldin! Hesabını etkinleştirmek için aşağıdaki butona tıkla." [ref=f28e60]:
+                                    - cell "Kalem Birliği'ne hoş geldin! Hesabını etkinleştirmek için aşağıdaki butona tıkla." [ref=f28e61]:
+                                      - paragraph [ref=f28e62]: Kalem Birliği'ne hoş geldin! Hesabını etkinleştirmek için aşağıdaki butona tıkla.
+                              - table [ref=f28e63]:
+                                - rowgroup [ref=f28e64]:
+                                  - row "Hesabımı Onayla →" [ref=f28e65]:
+                                    - cell "Hesabımı Onayla →" [ref=f28e66]:
+                                      - link "Hesabımı Onayla →" [active] [ref=f28e67] [cursor=pointer]:
+                                        - /url: https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback
+                              - table [ref=f28e68]:
+                                - rowgroup [ref=f28e69]:
+                                  - row "Buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcına kopyala:" [ref=f28e70]:
+                                    - cell "Buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcına kopyala:" [ref=f28e71]:
+                                      - paragraph [ref=f28e72]: "Buton çalışmıyorsa aşağıdaki bağlantıyı tarayıcına kopyala:"
+                                  - row "https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback" [ref=f28e73]:
+                                    - cell "https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback" [ref=f28e74]:
+                                      - link "https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback" [ref=f28e75] [cursor=pointer]:
+                                        - /url: https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/verify?token=pkce_e952895145fdb1fda514ad8704d8be23fc4ca67926225fd1a95894f1&type=signup&redirect_to=http://localhost:3000/auth/callback
+                              - table [ref=f28e76]:
+                                - rowgroup [ref=f28e77]:
+                                  - row "Bu bağlantı 24 saat geçerlidir. Eğer bu kaydı sen yapmadıysan bu e-postayı görmezden gelebilirsin." [ref=f28e78]:
+                                    - cell "Bu bağlantı 24 saat geçerlidir. Eğer bu kaydı sen yapmadıysan bu e-postayı görmezden gelebilirsin." [ref=f28e79]:
+                                      - paragraph [ref=f28e80]:
+                                        - text: Bu bağlantı
+                                        - strong [ref=f28e81]: 24 saat
+                                        - text: geçerlidir. Eğer bu kaydı sen yapmadıysan bu e-postayı görmezden gelebilirsin.
+                          - row "© 2025 Kalem Birliği · Birlikte yaz, birlikte büyü" [ref=f28e82]:
+                            - cell "© 2025 Kalem Birliği · Birlikte yaz, birlikte büyü" [ref=f28e83]:
+                              - paragraph [ref=f28e84]: © 2025 Kalem Birliği · Birlikte yaz, birlikte büyü
+              - table [ref=f28e86]:
+                - rowgroup [ref=f28e87]:
+                  - row "You're receiving this email because you signed up for an application powered by Supabase ⚡️ Opt out of these emails" [ref=f28e88]:
+                    - cell "You're receiving this email because you signed up for an application powered by Supabase ⚡️ Opt out of these emails" [ref=f28e89]:
+                      - table [ref=f28e90]:
+                        - rowgroup [ref=f28e91]:
+                          - row "You're receiving this email because you signed up for an application powered by Supabase ⚡️" [ref=f28e92]:
+                            - cell "You're receiving this email because you signed up for an application powered by Supabase ⚡️" [ref=f28e93]:
+                              - text: You're receiving this email because you signed up for an application
+                              - link "powered by Supabase" [ref=f28e94] [cursor=pointer]:
+                                - /url: https://supabase.com/?utm_source=auth-email&utm_medium=email&utm_campaign=powered-by-supabase
+                              - text: ⚡️
+                          - row "Opt out of these emails" [ref=f28e95]:
+                            - cell "Opt out of these emails" [ref=f28e96]:
+                              - link "Opt out of these emails" [ref=f28e97] [cursor=pointer]:
+                                - /url: https://supabase.com/opt-out/dtcwlvoggjxvuwvkjpip
+  - contentinfo [ref=e80]

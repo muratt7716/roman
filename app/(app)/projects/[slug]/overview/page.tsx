@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { Users, CheckCircle, XCircle, Clock, BarChart2, Globe, Lock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -78,6 +79,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
     'use server'
     const appId = formData.get('appId') as string
     const action = formData.get('action') as string
+    const projectSlugParam = formData.get('projectSlug') as string
     const supabase = await createClient()
 
     if (action === 'accept') {
@@ -88,23 +90,21 @@ export default async function ProjectOverviewPage({ params }: Props) {
         .single()
 
       if (app) {
-        await Promise.all([
-          supabase.from('applications').update({ status: 'accepted' }).eq('id', appId),
-          supabase.from('project_members').upsert({
+        await supabase.from('applications').update({ status: 'accepted' }).eq('id', appId)
+        await supabase.from('project_members').upsert({
+          project_id: app.project_id,
+          user_id: app.applicant_id,
+          role_id: app.role_id,
+        }, { onConflict: 'project_id,user_id', ignoreDuplicates: true })
+        await supabase.from('notifications').insert({
+          user_id: app.applicant_id,
+          type: 'acceptance',
+          payload: {
             project_id: app.project_id,
-            user_id: app.applicant_id,
-            role_id: app.role_id,
-          }, { onConflict: 'project_id,user_id', ignoreDuplicates: true }),
-          supabase.from('notifications').insert({
-            user_id: app.applicant_id,
-            type: 'acceptance',
-            payload: {
-              project_id: app.project_id,
-              project_title: (app.project as any)?.title,
-              role_name: (app.role as any)?.name,
-            },
-          }),
-        ])
+            project_title: (app.project as any)?.title,
+            role_name: (app.role as any)?.name,
+          },
+        })
       }
     } else {
       const { data: app } = await supabase
@@ -113,31 +113,33 @@ export default async function ProjectOverviewPage({ params }: Props) {
         .eq('id', appId)
         .single()
       if (app) {
-        await Promise.all([
-          supabase.from('applications').update({ status: 'rejected' }).eq('id', appId),
-          supabase.from('notifications').insert({
-            user_id: app.applicant_id,
-            type: 'rejection',
-            payload: {
-              project_id: app.project_id,
-              project_title: (app.project as any)?.title,
-            },
-          }),
-        ])
+        await supabase.from('applications').update({ status: 'rejected' }).eq('id', appId)
+        await supabase.from('notifications').insert({
+          user_id: app.applicant_id,
+          type: 'rejection',
+          payload: {
+            project_id: app.project_id,
+            project_title: (app.project as any)?.title,
+          },
+        })
       }
     }
+
+    revalidatePath(`/projects/${projectSlugParam}/overview`)
   }
 
   async function publishProject(formData: FormData) {
     'use server'
     const projectId = formData.get('projectId') as string
     const action = formData.get('action') as string
+    const projectSlug = formData.get('projectSlug') as string
     const supabase = await createClient()
     if (action === 'publish') {
       await supabase.from('projects').update({ visibility: 'published', collaboration_status: 'completed' }).eq('id', projectId)
     } else {
       await supabase.from('projects').update({ visibility: 'open', collaboration_status: 'recruiting' }).eq('id', projectId)
     }
+    revalidatePath(`/projects/${projectSlug}/overview`)
   }
 
   const isPublished = project.visibility === 'published'
@@ -153,6 +155,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
         {isOwner && (
           <form action={publishProject}>
             <input type="hidden" name="projectId" value={project.id} />
+            <input type="hidden" name="projectSlug" value={id} />
             <input type="hidden" name="action" value={isPublished ? 'unpublish' : 'publish'} />
             <button
               type="submit"
@@ -270,6 +273,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
                     <form action={updateApplication}>
                       <input type="hidden" name="appId" value={app.id} />
                       <input type="hidden" name="action" value="accept" />
+                      <input type="hidden" name="projectSlug" value={id} />
                       <button type="submit" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/15 text-green-400 hover:bg-success/25 text-xs font-medium transition-colors">
                         <CheckCircle className="w-3.5 h-3.5" /> Kabul Et
                       </button>
@@ -277,6 +281,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
                     <form action={updateApplication}>
                       <input type="hidden" name="appId" value={app.id} />
                       <input type="hidden" name="action" value="reject" />
+                      <input type="hidden" name="projectSlug" value={id} />
                       <button type="submit" className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 text-xs font-medium transition-colors">
                         <XCircle className="w-3.5 h-3.5" /> Reddet
                       </button>

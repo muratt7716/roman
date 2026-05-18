@@ -1,0 +1,90 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "Kalem Birliği anasayfa" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e8]
+          - generic [ref=e10]: Kalem Birliği
+        - generic [ref=e11]:
+          - link "Keşfet" [ref=e12] [cursor=pointer]:
+            - /url: /explore
+            - img [ref=e13]
+            - text: Keşfet
+          - link "Yazarlar" [ref=e16] [cursor=pointer]:
+            - /url: /writers
+            - img [ref=e17]
+            - text: Yazarlar
+          - link "Dashboard" [ref=e22] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e23]
+            - text: Dashboard
+          - link "Bildirimler" [ref=e28] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e29]
+          - button "Hesap menüsü" [expanded] [ref=e32] [cursor=pointer]:
+            - generic [ref=e34]: t
+          - menu "Hesap menüsü" [ref=e95]:
+            - generic [ref=e96]:
+              - paragraph [ref=e97]: testuser_kb_2024
+              - paragraph [ref=e98]: "@testkullanici"
+            - menuitem "Dashboard" [active] [ref=e99]:
+              - link "Dashboard" [ref=e100] [cursor=pointer]:
+                - /url: /dashboard
+                - img
+                - text: Dashboard
+            - menuitem "Profil" [ref=e101]:
+              - link "Profil" [ref=e102] [cursor=pointer]:
+                - /url: /u/testkullanici
+                - img
+                - text: Profil
+            - separator [ref=e103]
+            - menuitem "Ayarlar" [ref=e104]:
+              - link "Ayarlar" [ref=e105] [cursor=pointer]:
+                - /url: /settings
+            - separator [ref=e106]
+            - menuitem "Çıkış Yap" [ref=e107] [cursor=pointer]:
+              - img
+              - text: Çıkış Yap
+    - main [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - heading "Dashboard" [level=1] [ref=e39]
+            - paragraph [ref=e40]: Projelerini yönet ve ilerlemeyi takip et.
+          - link "Yeni Proje" [ref=e41] [cursor=pointer]:
+            - /url: /projects/new
+            - img
+            - text: Yeni Proje
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - img [ref=e44]
+            - paragraph [ref=e46]: "0"
+            - paragraph [ref=e47]: Projem
+          - generic [ref=e48]:
+            - img [ref=e49]
+            - paragraph [ref=e54]: "0"
+            - paragraph [ref=e55]: Katıldığım
+          - generic [ref=e56]:
+            - img [ref=e57]
+            - paragraph [ref=e60]: "0"
+            - paragraph [ref=e61]: Bekleyen
+          - generic [ref=e62]:
+            - img [ref=e63]
+            - paragraph [ref=e65]: "0"
+            - paragraph [ref=e66]: Toplam Kelime
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - img [ref=e70]
+            - heading "Projelerim" [level=2] [ref=e72]
+          - generic [ref=e73]:
+            - img [ref=e75]
+            - generic [ref=e77]:
+              - heading "Henüz proje yok" [level=3] [ref=e78]
+              - paragraph [ref=e79]: İlk projeyi oluştur ve ekibini kur.
+            - link "Proje Oluştur" [ref=e80] [cursor=pointer]:
+              - /url: /projects/new
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e86] [cursor=pointer]:
+    - img [ref=e87]
+  - alert [ref=e90]
