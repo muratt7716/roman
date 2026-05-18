@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/shared/Navbar'
 import type { Profile } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   let profile: Profile | null = null
   let unreadCount = 0
