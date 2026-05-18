@@ -1,76 +1,43 @@
 -- ============================================================
 -- Writer Squad — Tam Veritabanı Şeması
 -- Supabase SQL Editor'a yapıştır ve çalıştır.
--- Hem boş hem de mevcut veritabanında güvenle çalışır.
+-- VERİ KAYBETMEZ: Tablolar silinmez, sadece eksikler oluşturulur.
+-- Politikalar, fonksiyonlar ve trigger'lar her seferinde yenilenir.
 -- ============================================================
 
 -- ============================================================
--- 0. TEMİZLİK (varsa sil, yoksa atla)
+-- 1. ENUMs (yoksa oluştur)
 -- ============================================================
 
--- Storage politikaları
-DROP POLICY IF EXISTS "avatars_public_read"  ON storage.objects;
-DROP POLICY IF EXISTS "avatars_auth_insert"  ON storage.objects;
-DROP POLICY IF EXISTS "avatars_auth_update"  ON storage.objects;
-DROP POLICY IF EXISTS "avatars_auth_delete"  ON storage.objects;
-DROP POLICY IF EXISTS "covers_public_read"   ON storage.objects;
-DROP POLICY IF EXISTS "covers_auth_insert"   ON storage.objects;
-DROP POLICY IF EXISTS "covers_auth_update"   ON storage.objects;
-DROP POLICY IF EXISTS "covers_auth_delete"   ON storage.objects;
+DO $$ BEGIN
+  CREATE TYPE project_visibility AS ENUM ('draft', 'open', 'closed', 'published');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- Trigger'lar
-DROP TRIGGER IF EXISTS on_auth_user_created    ON auth.users;
-DROP TRIGGER IF EXISTS set_updated_at          ON projects;
-DROP TRIGGER IF EXISTS set_updated_at          ON chapters;
-DROP TRIGGER IF EXISTS set_updated_at          ON brainstorm_notes;
-DROP TRIGGER IF EXISTS set_updated_at          ON character_profiles;
+DO $$ BEGIN
+  CREATE TYPE collaboration_status AS ENUM ('recruiting', 'active', 'completed');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- Fonksiyonlar
-DROP FUNCTION IF EXISTS public.handle_new_user()      CASCADE;
-DROP FUNCTION IF EXISTS public.update_updated_at()    CASCADE;
-DROP FUNCTION IF EXISTS public.is_project_member(uuid) CASCADE;
-DROP FUNCTION IF EXISTS public.is_project_owner(uuid)  CASCADE;
+DO $$ BEGIN
+  CREATE TYPE application_status AS ENUM ('pending', 'accepted', 'rejected');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- Tablolar (CASCADE FK bağımlılıklarını halleder)
-DROP TABLE IF EXISTS notifications        CASCADE;
-DROP TABLE IF EXISTS timeline_events      CASCADE;
-DROP TABLE IF EXISTS character_profiles   CASCADE;
-DROP TABLE IF EXISTS brainstorm_notes     CASCADE;
-DROP TABLE IF EXISTS comments             CASCADE;
-DROP TABLE IF EXISTS chapter_suggestions  CASCADE;
-DROP TABLE IF EXISTS chapter_versions     CASCADE;
-DROP TABLE IF EXISTS chapters             CASCADE;
-DROP TABLE IF EXISTS applications         CASCADE;
-DROP TABLE IF EXISTS project_invites      CASCADE;
-DROP TABLE IF EXISTS project_members      CASCADE;
-DROP TABLE IF EXISTS project_roles        CASCADE;
-DROP TABLE IF EXISTS projects             CASCADE;
-DROP TABLE IF EXISTS profiles             CASCADE;
+DO $$ BEGIN
+  CREATE TYPE chapter_status AS ENUM ('draft', 'review', 'final');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- ENUM'lar
-DROP TYPE IF EXISTS project_visibility    CASCADE;
-DROP TYPE IF EXISTS collaboration_status  CASCADE;
-DROP TYPE IF EXISTS application_status    CASCADE;
-DROP TYPE IF EXISTS chapter_status        CASCADE;
-DROP TYPE IF EXISTS notification_type     CASCADE;
-DROP TYPE IF EXISTS brainstorm_note_type  CASCADE;
+DO $$ BEGIN
+  CREATE TYPE notification_type AS ENUM ('application', 'acceptance', 'rejection', 'comment', 'mention', 'invite', 'suggestion');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE brainstorm_note_type AS ENUM ('plot', 'character', 'lore', 'relationship', 'sticky');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- ============================================================
--- 1. ENUMs
+-- 2. TABLOLAR (yoksa oluştur — varsa dokunma)
 -- ============================================================
 
-CREATE TYPE project_visibility    AS ENUM ('draft', 'open', 'closed', 'published');
-CREATE TYPE collaboration_status  AS ENUM ('recruiting', 'active', 'completed');
-CREATE TYPE application_status    AS ENUM ('pending', 'accepted', 'rejected');
-CREATE TYPE chapter_status        AS ENUM ('draft', 'review', 'final');
-CREATE TYPE notification_type     AS ENUM ('application', 'acceptance', 'rejection', 'comment', 'mention', 'invite', 'suggestion');
-CREATE TYPE brainstorm_note_type  AS ENUM ('plot', 'character', 'lore', 'relationship', 'sticky');
-
--- ============================================================
--- 2. TABLOLAR
--- ============================================================
-
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
   id              uuid PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
   username        text UNIQUE NOT NULL,
   display_name    text,
@@ -82,7 +49,7 @@ CREATE TABLE profiles (
   created_at      timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
   id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   owner_id             uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   title                text NOT NULL,
@@ -99,7 +66,7 @@ CREATE TABLE projects (
   updated_at           timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE project_roles (
+CREATE TABLE IF NOT EXISTS project_roles (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id  uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   name        text NOT NULL,
@@ -108,7 +75,7 @@ CREATE TABLE project_roles (
   permissions jsonb NOT NULL DEFAULT '{}'
 );
 
-CREATE TABLE project_members (
+CREATE TABLE IF NOT EXISTS project_members (
   id                      uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id              uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   user_id                 uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -118,7 +85,7 @@ CREATE TABLE project_members (
   UNIQUE(project_id, user_id)
 );
 
-CREATE TABLE project_invites (
+CREATE TABLE IF NOT EXISTS project_invites (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id  uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   inviter_id  uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -130,7 +97,7 @@ CREATE TABLE project_invites (
   UNIQUE(project_id, invitee_id)
 );
 
-CREATE TABLE applications (
+CREATE TABLE IF NOT EXISTS applications (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id      uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   applicant_id    uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -142,7 +109,7 @@ CREATE TABLE applications (
   created_at      timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE chapters (
+CREATE TABLE IF NOT EXISTS chapters (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id  uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   title       text NOT NULL,
@@ -154,7 +121,7 @@ CREATE TABLE chapters (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE chapter_versions (
+CREATE TABLE IF NOT EXISTS chapter_versions (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   chapter_id  uuid NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
   author_id   uuid NOT NULL REFERENCES profiles(id),
@@ -163,7 +130,7 @@ CREATE TABLE chapter_versions (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE chapter_suggestions (
+CREATE TABLE IF NOT EXISTS chapter_suggestions (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   chapter_id  uuid NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
   author_id   uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -173,7 +140,7 @@ CREATE TABLE chapter_suggestions (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE comments (
+CREATE TABLE IF NOT EXISTS comments (
   id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   chapter_id      uuid NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
   author_id       uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -183,7 +150,7 @@ CREATE TABLE comments (
   created_at      timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE brainstorm_notes (
+CREATE TABLE IF NOT EXISTS brainstorm_notes (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id  uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   author_id   uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
@@ -197,7 +164,7 @@ CREATE TABLE brainstorm_notes (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE character_profiles (
+CREATE TABLE IF NOT EXISTS character_profiles (
   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id    uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   name          text NOT NULL,
@@ -212,7 +179,7 @@ CREATE TABLE character_profiles (
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE timeline_events (
+CREATE TABLE IF NOT EXISTS timeline_events (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id  uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   title       text NOT NULL,
@@ -224,7 +191,7 @@ CREATE TABLE timeline_events (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id    uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
   type       notification_type NOT NULL,
@@ -234,7 +201,7 @@ CREATE TABLE notifications (
 );
 
 -- ============================================================
--- 3. TRIGGER'LAR
+-- 3. TRIGGER'LAR (her seferinde yenile — veri içermez)
 -- ============================================================
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -245,11 +212,13 @@ BEGIN
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1) || '_' || substr(NEW.id::text, 1, 4)),
     COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1))
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
@@ -259,29 +228,34 @@ RETURNS trigger AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON projects          FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON chapters          FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
-CREATE TRIGGER set_updated_at BEFORE UPDATE ON brainstorm_notes  FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
+DROP TRIGGER IF EXISTS set_updated_at ON projects;
+DROP TRIGGER IF EXISTS set_updated_at ON chapters;
+DROP TRIGGER IF EXISTS set_updated_at ON brainstorm_notes;
+DROP TRIGGER IF EXISTS set_updated_at ON character_profiles;
+
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON projects           FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON chapters           FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON brainstorm_notes   FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON character_profiles FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();
 
 -- ============================================================
--- 4. ROW LEVEL SECURITY (RLS)
+-- 4. ROW LEVEL SECURITY (her seferinde yenile — veri içermez)
 -- ============================================================
 
-ALTER TABLE profiles           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE projects           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE project_roles      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE project_members    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE project_invites    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE applications       ENABLE ROW LEVEL SECURITY;
-ALTER TABLE chapters           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE chapter_versions   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE projects            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_roles       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_members     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE project_invites     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE applications        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chapters            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chapter_versions    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chapter_suggestions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE comments           ENABLE ROW LEVEL SECURITY;
-ALTER TABLE brainstorm_notes   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE character_profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE timeline_events    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE notifications      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE brainstorm_notes    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE character_profiles  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE timeline_events     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications       ENABLE ROW LEVEL SECURITY;
 
 -- Yardımcı fonksiyonlar
 CREATE OR REPLACE FUNCTION public.is_project_member(p_project_id uuid)
@@ -294,9 +268,58 @@ RETURNS boolean AS $$
   SELECT EXISTS (SELECT 1 FROM projects WHERE id = p_project_id AND owner_id = auth.uid());
 $$ LANGUAGE sql SECURITY DEFINER;
 
+-- Tüm politikaları sil ve yeniden oluştur (politikalar veri içermez)
+DROP POLICY IF EXISTS "profiles_select_all"          ON profiles;
+DROP POLICY IF EXISTS "profiles_update_own"           ON profiles;
+DROP POLICY IF EXISTS "projects_select_public"        ON projects;
+DROP POLICY IF EXISTS "projects_insert_auth"          ON projects;
+DROP POLICY IF EXISTS "projects_update_owner"         ON projects;
+DROP POLICY IF EXISTS "projects_delete_owner"         ON projects;
+DROP POLICY IF EXISTS "roles_select_member"           ON project_roles;
+DROP POLICY IF EXISTS "roles_insert_owner"            ON project_roles;
+DROP POLICY IF EXISTS "roles_update_owner"            ON project_roles;
+DROP POLICY IF EXISTS "roles_delete_owner"            ON project_roles;
+DROP POLICY IF EXISTS "members_select_member"         ON project_members;
+DROP POLICY IF EXISTS "members_insert_owner"          ON project_members;
+DROP POLICY IF EXISTS "members_delete_owner"          ON project_members;
+DROP POLICY IF EXISTS "invites_select"                ON project_invites;
+DROP POLICY IF EXISTS "invites_insert"                ON project_invites;
+DROP POLICY IF EXISTS "invites_update"                ON project_invites;
+DROP POLICY IF EXISTS "applications_select"           ON applications;
+DROP POLICY IF EXISTS "applications_insert_auth"      ON applications;
+DROP POLICY IF EXISTS "applications_update_owner"     ON applications;
+DROP POLICY IF EXISTS "chapters_select_member"        ON chapters;
+DROP POLICY IF EXISTS "chapters_insert_member"        ON chapters;
+DROP POLICY IF EXISTS "chapters_update_member"        ON chapters;
+DROP POLICY IF EXISTS "chapters_delete_owner"         ON chapters;
+DROP POLICY IF EXISTS "versions_select_member"        ON chapter_versions;
+DROP POLICY IF EXISTS "versions_insert_member"        ON chapter_versions;
+DROP POLICY IF EXISTS "suggestions_select"            ON chapter_suggestions;
+DROP POLICY IF EXISTS "suggestions_insert"            ON chapter_suggestions;
+DROP POLICY IF EXISTS "suggestions_update"            ON chapter_suggestions;
+DROP POLICY IF EXISTS "comments_select_member"        ON comments;
+DROP POLICY IF EXISTS "comments_insert_member"        ON comments;
+DROP POLICY IF EXISTS "comments_update_author"        ON comments;
+DROP POLICY IF EXISTS "comments_delete_author"        ON comments;
+DROP POLICY IF EXISTS "brainstorm_select_member"      ON brainstorm_notes;
+DROP POLICY IF EXISTS "brainstorm_insert_member"      ON brainstorm_notes;
+DROP POLICY IF EXISTS "brainstorm_update_member"      ON brainstorm_notes;
+DROP POLICY IF EXISTS "brainstorm_delete_author"      ON brainstorm_notes;
+DROP POLICY IF EXISTS "chars_select_member"           ON character_profiles;
+DROP POLICY IF EXISTS "chars_insert_member"           ON character_profiles;
+DROP POLICY IF EXISTS "chars_update_member"           ON character_profiles;
+DROP POLICY IF EXISTS "chars_delete_owner"            ON character_profiles;
+DROP POLICY IF EXISTS "timeline_select_member"        ON timeline_events;
+DROP POLICY IF EXISTS "timeline_insert_member"        ON timeline_events;
+DROP POLICY IF EXISTS "timeline_update_member"        ON timeline_events;
+DROP POLICY IF EXISTS "timeline_delete_owner"         ON timeline_events;
+DROP POLICY IF EXISTS "notifications_select_own"      ON notifications;
+DROP POLICY IF EXISTS "notifications_update_own"      ON notifications;
+DROP POLICY IF EXISTS "notifications_insert_service"  ON notifications;
+
 -- Profiles
-CREATE POLICY "profiles_select_all"  ON profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_update_own"  ON profiles FOR UPDATE USING (id = auth.uid());
+CREATE POLICY "profiles_select_all" ON profiles FOR SELECT USING (true);
+CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (id = auth.uid());
 
 -- Projects
 CREATE POLICY "projects_select_public" ON projects FOR SELECT USING (visibility IN ('open', 'closed', 'published') OR owner_id = auth.uid() OR is_project_member(id));
@@ -322,7 +345,7 @@ CREATE POLICY "members_insert_owner"  ON project_members FOR INSERT WITH CHECK (
     )
   )
 );
-CREATE POLICY "members_delete_owner"  ON project_members FOR DELETE USING (is_project_owner(project_id));
+CREATE POLICY "members_delete_owner" ON project_members FOR DELETE USING (is_project_owner(project_id));
 
 -- Project Invites
 CREATE POLICY "invites_select" ON project_invites FOR SELECT USING (inviter_id = auth.uid() OR invitee_id = auth.uid());
@@ -386,32 +409,32 @@ CREATE POLICY "notifications_update_own"     ON notifications FOR UPDATE USING (
 CREATE POLICY "notifications_insert_service" ON notifications FOR INSERT WITH CHECK (true);
 
 -- ============================================================
--- 5. INDEX'LER
+-- 5. INDEX'LER (yoksa oluştur)
 -- ============================================================
 
-CREATE INDEX idx_projects_owner         ON projects(owner_id);
-CREATE INDEX idx_projects_slug          ON projects(slug);
-CREATE INDEX idx_projects_visibility    ON projects(visibility);
-CREATE INDEX idx_projects_collab_status ON projects(collaboration_status);
-CREATE INDEX idx_project_members_project ON project_members(project_id);
-CREATE INDEX idx_project_members_user   ON project_members(user_id);
-CREATE INDEX idx_invites_invitee        ON project_invites(invitee_id, status);
-CREATE INDEX idx_invites_project        ON project_invites(project_id);
-CREATE INDEX idx_chapters_project       ON chapters(project_id);
-CREATE INDEX idx_chapter_versions_chapter ON chapter_versions(chapter_id);
-CREATE INDEX idx_suggestions_chapter    ON chapter_suggestions(chapter_id, status);
-CREATE INDEX idx_suggestions_author     ON chapter_suggestions(author_id);
-CREATE INDEX idx_applications_project   ON applications(project_id);
-CREATE INDEX idx_applications_applicant ON applications(applicant_id);
-CREATE INDEX idx_applications_status    ON applications(status);
-CREATE INDEX idx_notifications_user     ON notifications(user_id, read);
-CREATE INDEX idx_brainstorm_project     ON brainstorm_notes(project_id);
-CREATE INDEX idx_chars_project          ON character_profiles(project_id);
-CREATE INDEX idx_timeline_project       ON timeline_events(project_id, order_index);
-CREATE INDEX idx_profiles_writing_status ON profiles(writing_status);
+CREATE INDEX IF NOT EXISTS idx_projects_owner          ON projects(owner_id);
+CREATE INDEX IF NOT EXISTS idx_projects_slug           ON projects(slug);
+CREATE INDEX IF NOT EXISTS idx_projects_visibility     ON projects(visibility);
+CREATE INDEX IF NOT EXISTS idx_projects_collab_status  ON projects(collaboration_status);
+CREATE INDEX IF NOT EXISTS idx_project_members_project ON project_members(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_members_user    ON project_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_invites_invitee         ON project_invites(invitee_id, status);
+CREATE INDEX IF NOT EXISTS idx_invites_project         ON project_invites(project_id);
+CREATE INDEX IF NOT EXISTS idx_chapters_project        ON chapters(project_id);
+CREATE INDEX IF NOT EXISTS idx_chapter_versions_chapter ON chapter_versions(chapter_id);
+CREATE INDEX IF NOT EXISTS idx_suggestions_chapter     ON chapter_suggestions(chapter_id, status);
+CREATE INDEX IF NOT EXISTS idx_suggestions_author      ON chapter_suggestions(author_id);
+CREATE INDEX IF NOT EXISTS idx_applications_project    ON applications(project_id);
+CREATE INDEX IF NOT EXISTS idx_applications_applicant  ON applications(applicant_id);
+CREATE INDEX IF NOT EXISTS idx_applications_status     ON applications(status);
+CREATE INDEX IF NOT EXISTS idx_notifications_user      ON notifications(user_id, read);
+CREATE INDEX IF NOT EXISTS idx_brainstorm_project      ON brainstorm_notes(project_id);
+CREATE INDEX IF NOT EXISTS idx_chars_project           ON character_profiles(project_id);
+CREATE INDEX IF NOT EXISTS idx_timeline_project        ON timeline_events(project_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_profiles_writing_status ON profiles(writing_status);
 
 -- ============================================================
--- 6. STORAGE BUCKET'LARI (avatars + covers)
+-- 6. STORAGE BUCKET'LARI (yoksa oluştur)
 -- ============================================================
 
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
@@ -419,6 +442,15 @@ VALUES
   ('avatars', 'avatars', true, 5242880,  ARRAY['image/jpeg','image/png','image/webp','image/gif']),
   ('covers',  'covers',  true, 10485760, ARRAY['image/jpeg','image/png','image/webp'])
 ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "avatars_public_read" ON storage.objects;
+DROP POLICY IF EXISTS "avatars_auth_insert" ON storage.objects;
+DROP POLICY IF EXISTS "avatars_auth_update" ON storage.objects;
+DROP POLICY IF EXISTS "avatars_auth_delete" ON storage.objects;
+DROP POLICY IF EXISTS "covers_public_read"  ON storage.objects;
+DROP POLICY IF EXISTS "covers_auth_insert"  ON storage.objects;
+DROP POLICY IF EXISTS "covers_auth_update"  ON storage.objects;
+DROP POLICY IF EXISTS "covers_auth_delete"  ON storage.objects;
 
 CREATE POLICY "avatars_public_read"  ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
 CREATE POLICY "avatars_auth_insert"  ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'avatars' AND auth.uid() IS NOT NULL);
