@@ -72,6 +72,19 @@ export function ProjectForm() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
 
+    const fallbackUsername = (
+      user.user_metadata?.username ??
+      user.email?.split('@')[0] ??
+      'kullanici'
+    ).toLowerCase().replace(/[^a-z0-9_]/g, '') + '_' + user.id.slice(0, 4)
+
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      username: fallbackUsername,
+      display_name: user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? null,
+      avatar_url: user.user_metadata?.avatar_url ?? null,
+    }, { onConflict: 'id', ignoreDuplicates: true })
+
     const slug = slugify(data.title)
 
     const { data: project, error } = await supabase
