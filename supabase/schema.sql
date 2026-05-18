@@ -334,7 +334,10 @@ CREATE POLICY "roles_update_owner"  ON project_roles FOR UPDATE USING (is_projec
 CREATE POLICY "roles_delete_owner"  ON project_roles FOR DELETE USING (is_project_owner(project_id));
 
 -- Project Members
-CREATE POLICY "members_select_member" ON project_members FOR SELECT USING (is_project_owner(project_id) OR is_project_member(project_id));
+CREATE POLICY "members_select_member" ON project_members FOR SELECT USING (
+  is_project_owner(project_id) OR is_project_member(project_id)
+  OR EXISTS (SELECT 1 FROM projects WHERE id = project_id AND visibility IN ('open', 'closed', 'published'))
+);
 CREATE POLICY "members_insert_owner"  ON project_members FOR INSERT WITH CHECK (
   is_project_owner(project_id) OR (
     user_id = auth.uid() AND EXISTS (

@@ -23,7 +23,7 @@ export function SignupForm() {
 
   async function onSubmit(data: SignUpInput) {
     setServerError(null)
-    const { error } = await supabase.auth.signUp({
+    const { data: authData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -36,6 +36,14 @@ export function SignupForm() {
         ? 'Bu email zaten kayıtlı.'
         : 'Bir hata oluştu. Lütfen tekrar dene.')
       return
+    }
+    if (authData.user) {
+      await supabase.from('profiles').upsert({
+        id: authData.user.id,
+        username: data.username.toLowerCase().replace(/[^a-z0-9_]/g, ''),
+        display_name: data.username,
+        avatar_url: null,
+      }, { onConflict: 'id', ignoreDuplicates: true })
     }
     router.push('/dashboard')
     router.refresh()

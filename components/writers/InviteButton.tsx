@@ -110,7 +110,7 @@ export function InviteButton({ targetUserId, targetUsername, className }: Props)
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
-          <div className="relative w-full max-w-md glass-strong rounded-2xl border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] p-6 space-y-5">
+          <div className="relative w-full max-w-md glass-strong rounded-2xl border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] p-6 space-y-5" onClick={e => e.stopPropagation()}>
             <div>
               <h2 className="text-lg font-display font-semibold">Projeye Davet Et</h2>
               <p className="text-sm text-muted-foreground mt-0.5">@{targetUsername} kullanıcısını projena davet ediyorsun</p>

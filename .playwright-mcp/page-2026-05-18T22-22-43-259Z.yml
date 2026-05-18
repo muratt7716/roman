@@ -1,0 +1,57 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e25]:
+    - navigation [ref=e26]:
+      - generic [ref=e28]:
+        - link "Kalem Birliği anasayfa" [ref=e29] [cursor=pointer]:
+          - /url: /
+          - img [ref=e31]
+          - generic [ref=e33]: Kalem Birliği
+        - generic [ref=e34]:
+          - link "Keşfet" [ref=e35] [cursor=pointer]:
+            - /url: /explore
+          - link "Yazarlar" [ref=e36] [cursor=pointer]:
+            - /url: /writers
+          - link "Giriş Yap" [ref=e37] [cursor=pointer]:
+            - /url: /login
+          - link "Başla" [ref=e38] [cursor=pointer]:
+            - /url: /signup
+    - main [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]:
+          - generic [ref=e42]:
+            - heading "Dashboard" [level=1] [ref=e43]
+            - paragraph [ref=e44]: Projelerini yönet ve ilerlemeyi takip et.
+          - link "Yeni Proje" [ref=e45] [cursor=pointer]:
+            - /url: /projects/new
+            - img
+            - text: Yeni Proje
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - img [ref=e48]
+            - paragraph [ref=e50]: "0"
+            - paragraph [ref=e51]: Projem
+          - generic [ref=e52]:
+            - img [ref=e53]
+            - paragraph [ref=e58]: "0"
+            - paragraph [ref=e59]: Katıldığım
+          - generic [ref=e60]:
+            - img [ref=e61]
+            - paragraph [ref=e64]: "0"
+            - paragraph [ref=e65]: Bekleyen
+          - generic [ref=e66]:
+            - img [ref=e67]
+            - paragraph [ref=e69]: "0"
+            - paragraph [ref=e70]: Toplam Kelime
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - img [ref=e74]
+            - heading "Projelerim" [level=2] [ref=e76]
+          - generic [ref=e77]:
+            - img [ref=e79]
+            - generic [ref=e81]:
+              - heading "Henüz proje yok" [level=3] [ref=e82]
+              - paragraph [ref=e83]: İlk projeyi oluştur ve ekibini kur.
+            - link "Proje Oluştur" [ref=e84] [cursor=pointer]:
+              - /url: /projects/new
+  - region "Notifications alt+T"
+  - alert [ref=e24]: Dashboard — Kalem Birliği
