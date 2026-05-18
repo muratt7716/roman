@@ -7,7 +7,6 @@ export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 
-  // Skip auth if Supabase isn't configured yet
   if (!supabaseUrl.startsWith('http')) {
     return supabaseResponse
   }
