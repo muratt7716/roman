@@ -5,6 +5,7 @@ import { Users, BookOpen, Calendar, PenLine, Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ApplicationForm } from '@/components/project/ApplicationCard'
+import { MemberHoverCard } from '@/components/project/MemberHoverCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*), members:project_members(*, profile:profiles(*))')
+    .select('*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*), members:project_members(*, profile:profiles(*), role:project_roles(*))')
     .eq('slug', slug)
     .single()
 
@@ -127,19 +128,17 @@ export default async function ProjectDetailPage({ params }: Props) {
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Users className="w-5 h-5" /> Ekip ({project.members.length})
               </h2>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {project.members.map((member: any) => (
-                  <div key={member.id} className="flex items-center gap-2 glass rounded-lg p-3">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={member.profile?.avatar_url ?? undefined} />
-                      <AvatarFallback className="text-xs bg-primary/20 text-primary">
-                        {member.profile?.display_name?.[0] ?? member.profile?.username?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{member.profile?.display_name ?? member.profile?.username}</p>
-                    </div>
-                  </div>
+                  <MemberHoverCard
+                    key={member.id}
+                    username={member.profile?.username ?? null}
+                    displayName={member.profile?.display_name ?? null}
+                    avatarUrl={member.profile?.avatar_url ?? null}
+                    roleName={member.role?.name ?? null}
+                    wordCount={0}
+                    isOwner={member.user_id === project.owner_id}
+                  />
                 ))}
               </div>
             </div>

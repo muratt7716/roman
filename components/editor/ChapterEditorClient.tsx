@@ -6,6 +6,7 @@ import { Lightbulb, MessageSquare, X } from 'lucide-react'
 import { TipTapEditor } from './TipTapEditor'
 import { CommentPanel } from './CommentPanel'
 import { PresenceBar } from './PresenceBar'
+import { PomodoroTimer } from './PomodoroTimer'
 import { createClient } from '@/lib/supabase/client'
 import type { Chapter } from '@/types'
 
@@ -20,6 +21,7 @@ interface Props {
 
 export function ChapterEditorClient({ chapter, projectId, currentUser, initialContent, memberIds = [], isOwner = false }: Props) {
   const [wordCount, setWordCount] = useState(chapter.word_count)
+  const initialWordCount = chapter.word_count ?? 0
   const [pendingSuggestions, setPendingSuggestions] = useState(0)
   const [showComments, setShowComments] = useState(false)
   const supabase = createClient()
@@ -57,6 +59,11 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
         <h1 className="font-display text-base sm:text-lg font-semibold truncate flex-1 min-w-0">{chapter.title}</h1>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Pomodoro timer */}
+          <div className="hidden sm:flex">
+            <PomodoroTimer />
+          </div>
+
           {/* Bekleyen öneriler */}
           {pendingSuggestions > 0 && (
             <Link
@@ -94,6 +101,7 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
         chapterId={chapter.id}
         currentUser={currentUser}
         wordCount={wordCount}
+        initialWordCount={initialWordCount}
       />
 
       {/* Editor + Comments */}
@@ -103,6 +111,7 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
             chapterId={chapter.id}
             projectId={projectId}
             initialContent={initialContent}
+            chapterTitle={chapter.title}
             onWordCountChange={setWordCount}
           />
         </div>

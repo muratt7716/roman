@@ -247,6 +247,65 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
 
 ---
 
+## Eğlence & Verimlilik Özellikleri
+
+### Pomodoro Timer (`components/editor/PomodoroTimer.tsx`)
+- Editör başlık çubuğunda, sm+ ekranlarda görünür
+- 25 dk odak / 5 dk mola döngüsü
+- Tarayıcı `Notification` API ile sesli/görsel uyarı (kullanıcı izin verirse)
+- `phaseRef` + `sessionsRef` ile ref tabanlı phase takibi (stale closure sorununu önler)
+
+### Lofi Müzik Widget (`components/MusicWidget.tsx`)
+- `app/(app)/layout.tsx`'e entegre — tüm app sayfalarında görünür (sağ alt köşe)
+- 4 istasyon: Groove Salad, Drone Zone, Deep Space One, Lush (SomaFM)
+- `new Audio(url)` ile doğrudan MP3 stream — YouTube iframe değil (tarayıcı autoplay bloğu nedeniyle değiştirildi)
+- Widget kapatılsa ses çalmaya devam eder (Audio nesnesi React state'te kalır)
+
+### Streak & Oturum Kelimesi (`hooks/useStreak.ts` + `PresenceBar.tsx`)
+- `useStreak(hasWrittenToday: boolean)` hook'u: localStorage tabanlı, sıfır maliyet
+- `{ streak, best, lastDate }` saklar; ardışık günleri otomatik sayar
+- PresenceBar'da: toplam kelime + `+N bu oturumda` + 🔥 streak sayısı
+- `initialWordCount` prop'u ChapterEditorClient'tan PresenceBar'a geçirilir
+
+### Kelime Oyunu (`app/(app)/oyun/page.tsx` + `components/games/WordleGame.tsx`)
+- Wordle tarzı 5 harfli Türkçe kelime tahmin oyunu
+- 6 deneme hakkı, renk kodlu tahminler (yeşil=doğru, sarı=yerde var, gri=yok)
+- Her gün `getDailyWord()` ile WORDS dizisinden deterministik kelime seçilir
+- Türkçe klavye (Ğ, Ü, Ş, İ, Ö, Ç dahil)
+- Navbar dropdown menüsünde "Kelime Oyunu" linki
+
+### Gemini Free Tier (`/api/ai/suggest` + `/api/ai/character`)
+- `GEMINI_API_KEY` `.env.local`'da — client'a kesinlikle açılmaz, sadece server route'larda kullanılır
+- Model: `gemini-1.5-flash` (günde 1500 istek ücretsiz, kart gerektirmez)
+- **Tıkandım? butonu** — TipTap toolbar sağında ⚡, son 5 paragrafı + bölüm başlığını gönderir, 3 yön + 2 cümle başlangıcı döner
+- **Karakter Derinleştir** — `/jenerator` sayfasında, üretilen profili analiz eder, dramatik potansiyel + ses + ilk sahne önerir
+- **Rate limit:** localStorage günde 5 kullanım per feature (`kb_ai_suggest_uses`, `kb_ai_char_uses`)
+- API key yoksa route sessizce `{ suggestion: null }` döner — uygulama çökmez
+
+### Karakter Jeneratörü (`/jenerator` + `components/CharacterGenerator.tsx`)
+- Sıfır maliyet: `lib/characterData.ts` içindeki Türkçe veri listeleriyle `Math.random()` tabanlı üretim
+- Her alan (kişilik, görünüş, geçmiş, motivasyon, kusur) üzerinde hover → 🔀 ile tek tek yenilenebilir
+- "Kopyala" → Markdown formatında panoya
+- "Derinleştir" → Gemini API (günde 5 limit)
+- Navbar dropdown → "Karakter Jeneratörü"
+
+### Fikir Odası (`/fikir-odasi`) — TASARLANDI, HENÜZ IMPLEMENT EDİLMEDİ
+Tasarım kararları:
+- **Thread-per-idea modeli**: her kullanıcı bir "tohum fikir" atar (başlık + kısa açıklama)
+- Diğerleri o thread'e realtime mesaj atar — Supabase Realtime subscription
+- Fikir sahibi "Ekibe katılmak ister misiniz?" butonu açar (`status: 'team_forming'`)
+- İlgilenenler join request gönderir, fikir sahibi kabul/reddeder
+- Opsiyonel proje bağlantısı: fikir → mevcut projeye link
+
+Veritabanı tabloları (schema.sql'e eklendi):
+- `idea_threads`: id, user_id, title, seed(500 char), status(active/team_forming/closed), project_id(nullable), created_at
+- `idea_messages`: id, thread_id, user_id, content(1000 char), created_at
+- `idea_join_requests`: id, thread_id, user_id, status(pending/accepted/rejected), UNIQUE(thread_id, user_id)
+
+RLS: Herkese okuma açık, yazma sadece giriş yapanlara, silme sadece kendi kaydına
+
+---
+
 ## Henüz Uygulanmamış / Bekleyen
 
 - **RLS politikaları Supabase'de aktif değil** — `supabase/schema.sql`'deki güncel politikalar (members_select_member, members_insert_owner) Supabase Dashboard'da SQL Editor'dan çalıştırılmalı

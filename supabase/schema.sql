@@ -437,6 +437,91 @@ CREATE INDEX IF NOT EXISTS idx_timeline_project        ON timeline_events(projec
 CREATE INDEX IF NOT EXISTS idx_profiles_writing_status ON profiles(writing_status);
 
 -- ============================================================
+-- FİKİR ODASI TABLOLARI
+-- ============================================================
+
+-- Tohum fikirler (thread başlıkları)
+CREATE TABLE IF NOT EXISTS idea_threads (
+  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid        NOT NULL REFERENCES profiles(id)  ON DELETE CASCADE,
+  title       text        NOT NULL CHECK (char_length(title) BETWEEN 5 AND 100),
+  seed        text        NOT NULL CHECK (char_length(seed)  BETWEEN 10 AND 500),
+  status      text        NOT NULL DEFAULT 'active'
+                          CHECK (status IN ('active', 'team_forming', 'closed')),
+  project_id  uuid        REFERENCES projects(id) ON DELETE SET NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+-- Realtime mesajlar
+CREATE TABLE IF NOT EXISTS idea_messages (
+  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  thread_id   uuid        NOT NULL REFERENCES idea_threads(id) ON DELETE CASCADE,
+  user_id     uuid        NOT NULL REFERENCES profiles(id)     ON DELETE CASCADE,
+  content     text        NOT NULL CHECK (char_length(content) BETWEEN 1 AND 1000),
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+-- Katılım talepleri
+CREATE TABLE IF NOT EXISTS idea_join_requests (
+  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  thread_id   uuid        NOT NULL REFERENCES idea_threads(id) ON DELETE CASCADE,
+  user_id     uuid        NOT NULL REFERENCES profiles(id)     ON DELETE CASCADE,
+  status      text        NOT NULL DEFAULT 'pending'
+                          CHECK (status IN ('pending', 'accepted', 'rejected')),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (thread_id, user_id)
+);
+
+-- RLS
+ALTER TABLE idea_threads      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE idea_messages     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE idea_join_requests ENABLE ROW LEVEL SECURITY;
+
+-- idea_threads policies
+DROP POLICY IF EXISTS "idea_threads_select"  ON idea_threads;
+DROP POLICY IF EXISTS "idea_threads_insert"  ON idea_threads;
+DROP POLICY IF EXISTS "idea_threads_update"  ON idea_threads;
+DROP POLICY IF EXISTS "idea_threads_delete"  ON idea_threads;
+
+CREATE POLICY "idea_threads_select" ON idea_threads FOR SELECT USING (true);
+CREATE POLICY "idea_threads_insert" ON idea_threads FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "idea_threads_update" ON idea_threads FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "idea_threads_delete" ON idea_threads FOR DELETE USING (auth.uid() = user_id);
+
+-- idea_messages policies
+DROP POLICY IF EXISTS "idea_messages_select" ON idea_messages;
+DROP POLICY IF EXISTS "idea_messages_insert" ON idea_messages;
+DROP POLICY IF EXISTS "idea_messages_delete" ON idea_messages;
+
+CREATE POLICY "idea_messages_select" ON idea_messages FOR SELECT USING (true);
+CREATE POLICY "idea_messages_insert" ON idea_messages FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "idea_messages_delete" ON idea_messages FOR DELETE USING (auth.uid() = user_id);
+
+-- idea_join_requests policies
+DROP POLICY IF EXISTS "idea_join_select"  ON idea_join_requests;
+DROP POLICY IF EXISTS "idea_join_insert"  ON idea_join_requests;
+DROP POLICY IF EXISTS "idea_join_update"  ON idea_join_requests;
+DROP POLICY IF EXISTS "idea_join_delete"  ON idea_join_requests;
+
+-- Thread sahibi tüm talepleri görebilir; kullanıcı kendi talebini görebilir
+CREATE POLICY "idea_join_select" ON idea_join_requests FOR SELECT USING (
+  auth.uid() = user_id
+  OR auth.uid() = (SELECT user_id FROM idea_threads WHERE id = thread_id)
+);
+CREATE POLICY "idea_join_insert" ON idea_join_requests FOR INSERT WITH CHECK (auth.uid() = user_id);
+-- Thread sahibi kabul/ret yapabilir
+CREATE POLICY "idea_join_update" ON idea_join_requests FOR UPDATE USING (
+  auth.uid() = (SELECT user_id FROM idea_threads WHERE id = thread_id)
+);
+CREATE POLICY "idea_join_delete" ON idea_join_requests FOR DELETE USING (auth.uid() = user_id);
+
+-- İndeksler
+CREATE INDEX IF NOT EXISTS idx_idea_threads_user      ON idea_threads(user_id);
+CREATE INDEX IF NOT EXISTS idx_idea_threads_status    ON idea_threads(status);
+CREATE INDEX IF NOT EXISTS idx_idea_messages_thread   ON idea_messages(thread_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_idea_join_thread       ON idea_join_requests(thread_id);
+
+-- ============================================================
 -- 6. STORAGE BUCKET'LARI (yoksa oluştur)
 -- ============================================================
 

@@ -56,7 +56,7 @@ export default async function PublicLayout({ children }: { children: React.React
   return (
     <div className="min-h-dvh">
       <Navbar profile={profile} unreadCount={unreadCount} />
-      <main className="pt-14">{children}</main>
+      <main className="pt-16">{children}</main>
     </div>
   )
 }

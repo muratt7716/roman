@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Playfair_Display, Lora } from 'next/font/google'
 import { Toaster } from 'sonner'
+import { MusicWidget } from '@/components/MusicWidget'
 import './globals.css'
 
 const inter = Inter({
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="tr" className={`dark ${inter.variable} ${playfair.variable} ${lora.variable}`}>
       <body className="min-h-dvh bg-background text-foreground antialiased">
         {children}
+        <MusicWidget />
         <Toaster theme="dark" position="bottom-right" richColors />
       </body>
     </html>

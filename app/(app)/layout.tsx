@@ -49,7 +49,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-dvh">
       <Navbar profile={profile} unreadCount={unreadCount ?? 0} />
-      <main className="pt-14">
+      <main className="pt-16">
         {children}
       </main>
     </div>
