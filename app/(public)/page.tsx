@@ -580,7 +580,7 @@ export default function RedesignedLandingPage() {
 
       {/* ── CALL TO ACTION (CTA) ── */}
       <section className="relative py-28 px-4 border-t border-white/[0.04]">
-        <div aria-hidden className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
+        <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-[600px] h-[350px] bg-violet-600/5 rounded-full blur-[100px]" />
         </div>
         
