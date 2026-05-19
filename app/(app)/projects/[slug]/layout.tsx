@@ -43,9 +43,24 @@ export default async function ProjectLayout({ children, params }: Props) {
   if (!hasAccess) redirect(`/projects/${project.slug}`)
 
   return (
-    <div className="flex min-h-dvh pt-14">
-      {/* Sidebar */}
-      <aside className="w-56 border-r border-white/[0.06] bg-[hsl(245_25%_5%)] shrink-0 flex flex-col">
+    <div className="flex flex-col md:flex-row min-h-dvh pt-16">
+      
+      {/* Mobile Sticky Sub-Nav (only visible on mobile screens below md) */}
+      <div className="md:hidden sticky top-16 z-30 w-full overflow-x-auto flex-nowrap shrink-0 bg-background/80 backdrop-blur-md border-b border-white/[0.06] px-4 py-2.5 flex gap-1.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {NAV_ITEMS.map(item => (
+          <Link
+            key={item.href}
+            href={`/projects/${id}/${item.href}`}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap bg-white/[0.02] border border-white/[0.06] text-muted-foreground hover:text-white transition-all duration-200"
+          >
+            <item.icon className="w-3.5 h-3.5" />
+            {item.label}
+          </Link>
+        ))}
+      </div>
+
+      {/* Sidebar - Desktop only (hidden on mobile below md) */}
+      <aside className="hidden md:flex w-56 border-r border-white/[0.06] bg-[hsl(245_25%_5%)] shrink-0 flex-col">
         <div className="p-4 border-b border-white/[0.06]">
           <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-1.5 font-medium">Proje</p>
           <p className="font-display font-semibold text-sm line-clamp-2 leading-snug">{project.title}</p>
@@ -73,7 +88,7 @@ export default async function ProjectLayout({ children, params }: Props) {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 overflow-auto bg-[hsl(245_25%_4%)]">
+      <main className="flex-1 overflow-auto bg-[hsl(245_25%_4%)] w-full">
         {children}
       </main>
     </div>

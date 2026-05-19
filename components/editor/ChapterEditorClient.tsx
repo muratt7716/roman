@@ -53,10 +53,10 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
   }, [chapter.id, supabase])
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-3.5rem)]">
+    <div className="flex flex-col h-[calc(100dvh-4rem)]">
       {/* Chapter title bar */}
-      <div className="px-4 sm:px-8 py-3 border-b border-border bg-surface flex items-center gap-2 sm:gap-4">
-        <h1 className="font-display text-base sm:text-lg font-semibold truncate flex-1 min-w-0">{chapter.title}</h1>
+      <div className="px-3 sm:px-8 py-2.5 sm:py-3 border-b border-border bg-surface flex items-center gap-2 sm:gap-4">
+        <h1 className="font-display text-sm sm:text-lg font-semibold truncate flex-1 min-w-0">{chapter.title}</h1>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Pomodoro timer */}
