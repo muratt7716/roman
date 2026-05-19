@@ -7,6 +7,7 @@ import { Users, CheckCircle, XCircle, Clock, BarChart2, Globe, Lock } from 'luci
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DeleteProjectButton } from '@/components/project/DeleteProjectButton'
 import { CoverImageUpload } from '@/components/project/CoverImageUpload'
+import { MemberHoverCard } from '@/components/project/MemberHoverCard'
 
 export const metadata: Metadata = { title: 'Proje Genel Bakış — Kalem Birliği' }
 export const dynamic = 'force-dynamic'
@@ -325,26 +326,15 @@ export default async function ProjectOverviewPage({ params }: Props) {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {(project.members ?? []).map((member: any) => (
-            <Link
+            <MemberHoverCard
               key={member.id}
-              href={member.profile?.username ? `/u/${member.profile.username}` : '#'}
-              className="flex items-center gap-3 glass rounded-xl p-3 hover:border-primary/30 hover:bg-primary/[0.04] transition-colors border border-transparent"
-            >
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={member.profile?.avatar_url ?? undefined} />
-                <AvatarFallback className="bg-primary/20 text-primary">
-                  {member.profile?.display_name?.[0] ?? member.profile?.username?.[0]}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{member.profile?.display_name ?? member.profile?.username}</p>
-                <p className="text-xs text-muted-foreground">{member.role?.name ?? (member.user_id === project.owner_id ? 'Baş Yazar' : 'Üye')}</p>
-              </div>
-              <div className="ml-auto text-right shrink-0">
-                <p className="text-xs font-medium">{(wordsByMember[member.user_id] ?? 0).toLocaleString('tr')}</p>
-                <p className="text-[10px] text-muted-foreground">kelime</p>
-              </div>
-            </Link>
+              username={member.profile?.username ?? null}
+              displayName={member.profile?.display_name ?? null}
+              avatarUrl={member.profile?.avatar_url ?? null}
+              roleName={member.role?.name ?? null}
+              wordCount={wordsByMember[member.user_id] ?? 0}
+              isOwner={member.user_id === project.owner_id}
+            />
           ))}
         </div>
       </section>
