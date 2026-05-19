@@ -176,14 +176,20 @@ export function ProjectForm() {
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="synopsis">Özet <span className="text-muted-foreground text-xs">(isteğe bağlı)</span></Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="synopsis">Romanın Konusu <span className="text-muted-foreground text-xs">(isteğe bağlı)</span></Label>
+              <span className={`text-xs tabular-nums ${(watch('synopsis')?.length ?? 0) > 900 ? 'text-amber-400' : 'text-muted-foreground'}`}>
+                {watch('synopsis')?.length ?? 0}/1000
+              </span>
+            </div>
             <textarea
               id="synopsis"
-              rows={5}
-              placeholder="Projenin kısa açıklaması... Sonra da ekleyebilirsin."
+              rows={3}
+              placeholder="Romanın ne hakkında olduğunu kısaca anlat. Okuyucuyu ve ekip adaylarını heyecanlandıracak birkaç cümle yeterli."
               className="w-full px-3 py-2 rounded-lg bg-surface-2 border border-border text-foreground text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
               {...register('synopsis')}
             />
+            {errors.synopsis && <p className="text-destructive text-xs">{errors.synopsis.message}</p>}
           </div>
 
           <Button type="button" onClick={goToStep2} className="w-full bg-primary text-white">

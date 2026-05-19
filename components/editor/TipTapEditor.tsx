@@ -376,7 +376,7 @@ export function TipTapEditor({ chapterId, projectId, initialContent, onWordCount
         className="flex-1 overflow-y-auto"
         onClick={() => { setShowColorPicker(false); setShowFontPicker(false) }}
       >
-        <div className={`mx-auto py-10 px-8 ${focusMode ? 'max-w-2xl' : 'max-w-2xl'}`}>
+        <div className={`mx-auto py-6 sm:py-10 px-4 sm:px-8 ${focusMode ? 'max-w-2xl' : 'max-w-2xl'}`}>
           <EditorContent editor={editor} />
         </div>
       </div>

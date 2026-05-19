@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Lightbulb } from 'lucide-react'
+import { Lightbulb, MessageSquare, X } from 'lucide-react'
 import { TipTapEditor } from './TipTapEditor'
 import { CommentPanel } from './CommentPanel'
 import { PresenceBar } from './PresenceBar'
@@ -15,11 +15,13 @@ interface Props {
   currentUser: { id: string; username: string; displayName: string | null; avatarUrl: string | null }
   initialContent: string
   memberIds?: string[]
+  isOwner?: boolean
 }
 
-export function ChapterEditorClient({ chapter, projectId, currentUser, initialContent, memberIds = [] }: Props) {
+export function ChapterEditorClient({ chapter, projectId, currentUser, initialContent, memberIds = [], isOwner = false }: Props) {
   const [wordCount, setWordCount] = useState(chapter.word_count)
   const [pendingSuggestions, setPendingSuggestions] = useState(0)
+  const [showComments, setShowComments] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -49,31 +51,41 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
   }, [chapter.id, supabase])
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+    <div className="flex flex-col h-[calc(100dvh-3.5rem)]">
       {/* Chapter title bar */}
-      <div className="px-8 py-3 border-b border-border bg-surface flex items-center gap-4">
-        <h1 className="font-display text-lg font-semibold truncate flex-1">{chapter.title}</h1>
+      <div className="px-4 sm:px-8 py-3 border-b border-border bg-surface flex items-center gap-2 sm:gap-4">
+        <h1 className="font-display text-base sm:text-lg font-semibold truncate flex-1 min-w-0">{chapter.title}</h1>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Bekleyen öneriler */}
           {pendingSuggestions > 0 && (
             <Link
               href={`/projects/${projectId}/write/${chapter.id}/suggestions-list`}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-medium hover:bg-amber-500/25 transition-colors"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 text-xs font-medium hover:bg-amber-500/25 transition-colors"
             >
               <Lightbulb className="w-3.5 h-3.5" />
-              {pendingSuggestions} öneri var
+              <span className="hidden sm:inline">{pendingSuggestions} öneri var</span>
+              <span className="sm:hidden">{pendingSuggestions}</span>
             </Link>
           )}
 
           {/* Öneri yap */}
           <Link
             href={`/projects/${projectId}/write/${chapter.id}/suggest`}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-white/20 text-xs transition-colors"
+            className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-white/20 text-xs transition-colors"
           >
             <Lightbulb className="w-3.5 h-3.5" />
-            Öneri Yap
+            <span className="hidden sm:inline">Öneri Yap</span>
           </Link>
+
+          {/* Mobil: yorum toggle */}
+          <button
+            onClick={() => setShowComments(v => !v)}
+            className="lg:hidden flex items-center gap-1.5 px-2 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-white/20 text-xs transition-colors"
+            title="Yorumlar"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
@@ -85,7 +97,7 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
       />
 
       {/* Editor + Comments */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         <div className="flex-1 overflow-hidden">
           <TipTapEditor
             chapterId={chapter.id}
@@ -94,7 +106,42 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
             onWordCountChange={setWordCount}
           />
         </div>
-        <CommentPanel chapterId={chapter.id} currentUserId={currentUser.id} projectMemberIds={memberIds} />
+
+        {/* Desktop: always visible comment panel */}
+        <div className="hidden lg:flex">
+          <CommentPanel
+            chapterId={chapter.id}
+            projectId={projectId}
+            currentUserId={currentUser.id}
+            projectMemberIds={memberIds}
+            isOwner={isOwner}
+          />
+        </div>
+
+        {/* Mobile: overlay comment panel */}
+        {showComments && (
+          <div className="lg:hidden absolute inset-0 z-40 flex">
+            <div className="absolute inset-0 bg-black/50" onClick={() => setShowComments(false)} />
+            <div className="absolute right-0 top-0 bottom-0 w-[85vw] max-w-xs flex flex-col bg-surface border-l border-border">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                <span className="text-sm font-medium">Yorumlar</span>
+                <button onClick={() => setShowComments(false)} className="p-1 rounded text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden flex flex-col">
+                <CommentPanel
+                  chapterId={chapter.id}
+                  projectId={projectId}
+                  currentUserId={currentUser.id}
+                  projectMemberIds={memberIds}
+                  isOwner={isOwner}
+                  hideBorder
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

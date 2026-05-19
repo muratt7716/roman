@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MessageSquare, Send, CheckCircle } from 'lucide-react'
+import { MessageSquare, Send, CheckCircle, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Comment, Profile } from '@/types'
 
@@ -11,11 +11,14 @@ interface CommentWithAuthor extends Comment {
 
 interface Props {
   chapterId: string
+  projectId: string
   currentUserId: string
   projectMemberIds?: string[]
+  isOwner?: boolean
+  hideBorder?: boolean
 }
 
-export function CommentPanel({ chapterId, currentUserId, projectMemberIds = [] }: Props) {
+export function CommentPanel({ chapterId, projectId, currentUserId, projectMemberIds = [], isOwner = false, hideBorder = false }: Props) {
   const supabase = createClient()
   const [comments, setComments] = useState<CommentWithAuthor[]>([])
   const [input, setInput] = useState('')
@@ -51,7 +54,6 @@ export function CommentPanel({ chapterId, currentUserId, projectMemberIds = [] }
       content: input.trim(),
     })
 
-    // Diğer ekip üyelerine bildirim gönder
     const others = projectMemberIds.filter(id => id !== currentUserId)
     if (others.length > 0) {
       const { data: profile } = await supabase
@@ -65,6 +67,7 @@ export function CommentPanel({ chapterId, currentUserId, projectMemberIds = [] }
           user_id: uid,
           type: 'comment',
           payload: {
+            project_id: projectId,
             chapter_id: chapterId,
             commenter_username: profile?.username,
             commenter_display_name: profile?.display_name,
@@ -83,8 +86,13 @@ export function CommentPanel({ chapterId, currentUserId, projectMemberIds = [] }
     setComments(prev => prev.filter(c => c.id !== id))
   }
 
+  async function deleteComment(id: string) {
+    await supabase.from('comments').delete().eq('id', id)
+    setComments(prev => prev.filter(c => c.id !== id))
+  }
+
   return (
-    <div className="w-72 border-l border-border flex flex-col bg-surface shrink-0">
+    <div className={`w-72 flex flex-col bg-surface shrink-0 ${hideBorder ? '' : 'border-l border-border'}`}>
       <div className="p-4 border-b border-border flex items-center gap-2">
         <MessageSquare className="w-4 h-4 text-primary" />
         <span className="text-sm font-medium">Yorumlar</span>
@@ -98,19 +106,30 @@ export function CommentPanel({ chapterId, currentUserId, projectMemberIds = [] }
           <p className="text-xs text-muted-foreground text-center pt-8">Henüz yorum yok</p>
         ) : comments.map(c => (
           <div key={c.id} className="glass rounded-lg p-3 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-primary">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-medium text-primary truncate">
                 {c.author.display_name ?? c.author.username}
               </span>
-              {c.author_id === currentUserId && (
-                <button
-                  onClick={() => resolve(c.id)}
-                  className="text-muted-foreground hover:text-emerald-400 transition-colors"
-                  title="Çözüldü olarak işaretle"
-                >
-                  <CheckCircle className="w-3.5 h-3.5" />
-                </button>
-              )}
+              <div className="flex items-center gap-1 shrink-0">
+                {c.author_id === currentUserId && (
+                  <button
+                    onClick={() => resolve(c.id)}
+                    className="text-muted-foreground hover:text-emerald-400 transition-colors"
+                    title="Çözüldü olarak işaretle"
+                  >
+                    <CheckCircle className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {(isOwner && c.author_id !== currentUserId) && (
+                  <button
+                    onClick={() => deleteComment(c.id)}
+                    className="text-muted-foreground hover:text-destructive transition-colors"
+                    title="Yorumu sil"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
             </div>
             <p className="text-xs text-foreground/80 leading-relaxed">{c.content}</p>
             <p className="text-[10px] text-muted-foreground">

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Users, CheckCircle, XCircle, Clock, BarChart2, Globe, Lock } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -222,7 +223,10 @@ export default async function ProjectOverviewPage({ params }: Props) {
                 return (
                   <div key={member.id} className="space-y-1.5">
                     <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
+                      <Link
+                        href={member.profile?.username ? `/u/${member.profile.username}` : '#'}
+                        className="flex items-center gap-2 hover:text-primary transition-colors"
+                      >
                         <Avatar className="w-6 h-6">
                           <AvatarImage src={member.profile?.avatar_url ?? undefined} />
                           <AvatarFallback className="text-[10px] bg-primary/20 text-primary">
@@ -231,7 +235,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
                         </Avatar>
                         <span>{member.profile?.display_name ?? member.profile?.username}</span>
                         <span className="text-xs text-muted-foreground">{member.role?.name}</span>
-                      </div>
+                      </Link>
                       <span className="text-xs text-muted-foreground">{words.toLocaleString('tr')} kelime · %{pct.toFixed(1)}</span>
                     </div>
                     <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
@@ -321,22 +325,26 @@ export default async function ProjectOverviewPage({ params }: Props) {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {(project.members ?? []).map((member: any) => (
-            <div key={member.id} className="flex items-center gap-3 glass rounded-xl p-3">
+            <Link
+              key={member.id}
+              href={member.profile?.username ? `/u/${member.profile.username}` : '#'}
+              className="flex items-center gap-3 glass rounded-xl p-3 hover:border-primary/30 hover:bg-primary/[0.04] transition-colors border border-transparent"
+            >
               <Avatar className="w-10 h-10">
                 <AvatarImage src={member.profile?.avatar_url ?? undefined} />
                 <AvatarFallback className="bg-primary/20 text-primary">
                   {member.profile?.display_name?.[0] ?? member.profile?.username?.[0]}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-medium text-sm">{member.profile?.display_name ?? member.profile?.username}</p>
-                <p className="text-xs text-muted-foreground">{member.role?.name}</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate">{member.profile?.display_name ?? member.profile?.username}</p>
+                <p className="text-xs text-muted-foreground">{member.role?.name ?? (member.user_id === project.owner_id ? 'Baş Yazar' : 'Üye')}</p>
               </div>
-              <div className="ml-auto text-right">
+              <div className="ml-auto text-right shrink-0">
                 <p className="text-xs font-medium">{(wordsByMember[member.user_id] ?? 0).toLocaleString('tr')}</p>
                 <p className="text-[10px] text-muted-foreground">kelime</p>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

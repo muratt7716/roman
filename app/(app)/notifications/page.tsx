@@ -48,6 +48,19 @@ function getNotifDetail(n: any): { title: string; subtitle?: string; link?: stri
     case 'rejection':
       return {
         title: `"${p.project_title ?? 'Bir proje'}" başvurun reddedildi`,
+        link: p.project_id ? `/projects/${p.project_id}/overview` : undefined,
+      }
+    case 'comment':
+      return {
+        title: `${p.commenter_display_name ?? p.commenter_username ?? 'Biri'} yorum yaptı`,
+        subtitle: p.preview ? `"${p.preview}"` : undefined,
+        link: p.project_id && p.chapter_id ? `/projects/${p.project_id}/write/${p.chapter_id}` : undefined,
+      }
+    case 'mention':
+      return {
+        title: `${p.mentioner_display_name ?? p.mentioner_username ?? 'Biri'} senden bahsetti`,
+        subtitle: p.preview ? `"${p.preview}"` : undefined,
+        link: p.project_id && p.chapter_id ? `/projects/${p.project_id}/write/${p.chapter_id}` : undefined,
       }
     default:
       return { title: TYPE_META[n.type]?.label ?? n.type }
@@ -115,23 +128,20 @@ export default async function NotificationsPage() {
             return (
               <div
                 key={n.id}
-                className={`glass rounded-xl p-4 flex items-start gap-3 transition-colors ${isUnread ? 'border border-primary/20 bg-primary/[0.03]' : 'border border-white/[0.04]'}`}
+                className={`relative glass rounded-xl p-4 flex items-start gap-3 transition-colors ${isUnread ? 'border border-primary/20 bg-primary/[0.03]' : 'border border-white/[0.04]'} ${detail.link ? 'hover:border-primary/30 hover:bg-primary/[0.06] cursor-pointer' : ''}`}
               >
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${meta.color}`}>
+                {detail.link && !isInvite && (
+                  <Link href={detail.link} className="absolute inset-0 rounded-xl" aria-label={detail.title} />
+                )}
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${meta.color} relative z-10`}>
                   <Icon className="w-4 h-4" />
                 </div>
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 relative z-10">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      {detail.link ? (
-                        <Link href={detail.link} className="text-sm font-medium hover:text-primary transition-colors">
-                          {detail.title}
-                        </Link>
-                      ) : (
-                        <p className="text-sm font-medium">{detail.title}</p>
-                      )}
+                      <p className="text-sm font-medium">{detail.title}</p>
                       {detail.subtitle && (
-                        <p className="text-xs text-muted-foreground mt-0.5">{detail.subtitle}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{detail.subtitle}</p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
                         {new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
