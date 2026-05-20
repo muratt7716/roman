@@ -319,6 +319,27 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
 - "Derinleştir" → Gemini API (günde 5 limit)
 - Navbar dropdown → "Karakter Jeneratörü"
 
+### Admin Paneli (`/admin`) — IMPLEMENT EDİLDİ ✅
+- Sadece `mmuratb77@gmail.com` erişebilir — `app/(app)/admin/layout.tsx`'te server-side `notFound()` guard
+- `isAdmin` boolean'ı `app/(app)/layout.tsx` ve `app/(public)/layout.tsx`'te `user.email` karşılaştırmasıyla hesaplanıp Navbar'a prop olarak geçilir
+- Navbar dropdown'da "Admin Paneli" linki (amber renk, ShieldCheck icon) — sadece `isAdmin=true` iken görünür
+- Admin nav: Genel Bakış / Kullanıcılar / Projeler / Geri Bildirim sekmeleri
+
+Sayfalar:
+- `app/(app)/admin/layout.tsx` — email guard + üst nav bar
+- `app/(app)/admin/page.tsx` — 6 istatistik kartı (kullanıcı, 7 günde yeni, proje, bölüm, bildirim toplam/okunmamış) + son 5 feedback
+- `app/(app)/admin/users/page.tsx` — tüm kullanıcılar tablosu (isim, kullanıcı adı, durum, puan, katılım tarihi)
+- `app/(app)/admin/projects/page.tsx` — tüm projeler tablosu (başlık, sahibi, görünürlük, üye sayısı)
+- `app/(app)/admin/feedback/page.tsx` — feedback inbox, durum filtresi, tıklayarak new→reviewed→done döngüsü (client component, Supabase browser client)
+
+### Geri Bildirim Sistemi — IMPLEMENT EDİLDİ ✅
+- `feedback` tablosu: `supabase/schema.sql`'e eklendi — Supabase Dashboard'da çalıştırılması gerekiyor
+- `components/FeedbackModal.tsx` — controlled (`open/onClose` props), 4 tip (bug/öneri/özellik/diğer), min 20 karakter
+- `app/api/feedback/route.ts` — auth guard, validasyon, DB insert
+- Navbar dropdown'da "Geri Bildirim Gönder" linki → modal açar
+- Modal Navbar içinde `feedbackOpen` state ile yönetilir, dropdown dışında render edilir (dropdown kapanınca state kaybolmaması için)
+- DropdownMenuItem'da `onSelect={e => { e.preventDefault(); setFeedbackOpen(true) }}` — dropdown kapanmadan önce state set edilir
+
 ### Fikir Odası (`/fikir-odasi`) — IMPLEMENT EDİLDİ ✅
 - **Thread-per-idea modeli**: her kullanıcı bir "tohum fikir" atar (başlık + kısa açıklama)
 - Diğerleri o thread'e realtime mesaj atar — Supabase Realtime subscription

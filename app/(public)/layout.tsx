@@ -7,12 +7,15 @@ export const dynamic = 'force-dynamic'
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   let profile: Profile | null = null
   let unreadCount = 0
+  let isAdmin = false
 
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (user) {
+      isAdmin = user.email === 'mmuratb77@gmail.com'
+
       const [{ data }, { count }] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', user.id).single(),
         supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
@@ -55,7 +58,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-dvh">
-      <Navbar profile={profile} unreadCount={unreadCount} />
+      <Navbar profile={profile} unreadCount={unreadCount} isAdmin={isAdmin} />
       <main className="pt-16">{children}</main>
     </div>
   )

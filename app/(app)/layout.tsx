@@ -11,6 +11,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (!user) redirect('/login')
 
+  const isAdmin = user.email === 'mmuratb77@gmail.com'
+
   const [{ data: profileData }, { count: unreadCount }] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', user.id).eq('read', false),
@@ -48,7 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-dvh">
-      <Navbar profile={profile} unreadCount={unreadCount ?? 0} />
+      <Navbar profile={profile} unreadCount={unreadCount ?? 0} isAdmin={isAdmin} />
       <main className="pt-16">
         {children}
       </main>

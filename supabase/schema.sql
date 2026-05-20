@@ -549,3 +549,29 @@ CREATE POLICY "covers_public_read"   ON storage.objects FOR SELECT USING (bucket
 CREATE POLICY "covers_auth_insert"   ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'covers' AND auth.uid() IS NOT NULL);
 CREATE POLICY "covers_auth_update"   ON storage.objects FOR UPDATE USING (bucket_id = 'covers' AND auth.uid() IS NOT NULL);
 CREATE POLICY "covers_auth_delete"   ON storage.objects FOR DELETE USING (bucket_id = 'covers' AND auth.uid() IS NOT NULL);
+
+-- ============================================================
+-- 7. FEEDBACK TABLOSU
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS feedback (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  type       text NOT NULL CHECK (type IN ('bug', 'suggestion', 'feature', 'other')),
+  message    text NOT NULL CHECK (char_length(message) BETWEEN 20 AND 2000),
+  status     text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'reviewed', 'done')),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "feedback_insert_self"  ON feedback;
+DROP POLICY IF EXISTS "feedback_select_self"  ON feedback;
+
+-- Kullanıcı kendi feedback'ini gönderebilir ve görebilir
+CREATE POLICY "feedback_insert_self" ON feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "feedback_select_self" ON feedback FOR SELECT USING (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_feedback_user_id   ON feedback(user_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_status    ON feedback(status);
+CREATE INDEX IF NOT EXISTS idx_feedback_created   ON feedback(created_at DESC);
