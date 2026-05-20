@@ -138,6 +138,7 @@ CREATE POLICY "members_insert_owner" ON project_members FOR INSERT WITH CHECK (
 
 ```
 proxy.ts                              # Next.js 16 proxy (session refresh + route koruma)
+app/layout.tsx                        # ROOT layout — MusicWidget buraya entegre (tüm sayfalarda görünür)
 lib/supabase/
   client.ts                           # Browser client (createBrowserClient)
   server.ts                           # Server client (createServerClient + cookies)
@@ -145,26 +146,38 @@ lib/supabase/
 lib/validations/
   project.ts                          # Zod şemaları — synopsis max 1000 karakter
   auth.ts                             # Auth zod şemaları
+lib/gemini.ts                         # generateWithFallback() — çok model retry (RPD öncelikli)
+lib/characterData.ts                  # Türkçe karakter üretimi için veri listeleri
+hooks/useStreak.ts                    # localStorage streak takibi (zero cost)
 app/(auth)/auth/callback/route.ts     # OAuth callback — profil upsert burada
 app/(app)/
   layout.tsx                          # Auth guard + profil upsert fallback
   dashboard/page.tsx                  # Dashboard
   notifications/page.tsx              # Bildirimler — tüm tipler linklendi
+  oyun/page.tsx                       # Türkçe Wordle kelime oyunu
+  jenerator/page.tsx                  # Karakter jeneratörü sayfası
+  fikir-odasi/page.tsx                # Fikir Odası — thread listesi
+  fikir-odasi/[id]/page.tsx           # Fikir thread detayı
   projects/[slug]/
     overview/page.tsx                 # Proje yönetim paneli (server actions içinde)
     write/page.tsx                    # Bölüm listesi
     write/[chapterId]/page.tsx        # Editör sayfası — isOwner, memberIds aktarır
 app/(public)/
   layout.tsx                          # Public layout + profil upsert fallback (try/catch)
+  page.tsx                            # Anasayfa — stats grid-cols-2 mobilde, footer pb-24
+app/api/ai/
+  suggest/route.ts                    # AI yazma önerisi — generateWithFallback kullanır
+  character/route.ts                  # AI karakter derinleştirme — generateWithFallback kullanır
 components/auth/
   LoginForm.tsx                       # Email login — profil upsert burada
   SignupForm.tsx                      # Email signup — session varsa profil upsert
 components/editor/
-  TipTapEditor.tsx                    # Ana editör — autosave 30s, versioning (>=20 kelime fark)
+  TipTapEditor.tsx                    # Ana editör — autosave 30s, versioning (>=20 kelime fark), AI butonu
   ChapterEditorClient.tsx             # Editör wrapper — responsive, mobil comment toggle
   CommentPanel.tsx                    # Yorum paneli — proje sahibi silebilir, projectId payload'da
-  PresenceBar.tsx                     # Realtime presence bar
+  PresenceBar.tsx                     # Realtime presence bar — streak + oturum kelimesi
   VersionHistoryClient.tsx            # Versiyon geçmişi modal
+  PomodoroTimer.tsx                   # 25/5 dk pomodoro, browser notification
 components/project/
   ProjectForm.tsx                     # Proje oluşturma (3 adımlı) — profil upsert içinde
   ProjectCard.tsx                     # Proje kartı — /projects/${slug} (public) adresine link
@@ -172,7 +185,15 @@ components/project/
   DeleteProjectButton.tsx             # Proje silme butonu (client)
   CoverImageUpload.tsx                # Kapak görseli yükleme
   RoleForm.tsx                        # Ekip rolü oluşturma formu
-supabase/schema.sql                   # Tek SQL dosyası — tüm şema + RLS politikaları
+components/
+  MusicWidget.tsx                     # SomaFM lofi widget — root layout'ta, fixed bottom-6 right-6
+  CharacterGenerator.tsx              # Per-field shuffle, Gemini derinleştirme, markdown kopyala
+components/games/
+  WordleGame.tsx                      # Türkçe Wordle — [...str].length ile doğru Unicode sayımı
+components/idea/
+  NewIdeaForm.tsx                     # Yeni fikir modal formu
+  IdeaRoomClient.tsx                  # Realtime mesajlaşma + join request yönetimi
+supabase/schema.sql                   # Tek SQL dosyası — tüm şema + RLS + idea tabloları
 ```
 
 ---
@@ -256,10 +277,12 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
 - `phaseRef` + `sessionsRef` ile ref tabanlı phase takibi (stale closure sorununu önler)
 
 ### Lofi Müzik Widget (`components/MusicWidget.tsx`)
-- `app/(app)/layout.tsx`'e entegre — tüm app sayfalarında görünür (sağ alt köşe)
+- `app/layout.tsx` (ROOT layout)'a entegre — **tüm sayfalarda** görünür, hem public hem app (sağ alt köşe)
+- Eskiden `app/(app)/layout.tsx`'teydi, public sayfalarda görünmüyordu — root'a taşındı
 - 4 istasyon: Groove Salad, Drone Zone, Deep Space One, Lush (SomaFM)
 - `new Audio(url)` ile doğrudan MP3 stream — YouTube iframe değil (tarayıcı autoplay bloğu nedeniyle değiştirildi)
 - Widget kapatılsa ses çalmaya devam eder (Audio nesnesi React state'te kalır)
+- Pozisyon: `fixed bottom-6 right-6 z-50` — sayfa içeriği ile çakışmaması için footer'a `pb-24 sm:pb-12` eklendi
 
 ### Streak & Oturum Kelimesi (`hooks/useStreak.ts` + `PresenceBar.tsx`)
 - `useStreak(hasWrittenToday: boolean)` hook'u: localStorage tabanlı, sıfır maliyet
@@ -276,7 +299,14 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
 
 ### Gemini Free Tier (`/api/ai/suggest` + `/api/ai/character`)
 - `GEMINI_API_KEY` `.env.local`'da — client'a kesinlikle açılmaz, sadece server route'larda kullanılır
-- Model: `gemini-1.5-flash` (günde 1500 istek ücretsiz, kart gerektirmez)
+- **Model sistemi:** `lib/gemini.ts` → `generateWithFallback(prompt)` fonksiyonu — tüm AI route'ları bunu kullanır
+- Fallback sırası (RPD'ye göre, yüksekten düşüğe):
+  1. `gemini-3.1-flash-lite` — 500 RPD (öncelikli)
+  2. `gemini-2.5-flash-lite` — 20 RPD
+  3. `gemini-2.5-flash` — 20 RPD
+  4. `gemini-3.5-flash` — 20 RPD
+  5. `gemini-3-flash` — 20 RPD
+- Bir model rate limit veya hata verirse otomatik sonraki modele geçer, null dönerse tüm modeller başarısız
 - **Tıkandım? butonu** — TipTap toolbar sağında ⚡, son 5 paragrafı + bölüm başlığını gönderir, 3 yön + 2 cümle başlangıcı döner
 - **Karakter Derinleştir** — `/jenerator` sayfasında, üretilen profili analiz eder, dramatik potansiyel + ses + ilk sahne önerir
 - **Rate limit:** localStorage günde 5 kullanım per feature (`kb_ai_suggest_uses`, `kb_ai_char_uses`)
@@ -289,15 +319,23 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
 - "Derinleştir" → Gemini API (günde 5 limit)
 - Navbar dropdown → "Karakter Jeneratörü"
 
-### Fikir Odası (`/fikir-odasi`) — TASARLANDI, HENÜZ IMPLEMENT EDİLMEDİ
-Tasarım kararları:
+### Fikir Odası (`/fikir-odasi`) — IMPLEMENT EDİLDİ ✅
 - **Thread-per-idea modeli**: her kullanıcı bir "tohum fikir" atar (başlık + kısa açıklama)
 - Diğerleri o thread'e realtime mesaj atar — Supabase Realtime subscription
 - Fikir sahibi "Ekibe katılmak ister misiniz?" butonu açar (`status: 'team_forming'`)
 - İlgilenenler join request gönderir, fikir sahibi kabul/reddeder
 - Opsiyonel proje bağlantısı: fikir → mevcut projeye link
+- Navbar dropdown'da "Fikir Odası" linki (Lightbulb/amber icon)
 
-Veritabanı tabloları (schema.sql'e eklendi):
+Sayfalar:
+- `app/(app)/fikir-odasi/page.tsx` — aktif/team_forming thread listesi + NewIdeaForm modal
+- `app/(app)/fikir-odasi/[id]/page.tsx` — thread detayı, IdeaRoomClient render eder
+
+Componentler:
+- `components/idea/NewIdeaForm.tsx` — başlık (5-100) + seed (10-500) modal formu
+- `components/idea/IdeaRoomClient.tsx` — realtime mesajlaşma, join request yönetimi, owner kontrolleri
+
+Veritabanı tabloları (schema.sql'de mevcut — Supabase'e uygulanması gerekiyor):
 - `idea_threads`: id, user_id, title, seed(500 char), status(active/team_forming/closed), project_id(nullable), created_at
 - `idea_messages`: id, thread_id, user_id, content(1000 char), created_at
 - `idea_join_requests`: id, thread_id, user_id, status(pending/accepted/rejected), UNIQUE(thread_id, user_id)
@@ -306,7 +344,45 @@ RLS: Herkese okuma açık, yazma sadece giriş yapanlara, silme sadece kendi kay
 
 ---
 
+---
+
+## Mobil / Responsive Düzeltmeler
+
+### Anasayfa (`app/(public)/page.tsx`) — Uygulanmış Kurallar
+- **Stats grid:** `grid-cols-2 lg:grid-cols-4` — mobilde 2×2, desktop'ta 4 kolon. `grid-cols-1` KULLANMA, aşırı scroll olur.
+- **Stats kartları:** Mobilde `p-4 sm:p-6`, büyük sayılar `text-2xl sm:text-3xl md:text-4xl`. Açıklama metni mobilde `hidden sm:block`.
+- **Yazar kartı badge:** `shrink-0 whitespace-nowrap` zorunlu — yoksa "İşbirliğine Açık" gibi uzun metinler kesilir.
+- **Footer alt boşluk:** `pb-24 sm:pb-12` — müzik widget'ı (`fixed bottom-6 right-6`) email input butonunu kapamaması için.
+- **Hero butonları:** Her ikisi de `w-full sm:w-auto` — mobilde tam genişlik, desktop'ta otomatik.
+- **Features grid:** `grid-cols-1 md:grid-cols-2 lg:grid-cols-3` — mobilde 1 kolon yeterli (içerik zengin).
+
+### Genel Mobil Kurallar
+- Floating fixed elementler (MusicWidget, toast vs.) → içerik üzerlerine binmemesi için ilgili section'a `pb-16` veya `pb-24` ekle
+- Badge / tag elementleri → her zaman `shrink-0 whitespace-nowrap` ekle (flex container içindeyse sıkışır)
+- Stat/sayı kartları → mobilde `grid-cols-2` en az, tek kolon asla
+- JSX'te aynı attribute iki kez yazma (`aria-hidden` gibi) → TypeScript build'i kırar
+
+---
+
+## Görsel Test Metodolojisi
+
+Playwright MCP ile visual test adımları:
+1. `browser_resize(1440, 900)` → desktop
+2. `browser_navigate(url)` → sayfaya git
+3. `browser_take_screenshot(fullPage: true)` → tam sayfa
+4. `browser_resize(390, 844)` → iPhone 14 boyutu
+5. Her section için `scrollTo(0, Y)` + screenshot
+6. `document.documentElement.scrollWidth > clientWidth` → yatay overflow kontrolü
+7. `document.querySelectorAll('[class*="grid-cols"]')` → grid class'larını doğrula
+
+Screenshot dosyaları `./desktop-*.png`, `./mobile-*.png` olarak kaydedilir.
+`.playwright-mcp/` klasörü .gitignore'da — commit'lenmesin.
+
+---
+
 ## Henüz Uygulanmamış / Bekleyen
 
-- **RLS politikaları Supabase'de aktif değil** — `supabase/schema.sql`'deki güncel politikalar (members_select_member, members_insert_owner) Supabase Dashboard'da SQL Editor'dan çalıştırılmalı
+- **RLS politikaları Supabase'de aktif değil** — `supabase/schema.sql`'deki güncel politikalar (members_select_member, members_insert_owner, idea tabloları) Supabase Dashboard'da SQL Editor'dan çalıştırılmalı
+- **Fikir Odası DB tabloları** — `idea_threads`, `idea_messages`, `idea_join_requests` Supabase'e uygulanmamış olabilir
 - Davet akışı tam test edilmedi (roles gerektiriyor)
+- Google OAuth "test" modunda — production'a geçmek için Google Cloud Console'da "Publish App" gerekiyor
