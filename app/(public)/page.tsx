@@ -285,7 +285,7 @@ export default function RedesignedLandingPage() {
       {/* ── STATS SECTION ── */}
       <section className="relative py-16 px-4 bg-black/[0.15]">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {STATS.map((s, i) => (
               <motion.div
                 key={s.label}
@@ -293,13 +293,13 @@ export default function RedesignedLandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.6, ease, delay: i * 0.08 }}
-                className="bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-colors p-6 rounded-2xl text-center flex flex-col justify-between"
+                className="bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-colors p-4 sm:p-6 rounded-2xl text-center flex flex-col justify-between"
               >
                 <div>
-                  <p className="text-3xl sm:text-4xl font-display font-bold text-gradient">{s.value}</p>
-                  <p className="text-sm font-semibold text-white/90 mt-2">{s.label}</p>
+                  <p className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-gradient">{s.value}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-white/90 mt-1.5 sm:mt-2">{s.label}</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{s.desc}</p>
+                <p className="hidden sm:block text-xs text-muted-foreground mt-2 leading-relaxed">{s.desc}</p>
               </motion.div>
             ))}
           </div>
@@ -551,7 +551,7 @@ export default function RedesignedLandingPage() {
                     </div>
                   </div>
                   <span className={cn(
-                    'text-[9px] px-2 py-0.5 rounded-full border font-medium',
+                    'text-[9px] px-2 py-0.5 rounded-full border font-medium shrink-0 whitespace-nowrap',
                     writer.status === 'İşbirliğine Açık' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-sky-500/10 border-sky-500/20 text-sky-400'
                   )}>
                     {writer.status}
@@ -614,7 +614,7 @@ export default function RedesignedLandingPage() {
       </section>
 
       {/* ── MODERN MINIMALIST FOOTER ── */}
-      <footer className="border-t border-white/[0.04] bg-black/[0.1] py-12 px-4">
+      <footer className="border-t border-white/[0.04] bg-black/[0.1] py-12 pb-24 sm:pb-12 px-4">
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10 text-left">
           
           <div className="space-y-4">
