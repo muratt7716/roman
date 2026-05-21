@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { BookMarked, BookOpen, CheckCheck, Bookmark } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,19 +51,16 @@ export function ReadingListButton({ projectId, initialStatus }: Props) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={loading}
-          className={cn(
-            'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] gap-2',
-            current ? current.color : 'text-muted-foreground'
-          )}
-        >
-          <CurrentIcon className="w-4 h-4" />
-          {current ? current.label : 'Listeye Ekle'}
-        </Button>
+      <DropdownMenuTrigger
+        disabled={loading}
+        className={cn(
+          'flex items-center gap-2 px-3 py-1.5 rounded-md text-sm border transition-colors',
+          'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05]',
+          current ? current.color : 'text-muted-foreground'
+        )}
+      >
+        <CurrentIcon className="w-4 h-4" />
+        {current ? current.label : 'Listeye Ekle'}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
         {(Object.entries(STATUS_META) as [ReadingListStatus, typeof STATUS_META[ReadingListStatus]][]).map(([key, meta]) => {
