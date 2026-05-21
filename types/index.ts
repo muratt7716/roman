@@ -213,3 +213,53 @@ export interface Follow {
   following_id: string
   created_at: string
 }
+
+export type BadgeCode =
+  | 'first_chapter'
+  | 'thousand_words'
+  | 'seven_day_streak'
+  | 'team_player'
+  | 'beloved'
+  | 'followed'
+  | 'reader_friend'
+  | 'editorial_pick'
+
+export interface UserWritingGoal {
+  user_id: string
+  daily_target: number
+  streak_current: number
+  streak_best: number
+  streak_last_date: string | null
+  updated_at: string
+}
+
+export interface UserBadge {
+  user_id: string
+  badge_code: BadgeCode
+  earned_at: string
+}
+
+export interface WeeklyStats {
+  wordsWritten: number
+  reactionsReceived: number
+  newFollowers: number
+  totalViews: number
+}
+
+export interface WritingGoalResponse {
+  daily_target: number
+  streak_current: number
+  streak_best: number
+  today_words: number
+}
+
+export interface EditorialPick {
+  id: string
+  title: string
+  slug: string
+  cover_image_url: string | null
+  genre: string | null
+  owner_display_name: string | null
+  owner_username: string
+  score: number
+}
