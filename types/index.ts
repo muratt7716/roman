@@ -4,7 +4,10 @@ export type ProjectVisibility = 'draft' | 'open' | 'closed' | 'published'
 export type CollaborationStatus = 'recruiting' | 'active' | 'completed'
 export type ApplicationStatus = 'pending' | 'accepted' | 'rejected'
 export type ChapterStatus = 'draft' | 'review' | 'final'
-export type NotificationType = 'application' | 'acceptance' | 'rejection' | 'comment' | 'mention' | 'invite' | 'suggestion'
+export type NotificationType =
+  | 'application' | 'acceptance' | 'rejection'
+  | 'comment' | 'mention' | 'invite' | 'suggestion'
+  | 'new_chapter' | 'new_follower'
 export type SuggestionStatus = 'pending' | 'accepted' | 'rejected'
 export type InviteStatus = 'pending' | 'accepted' | 'declined'
 export type BrainstormNoteType = 'plot' | 'character' | 'lore' | 'relationship' | 'sticky'
@@ -183,5 +186,30 @@ export interface ChapterSuggestion {
   content: string
   note: string | null
   status: SuggestionStatus
+  created_at: string
+}
+
+export type ReactionType = 'fire' | 'drop' | 'bolt'
+export type ReadingListStatus = 'want' | 'reading' | 'done'
+
+export interface ChapterReaction {
+  id: string
+  chapter_id: string
+  user_id: string
+  reaction: ReactionType
+  created_at: string
+}
+
+export interface ReadingList {
+  id: string
+  user_id: string
+  project_id: string
+  status: ReadingListStatus
+  updated_at: string
+}
+
+export interface Follow {
+  follower_id: string
+  following_id: string
   created_at: string
 }
