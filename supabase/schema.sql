@@ -704,12 +704,18 @@ CREATE TABLE IF NOT EXISTS feedback (
 
 ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "feedback_insert_self"  ON feedback;
-DROP POLICY IF EXISTS "feedback_select_self"  ON feedback;
+DROP POLICY IF EXISTS "feedback_insert_self"   ON feedback;
+DROP POLICY IF EXISTS "feedback_select_self"   ON feedback;
+DROP POLICY IF EXISTS "feedback_select_admin"  ON feedback;
+DROP POLICY IF EXISTS "feedback_update_admin"  ON feedback;
 
--- Kullanıcı kendi feedback'ini gönderebilir ve görebilir
+-- Kullanıcı kendi feedback'ini gönderebilir; admin tümünü görebilir ve güncelleyebilir
 CREATE POLICY "feedback_insert_self" ON feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "feedback_select_self" ON feedback FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "feedback_select_admin" ON feedback FOR SELECT
+  USING (auth.uid() = user_id OR (auth.jwt() ->> 'email') = 'mmuratb77@gmail.com');
+CREATE POLICY "feedback_update_admin" ON feedback FOR UPDATE
+  USING ((auth.jwt() ->> 'email') = 'mmuratb77@gmail.com')
+  WITH CHECK ((auth.jwt() ->> 'email') = 'mmuratb77@gmail.com');
 
 CREATE INDEX IF NOT EXISTS idx_feedback_user_id   ON feedback(user_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_status    ON feedback(status);
