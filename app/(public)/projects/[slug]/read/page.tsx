@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { BookOpen, ArrowLeft, Clock } from 'lucide-react'
+import { ReadingListButton } from '@/components/reader/ReadingListButton'
+import { FollowButton } from '@/components/reader/FollowButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +25,7 @@ export default async function ReadPage({ params }: Props) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, title, slug, synopsis, visibility, owner:profiles!projects_owner_id_fkey(display_name, username)')
+    .select('id, title, slug, synopsis, visibility, owner:profiles!projects_owner_id_fkey(id, display_name, username)')
     .eq('slug', slug)
     .single()
 
@@ -37,6 +39,28 @@ export default async function ReadPage({ params }: Props) {
     .order('order_index')
 
   const totalWords = (chapters ?? []).reduce((s: number, c: any) => s + c.word_count, 0)
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  let readingListStatus: 'want' | 'reading' | 'done' | null = null
+  let isFollowing = false
+  let followerCount = 0
+
+  const ownerId = (project.owner as any)?.id as string | undefined
+
+  if (user && ownerId) {
+    const [{ data: rl }, { count: fc }, { data: fol }] = await Promise.all([
+      supabase.from('reading_lists').select('status').eq('user_id', user.id).eq('project_id', project.id).single(),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', ownerId),
+      supabase.from('follows').select('follower_id').eq('follower_id', user.id).eq('following_id', ownerId).single(),
+    ])
+    readingListStatus = (rl?.status as typeof readingListStatus) ?? null
+    followerCount = fc ?? 0
+    isFollowing = !!fol
+  } else if (ownerId) {
+    const { count: fc } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', ownerId)
+    followerCount = fc ?? 0
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
@@ -52,6 +76,22 @@ export default async function ReadPage({ params }: Props) {
           · {(chapters ?? []).length} bölüm
         </p>
       </div>
+
+      {user && (
+        <div className="flex items-center gap-2 flex-wrap mb-6">
+          <ReadingListButton
+            projectId={project.id}
+            initialStatus={readingListStatus}
+          />
+          {ownerId && user.id !== ownerId && (
+            <FollowButton
+              authorId={ownerId}
+              initialFollowing={isFollowing}
+              followerCount={followerCount}
+            />
+          )}
+        </div>
+      )}
 
       {project.synopsis && (
         <div className="glass rounded-xl p-5 mb-8">
