@@ -721,6 +721,45 @@ CREATE INDEX IF NOT EXISTS idx_feedback_user_id   ON feedback(user_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_status    ON feedback(status);
 CREATE INDEX IF NOT EXISTS idx_feedback_created   ON feedback(created_at DESC);
 
+-- ============================================================
+-- USER WRITING GOALS (Faz 2)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS user_writing_goals (
+  user_id          uuid PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  daily_target     int NOT NULL DEFAULT 500 CHECK (daily_target BETWEEN 50 AND 10000),
+  streak_current   int NOT NULL DEFAULT 0,
+  streak_best      int NOT NULL DEFAULT 0,
+  streak_last_date date,
+  updated_at       timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE user_writing_goals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "goals_self" ON user_writing_goals;
+CREATE POLICY "goals_self" ON user_writing_goals
+  USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- ============================================================
+-- USER BADGES (Faz 2)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS user_badges (
+  user_id    uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  badge_code text NOT NULL,
+  earned_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (user_id, badge_code)
+);
+
+ALTER TABLE user_badges ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "badges_select_all"  ON user_badges;
+DROP POLICY IF EXISTS "badges_insert_self" ON user_badges;
+CREATE POLICY "badges_select_all"  ON user_badges FOR SELECT USING (true);
+CREATE POLICY "badges_insert_self" ON user_badges FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id);
+
 -- Chapter Reactions
 CREATE POLICY "reactions_select_all"  ON chapter_reactions FOR SELECT USING (true);
 CREATE POLICY "reactions_insert_auth" ON chapter_reactions FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid());
