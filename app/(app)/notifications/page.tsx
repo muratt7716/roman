@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Bell, CheckCircle, UserPlus, FileText, ThumbsUp, ThumbsDown, MessageSquare, AtSign } from 'lucide-react'
+import { Bell, CheckCircle, UserPlus, FileText, ThumbsUp, ThumbsDown, MessageSquare, AtSign, BookOpen } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { InviteActions } from '@/components/notifications/InviteActions'
@@ -17,6 +17,8 @@ const TYPE_META: Record<string, { label: string; icon: React.ElementType; color:
   mention:     { label: 'Bahsedildin',                icon: AtSign,        color: 'text-amber-400 bg-amber-500/15' },
   invite:      { label: 'Projeye davet edildin',      icon: UserPlus,      color: 'text-primary bg-primary/15' },
   suggestion:  { label: 'Yeni öneri taslağı var',     icon: Bell,          color: 'text-amber-400 bg-amber-500/15' },
+  new_chapter: { label: 'Yeni bölüm yayınlandı',      icon: BookOpen,      color: 'text-violet-400 bg-violet-500/15' },
+  new_follower: { label: 'Seni takip etmeye başladı', icon: UserPlus,      color: 'text-emerald-400 bg-emerald-500/15' },
 }
 
 function getNotifDetail(n: any): { title: string; subtitle?: string; link?: string } {
@@ -61,6 +63,18 @@ function getNotifDetail(n: any): { title: string; subtitle?: string; link?: stri
         title: `${p.mentioner_display_name ?? p.mentioner_username ?? 'Biri'} senden bahsetti`,
         subtitle: p.preview ? `"${p.preview}"` : undefined,
         link: p.project_id && p.chapter_id ? `/projects/${p.project_id}/write/${p.chapter_id}` : undefined,
+      }
+    case 'new_chapter':
+      return {
+        title: `"${p.project_title ?? 'Bir proje'}" için yeni bölüm: "${p.chapter_title ?? ''}"`,
+        link: p.project_slug && p.chapter_id
+          ? `/projects/${p.project_slug}/read/${p.chapter_id}`
+          : undefined,
+      }
+    case 'new_follower':
+      return {
+        title: `${p.follower_display_name ?? p.follower_username ?? 'Biri'} seni takip etmeye başladı`,
+        link: p.follower_username ? `/u/${p.follower_username}` : undefined,
       }
     default:
       return { title: TYPE_META[n.type]?.label ?? n.type }
