@@ -236,6 +236,9 @@ CREATE TABLE IF NOT EXISTS follows (
   CHECK(follower_id != following_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
+CREATE INDEX IF NOT EXISTS idx_reading_lists_project ON reading_lists(project_id);
+
 -- ============================================================
 -- 3. TRIGGER'LAR (her seferinde yenile — veri içermez)
 -- ============================================================
@@ -243,7 +246,14 @@ CREATE TABLE IF NOT EXISTS follows (
 -- Bölüm görüntüleme sayacı (RLS bypass — SECURITY DEFINER)
 CREATE OR REPLACE FUNCTION public.increment_chapter_view(p_chapter_id uuid)
 RETURNS void AS $$
-  UPDATE chapters SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_chapter_id;
+  UPDATE chapters
+  SET view_count = COALESCE(view_count, 0) + 1
+  WHERE id = p_chapter_id
+    AND status = 'final'
+    AND EXISTS (
+      SELECT 1 FROM projects
+      WHERE id = chapters.project_id AND visibility = 'published'
+    );
 $$ LANGUAGE sql SECURITY DEFINER;
 
 -- Yeni bölüm yayınlanınca takipçilere bildirim
@@ -538,7 +548,7 @@ CREATE POLICY "timeline_delete_owner"  ON timeline_events FOR DELETE USING (is_p
 -- Notifications
 CREATE POLICY "notifications_select_own"     ON notifications FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "notifications_update_own"     ON notifications FOR UPDATE USING (user_id = auth.uid());
-CREATE POLICY "notifications_insert_service" ON notifications FOR INSERT WITH CHECK (true);
+CREATE POLICY "notifications_insert_service" ON notifications FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- ============================================================
 -- 5. INDEX'LER (yoksa oluştur)
