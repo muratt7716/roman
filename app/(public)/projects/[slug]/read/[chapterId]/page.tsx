@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react'
+import { ViewTracker } from '@/components/reader/ViewTracker'
+import { ReactionBar } from '@/components/reader/ReactionBar'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,11 +31,26 @@ export default async function ChapterReadPage({ params }: Props) {
 
   if (!project || project.visibility !== 'published') notFound()
 
-  const [{ data: chapter }, { data: latestVersion }, { data: allChapters }] = await Promise.all([
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const [
+    { data: chapter },
+    { data: latestVersion },
+    { data: allChapters },
+    { data: reactions },
+  ] = await Promise.all([
     supabase.from('chapters').select('*').eq('id', chapterId).single(),
     supabase.from('chapter_versions').select('content').eq('chapter_id', chapterId).order('created_at', { ascending: false }).limit(1).single(),
     supabase.from('chapters').select('id, title, order_index').eq('project_id', project.id).eq('status', 'final').order('order_index'),
+    supabase.from('chapter_reactions').select('reaction, user_id').eq('chapter_id', chapterId),
   ])
+
+  const reactionCounts = { fire: 0, drop: 0, bolt: 0 }
+  const userReactions: string[] = []
+  for (const r of reactions ?? []) {
+    if (r.reaction in reactionCounts) reactionCounts[r.reaction as keyof typeof reactionCounts]++
+    if (user && r.user_id === user.id) userReactions.push(r.reaction)
+  }
 
   if (!chapter) notFound()
 
@@ -44,6 +61,7 @@ export default async function ChapterReadPage({ params }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12">
+      <ViewTracker chapterId={chapterId} />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-muted-foreground mb-10">
         <Link href={`/projects/${slug}/read`} className="hover:text-foreground transition-colors flex items-center gap-1.5">
@@ -65,8 +83,14 @@ export default async function ChapterReadPage({ params }: Props) {
         <p className="text-muted-foreground italic">Bu bölümün içeriği henüz mevcut değil.</p>
       )}
 
+      <ReactionBar
+        chapterId={chapterId}
+        initialCounts={reactionCounts}
+        initialUserReactions={userReactions}
+      />
+
       {/* Chapter navigation */}
-      <div className="flex items-center justify-between mt-16 pt-8 border-t border-border gap-4">
+      <div className="flex items-center justify-between mt-8 pt-8 border-t border-border gap-4">
         {prevChapter ? (
           <Link
             href={`/projects/${slug}/read/${prevChapter.id}`}
