@@ -29,6 +29,10 @@ DO $$ BEGIN
   CREATE TYPE notification_type AS ENUM ('application', 'acceptance', 'rejection', 'comment', 'mention', 'invite', 'suggestion');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+-- Yeni notification tipleri (idempotent — varsa hata vermez)
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'new_chapter';
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'new_follower';
+
 DO $$ BEGIN
   CREATE TYPE brainstorm_note_type AS ENUM ('plot', 'character', 'lore', 'relationship', 'sticky');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
@@ -200,9 +204,105 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Bölüm görüntüleme sayacı (chapters tablosuna kolon)
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS view_count int NOT NULL DEFAULT 0;
+
+-- Alkış/tepki sistemi
+CREATE TABLE IF NOT EXISTS chapter_reactions (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  chapter_id  uuid NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
+  user_id     uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  reaction    text NOT NULL CHECK (reaction IN ('fire', 'drop', 'bolt')),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(chapter_id, user_id, reaction)
+);
+
+-- Okuma listesi
+CREATE TABLE IF NOT EXISTS reading_lists (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  project_id uuid NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  status     text NOT NULL CHECK (status IN ('want', 'reading', 'done')),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(user_id, project_id)
+);
+
+-- Takip sistemi
+CREATE TABLE IF NOT EXISTS follows (
+  follower_id  uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  following_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY(follower_id, following_id),
+  CHECK(follower_id != following_id)
+);
+
 -- ============================================================
 -- 3. TRIGGER'LAR (her seferinde yenile — veri içermez)
 -- ============================================================
+
+-- Bölüm görüntüleme sayacı (RLS bypass — SECURITY DEFINER)
+CREATE OR REPLACE FUNCTION public.increment_chapter_view(p_chapter_id uuid)
+RETURNS void AS $$
+  UPDATE chapters SET view_count = COALESCE(view_count, 0) + 1 WHERE id = p_chapter_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- Yeni bölüm yayınlanınca takipçilere bildirim
+CREATE OR REPLACE FUNCTION public.notify_chapter_followers()
+RETURNS trigger AS $$
+DECLARE
+  v_project_id    uuid;
+  v_owner_id      uuid;
+  v_project_title text;
+  v_project_slug  text;
+  v_follower      record;
+BEGIN
+  IF NEW.status = 'final' AND (OLD.status IS NULL OR OLD.status::text != 'final') THEN
+    SELECT p.id, p.owner_id, p.title, p.slug
+      INTO v_project_id, v_owner_id, v_project_title, v_project_slug
+      FROM projects p WHERE p.id = NEW.project_id;
+    FOR v_follower IN
+      SELECT follower_id FROM follows WHERE following_id = v_owner_id
+    LOOP
+      INSERT INTO notifications (user_id, type, payload)
+      VALUES (
+        v_follower.follower_id,
+        'new_chapter',
+        jsonb_build_object(
+          'chapter_id', NEW.id,
+          'chapter_title', NEW.title,
+          'project_id', v_project_id,
+          'project_title', v_project_title,
+          'project_slug', v_project_slug,
+          'author_id', v_owner_id
+        )
+      );
+    END LOOP;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Yeni takipçi bildirimi
+CREATE OR REPLACE FUNCTION public.notify_new_follower()
+RETURNS trigger AS $$
+DECLARE
+  v_name text; v_username text;
+BEGIN
+  SELECT display_name, username INTO v_name, v_username
+    FROM profiles WHERE id = NEW.follower_id;
+  INSERT INTO notifications (user_id, type, payload)
+  VALUES (
+    NEW.following_id,
+    'new_follower',
+    jsonb_build_object(
+      'follower_id', NEW.follower_id,
+      'follower_display_name', v_name,
+      'follower_username', v_username
+    )
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
@@ -217,6 +317,16 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_chapter_published ON chapters;
+CREATE TRIGGER on_chapter_published
+  AFTER UPDATE ON chapters
+  FOR EACH ROW EXECUTE PROCEDURE public.notify_chapter_followers();
+
+DROP TRIGGER IF EXISTS on_new_follow ON follows;
+CREATE TRIGGER on_new_follow
+  AFTER INSERT ON follows
+  FOR EACH ROW EXECUTE PROCEDURE public.notify_new_follower();
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -256,6 +366,9 @@ ALTER TABLE brainstorm_notes    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE character_profiles  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE timeline_events     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE chapter_reactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reading_lists     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE follows           ENABLE ROW LEVEL SECURITY;
 
 -- Yardımcı fonksiyonlar
 CREATE OR REPLACE FUNCTION public.is_project_member(p_project_id uuid)
@@ -316,6 +429,16 @@ DROP POLICY IF EXISTS "timeline_delete_owner"         ON timeline_events;
 DROP POLICY IF EXISTS "notifications_select_own"      ON notifications;
 DROP POLICY IF EXISTS "notifications_update_own"      ON notifications;
 DROP POLICY IF EXISTS "notifications_insert_service"  ON notifications;
+DROP POLICY IF EXISTS "reactions_select_all"     ON chapter_reactions;
+DROP POLICY IF EXISTS "reactions_insert_auth"    ON chapter_reactions;
+DROP POLICY IF EXISTS "reactions_delete_own"     ON chapter_reactions;
+DROP POLICY IF EXISTS "readinglist_select_own"   ON reading_lists;
+DROP POLICY IF EXISTS "readinglist_insert_auth"  ON reading_lists;
+DROP POLICY IF EXISTS "readinglist_update_own"   ON reading_lists;
+DROP POLICY IF EXISTS "readinglist_delete_own"   ON reading_lists;
+DROP POLICY IF EXISTS "follows_select_all"       ON follows;
+DROP POLICY IF EXISTS "follows_insert_auth"      ON follows;
+DROP POLICY IF EXISTS "follows_delete_own"       ON follows;
 
 -- Profiles
 CREATE POLICY "profiles_select_all" ON profiles FOR SELECT USING (true);
@@ -361,7 +484,13 @@ CREATE POLICY "applications_insert_auth"  ON applications FOR INSERT WITH CHECK 
 CREATE POLICY "applications_update_owner" ON applications FOR UPDATE USING (is_project_owner(project_id));
 
 -- Chapters
-CREATE POLICY "chapters_select_member" ON chapters FOR SELECT USING (is_project_owner(project_id) OR is_project_member(project_id));
+CREATE POLICY "chapters_select_member" ON chapters FOR SELECT USING (
+  is_project_owner(project_id)
+  OR is_project_member(project_id)
+  OR (status = 'final' AND EXISTS (
+    SELECT 1 FROM projects WHERE id = project_id AND visibility = 'published'
+  ))
+);
 CREATE POLICY "chapters_insert_member" ON chapters FOR INSERT WITH CHECK (is_project_owner(project_id) OR is_project_member(project_id));
 CREATE POLICY "chapters_update_member" ON chapters FOR UPDATE USING (is_project_owner(project_id) OR is_project_member(project_id));
 CREATE POLICY "chapters_delete_owner"  ON chapters FOR DELETE USING (is_project_owner(project_id));
@@ -575,3 +704,19 @@ CREATE POLICY "feedback_select_self" ON feedback FOR SELECT USING (auth.uid() = 
 CREATE INDEX IF NOT EXISTS idx_feedback_user_id   ON feedback(user_id);
 CREATE INDEX IF NOT EXISTS idx_feedback_status    ON feedback(status);
 CREATE INDEX IF NOT EXISTS idx_feedback_created   ON feedback(created_at DESC);
+
+-- Chapter Reactions
+CREATE POLICY "reactions_select_all"  ON chapter_reactions FOR SELECT USING (true);
+CREATE POLICY "reactions_insert_auth" ON chapter_reactions FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid());
+CREATE POLICY "reactions_delete_own"  ON chapter_reactions FOR DELETE USING (user_id = auth.uid());
+
+-- Reading Lists
+CREATE POLICY "readinglist_select_own"  ON reading_lists FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "readinglist_insert_auth" ON reading_lists FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY "readinglist_update_own"  ON reading_lists FOR UPDATE USING (user_id = auth.uid());
+CREATE POLICY "readinglist_delete_own"  ON reading_lists FOR DELETE USING (user_id = auth.uid());
+
+-- Follows
+CREATE POLICY "follows_select_all"  ON follows FOR SELECT USING (true);
+CREATE POLICY "follows_insert_auth" ON follows FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND follower_id = auth.uid());
+CREATE POLICY "follows_delete_own"  ON follows FOR DELETE USING (follower_id = auth.uid());
