@@ -403,6 +403,7 @@ Screenshot dosyaları `./desktop-*.png`, `./mobile-*.png` olarak kaydedilir.
 
 ## Henüz Uygulanmamış / Bekleyen
 
+- **Faz 1 tamamlandı** — alkış sistemi (🔥💧⚡), okuma listesi, takip et, view counter, yeni bölüm bildirimi — **Supabase'e schema.sql uygulanmalı**: chapter_reactions, reading_lists, follows tabloları + triggers
 - **RLS politikaları Supabase'de aktif değil** — `supabase/schema.sql`'deki güncel politikalar (members_select_member, members_insert_owner, idea tabloları) Supabase Dashboard'da SQL Editor'dan çalıştırılmalı
 - **Fikir Odası DB tabloları** — `idea_threads`, `idea_messages`, `idea_join_requests` Supabase'e uygulanmamış olabilir
 - Davet akışı tam test edilmedi (roles gerektiriyor)
