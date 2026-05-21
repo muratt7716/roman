@@ -34,6 +34,7 @@ export async function DELETE(req: Request) {
   const project_id = searchParams.get('project_id')
   if (!project_id) return NextResponse.json({ error: 'project_id gerekli' }, { status: 400 })
 
-  await supabase.from('reading_lists').delete().eq('user_id', user.id).eq('project_id', project_id)
+  const { error } = await supabase.from('reading_lists').delete().eq('user_id', user.id).eq('project_id', project_id)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

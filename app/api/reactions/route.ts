@@ -49,10 +49,12 @@ export async function POST(req: Request) {
     .single()
 
   if (existing) {
-    await supabase.from('chapter_reactions').delete().eq('id', existing.id)
+    const { error } = await supabase.from('chapter_reactions').delete().eq('id', existing.id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ active: false })
   } else {
-    await supabase.from('chapter_reactions').insert({ chapter_id, user_id: user.id, reaction })
+    const { error } = await supabase.from('chapter_reactions').insert({ chapter_id, user_id: user.id, reaction })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ active: true })
   }
 }
