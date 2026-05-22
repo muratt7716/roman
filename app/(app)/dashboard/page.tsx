@@ -5,9 +5,12 @@ import { Plus, BookOpen, Bell, Users, PenLine, Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { WritingGoalCard } from '@/components/dashboard/WritingGoalCard'
+import { WeeklyStatsRow } from '@/components/dashboard/WeeklyStatsRow'
+import { BadgesRow } from '@/components/dashboard/BadgesRow'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { ProjectWithOwner } from '@/types'
+import type { ProjectWithOwner, WeeklyStats, UserBadge } from '@/types'
 
 export const metadata: Metadata = { title: 'Dashboard — Kalem Birliği' }
 export const dynamic = 'force-dynamic'
@@ -17,24 +20,49 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: ownedProjects } = await supabase
-    .from('projects')
-    .select('*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*)')
-    .eq('owner_id', user.id)
-    .order('updated_at', { ascending: false })
-    .limit(6)
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  const { data: membershipData } = await supabase
-    .from('project_members')
-    .select('project:projects(*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*))')
-    .eq('user_id', user.id)
-    .limit(6)
+  const [
+    { data: ownedProjects },
+    { data: membershipData },
+    { data: versionStats },
+    { data: followerData },
+    { data: badgeData },
+  ] = await Promise.all([
+    supabase
+      .from('projects')
+      .select('*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*)')
+      .eq('owner_id', user.id)
+      .order('updated_at', { ascending: false })
+      .limit(6),
+    supabase
+      .from('project_members')
+      .select('project:projects(*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*))')
+      .eq('user_id', user.id)
+      .limit(6),
+    supabase
+      .from('chapter_versions')
+      .select('word_count')
+      .eq('author_id', user.id)
+      .gte('created_at', sevenDaysAgo),
+    supabase
+      .from('follows')
+      .select('follower_id', { count: 'exact', head: true })
+      .eq('following_id', user.id)
+      .gte('created_at', sevenDaysAgo),
+    supabase
+      .from('user_badges')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('earned_at', { ascending: false }),
+  ])
 
+  const owned = (ownedProjects ?? []) as ProjectWithOwner[]
   const memberProjects = (membershipData ?? [])
     .map((m: any) => m.project)
     .filter(Boolean) as ProjectWithOwner[]
 
-  const projectIds = (ownedProjects ?? []).map(p => p.id)
+  const projectIds = owned.map(p => p.id)
   const { data: pendingApplications } = projectIds.length > 0
     ? await supabase
         .from('applications')
@@ -44,10 +72,31 @@ export default async function DashboardPage() {
         .limit(5)
     : { data: [] }
 
-  const owned = (ownedProjects ?? []) as ProjectWithOwner[]
-  const pending = (pendingApplications ?? []) as any[]
+  // Count reactions on user's chapters in last 7 days
+  const { data: userChapters } = await supabase
+    .from('chapters')
+    .select('id')
+    .eq('created_by', user.id)
+  const chapterIds = (userChapters ?? []).map((c: { id: string }) => c.id)
+  const { count: reactionCount } = chapterIds.length > 0
+    ? await supabase
+        .from('chapter_reactions')
+        .select('id', { count: 'exact', head: true })
+        .in('chapter_id', chapterIds)
+        .gte('created_at', sevenDaysAgo)
+    : { count: 0 }
 
+  const pending = (pendingApplications ?? []) as any[]
   const totalWords = owned.reduce((s, p) => s + (p.current_word_count ?? 0), 0)
+
+  const weeklyStats: WeeklyStats = {
+    wordsWritten: (versionStats ?? []).reduce((s: number, v: { word_count: number }) => s + (v.word_count ?? 0), 0),
+    reactionsReceived: reactionCount ?? 0,
+    newFollowers: (followerData as unknown as number) ?? 0,
+    totalViews: 0,
+  }
+
+  const badges = (badgeData ?? []) as UserBadge[]
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-12">
@@ -69,9 +118,9 @@ export default async function DashboardPage() {
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Projem', value: owned.length, icon: BookOpen, color: 'text-violet-400' },
-          { label: 'Katıldığım', value: memberProjects.length, icon: Users, color: 'text-sky-400' },
-          { label: 'Bekleyen', value: pending.length, icon: Bell, color: 'text-amber-400' },
+          { label: 'Projem',        value: owned.length,          icon: BookOpen, color: 'text-violet-400'  },
+          { label: 'Katıldığım',    value: memberProjects.length, icon: Users,    color: 'text-sky-400'     },
+          { label: 'Bekleyen',      value: pending.length,        icon: Bell,     color: 'text-amber-400'   },
           { label: 'Toplam Kelime', value: totalWords > 999 ? `${(totalWords/1000).toFixed(1)}K` : totalWords, icon: BookOpen, color: 'text-emerald-400' },
         ].map(stat => (
           <div key={stat.label} className="glass-card rounded-2xl p-5">
@@ -81,6 +130,17 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Günlük hedef + haftalık stats yan yana */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <WritingGoalCard />
+        <div className="lg:col-span-2">
+          <WeeklyStatsRow stats={weeklyStats} />
+        </div>
+      </div>
+
+      {/* Rozetler */}
+      <BadgesRow badges={badges} />
 
       {/* Bekleyen Başvurular */}
       {pending.length > 0 && (
