@@ -31,6 +31,7 @@ interface Props {
   initialContent: string
   chapterTitle?: string
   onWordCountChange?: (count: number) => void
+  editable?: boolean
 }
 
 function countWords(text: string): number {
@@ -56,7 +57,7 @@ const TEXT_COLORS = [
   { label: 'Mor', value: '#a78bfa' },
 ]
 
-export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitle, onWordCountChange }: Props) {
+export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitle, onWordCountChange, editable = true }: Props) {
   const supabase = createClient()
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSaved = useRef<string>(initialContent)
@@ -151,6 +152,7 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
 
   const editor = useEditor({
     immediatelyRender: false,
+    editable,
     extensions: [
       StarterKit,
       Underline,

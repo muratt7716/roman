@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Lightbulb, MessageSquare, X } from 'lucide-react'
+import { Lightbulb, Lock, MessageSquare, X } from 'lucide-react'
 import { TipTapEditor } from './TipTapEditor'
+import { SubmitButton } from './SubmitButton'
 import { CommentPanel } from './CommentPanel'
 import { PresenceBar } from './PresenceBar'
 import { PomodoroTimer } from './PomodoroTimer'
@@ -17,9 +18,11 @@ interface Props {
   initialContent: string
   memberIds?: string[]
   isOwner?: boolean
+  locked?: boolean
+  submissionId?: string
 }
 
-export function ChapterEditorClient({ chapter, projectId, currentUser, initialContent, memberIds = [], isOwner = false }: Props) {
+export function ChapterEditorClient({ chapter, projectId, currentUser, initialContent, memberIds = [], isOwner = false, locked = false, submissionId }: Props) {
   const [wordCount, setWordCount] = useState(chapter.word_count)
   const initialWordCount = chapter.word_count ?? 0
   const [pendingSuggestions, setPendingSuggestions] = useState(0)
@@ -59,6 +62,14 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
         <h1 className="font-display text-sm sm:text-lg font-semibold truncate flex-1 min-w-0">{chapter.title}</h1>
 
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {submissionId && !locked && (
+            <SubmitButton submissionId={submissionId} />
+          )}
+          {locked && (
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+              <Lock className="w-3 h-3" /> Kilitli
+            </span>
+          )}
           {/* Pomodoro timer */}
           <div className="hidden sm:flex">
             <PomodoroTimer />
@@ -113,6 +124,7 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
             initialContent={initialContent}
             chapterTitle={chapter.title}
             onWordCountChange={setWordCount}
+            editable={!locked}
           />
         </div>
 
