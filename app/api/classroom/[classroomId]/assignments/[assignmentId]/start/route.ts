@@ -82,7 +82,10 @@ export async function POST(_req: Request, { params }: Params) {
     })
     .select()
     .single()
-  if (chapterError) return NextResponse.json({ error: chapterError.message }, { status: 500 })
+  if (chapterError) {
+    await supabase.from('projects').delete().eq('id', project.id)
+    return NextResponse.json({ error: chapterError.message }, { status: 500 })
+  }
 
   // Create submission record
   const { data: submission, error: subError } = await supabase
@@ -95,7 +98,11 @@ export async function POST(_req: Request, { params }: Params) {
     })
     .select()
     .single()
-  if (subError) return NextResponse.json({ error: subError.message }, { status: 500 })
+  if (subError) {
+    await supabase.from('chapters').delete().eq('id', chapter.id)
+    await supabase.from('projects').delete().eq('id', project.id)
+    return NextResponse.json({ error: subError.message }, { status: 500 })
+  }
 
   return NextResponse.json({
     submission_id: submission.id,
