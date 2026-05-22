@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, BookOpen, Sparkles, Calendar, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
@@ -42,7 +42,6 @@ export default function NewAssignmentPage({ params }: PageProps) {
       if (res.ok) {
         toast.success('Ödev başarıyla atandı! 📝')
         router.push(`/classroom/${classroomId}/assignments/${data.assignment.id}`)
-        router.refresh()
       } else {
         toast.error(data.error || 'Ödev oluşturulamadı.')
       }
@@ -121,7 +120,7 @@ export default function NewAssignmentPage({ params }: PageProps) {
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               disabled={loading}
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-primary/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all placeholder:text-slate-600 disabled:opacity-50 color-scheme-dark"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-primary/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all placeholder:text-slate-600 disabled:opacity-50 [color-scheme:dark]"
             />
           </div>
 

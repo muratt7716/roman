@@ -147,7 +147,7 @@ export default async function AssignmentPage({ params }: PageProps) {
           timeLeftColor = 'text-sky-400 bg-sky-500/10 border-sky-500/20 shadow-[0_0_15px_rgba(14,165,233,0.05)]'
         } else {
           timeLeftText = `Son Saatler: ${diffHours} Saat Kaldı! ⚡`
-          timeLeftColor = 'text-amber-400 bg-amber-500/10 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.05)] animate-pulse'
+          timeLeftColor = 'text-amber-400 bg-amber-500/10 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.05)]'
         }
       }
     }
@@ -167,7 +167,7 @@ export default async function AssignmentPage({ params }: PageProps) {
         </Link>
 
         {/* Gamified Briefing Card */}
-        <div className="relative glass-card rounded-3xl p-6 md:p-8 border border-sky-500/15 bg-slate-950/40 relative overflow-hidden space-y-6">
+        <div className="relative glass-card rounded-3xl p-6 md:p-8 border border-sky-500/15 bg-slate-950/40 overflow-hidden space-y-6">
           <div className="absolute top-0 right-0 w-32 h-32 bg-sky-500/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10 border-b border-white/[0.04] pb-5">

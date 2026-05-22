@@ -35,7 +35,7 @@ export function SubmissionList({ initialSubmissions, classroomId }: Props) {
       {submissions.map(sub => {
         const meta = STATUS_LABEL[sub.status]
         const isOpen = expanded === sub.id
-        const student = (sub as any).student
+        const student = sub.student
 
         return (
           <div key={sub.id} className="glass-card rounded-xl overflow-hidden">
