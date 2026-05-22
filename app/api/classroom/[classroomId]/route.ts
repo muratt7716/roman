@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: Params) {
 
   if (!classroom) return NextResponse.json({ error: 'Sınıf bulunamadı.' }, { status: 404 })
 
-  const myRole = members?.find((m: any) => m.user_id === user.id)?.role ?? null
+  const myRole = members?.find((m) => m.user_id === user.id)?.role ?? null
   if (!myRole) return NextResponse.json({ error: 'Bu sınıfa erişim yetkin yok.' }, { status: 403 })
 
   return NextResponse.json({ classroom, members: members ?? [], myRole })

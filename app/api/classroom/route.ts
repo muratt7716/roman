@@ -45,11 +45,12 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Öğretmeni üye olarak ekle
-  await supabase.from('classroom_members').insert({
+  const { error: memberError } = await supabase.from('classroom_members').insert({
     classroom_id: classroom.id,
     user_id: user.id,
     role: 'teacher',
   })
+  if (memberError) return NextResponse.json({ error: memberError.message }, { status: 500 })
 
   return NextResponse.json({ classroom }, { status: 201 })
 }
