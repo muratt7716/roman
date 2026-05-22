@@ -263,3 +263,47 @@ export interface EditorialPick {
   owner_username: string
   score: number
 }
+
+export type ClassroomRole = 'teacher' | 'student'
+export type SubmissionStatus = 'draft' | 'submitted' | 'graded'
+export type AssignmentVisibility = 'private' | 'class_visible'
+
+export interface Classroom {
+  id: string
+  owner_id: string
+  name: string
+  description: string | null
+  join_code: string
+  created_at: string
+}
+
+export interface ClassroomMember {
+  classroom_id: string
+  user_id: string
+  role: ClassroomRole
+  joined_at: string
+  profile?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>
+}
+
+export interface ClassroomAssignment {
+  id: string
+  classroom_id: string
+  title: string
+  description: string | null
+  due_date: string | null
+  visibility: AssignmentVisibility
+  created_at: string
+}
+
+export interface AssignmentSubmission {
+  id: string
+  assignment_id: string
+  student_id: string
+  project_id: string | null
+  status: SubmissionStatus
+  grade: number | null
+  teacher_comment: string | null
+  submitted_at: string | null
+  graded_at: string | null
+  student?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>
+}
