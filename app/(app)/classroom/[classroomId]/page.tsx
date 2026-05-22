@@ -25,30 +25,17 @@ export default async function ClassroomPage({ params }: PageProps) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch classroom data
-  const { data: classroom } = await supabase
-    .from('classrooms')
-    .select('*')
-    .eq('id', classroomId)
-    .single()
+  // Fetch classroom data, members, and assignments in parallel
+  const [{ data: classroom }, { data: members }, { data: assignments }] = await Promise.all([
+    supabase.from('classrooms').select('*').eq('id', classroomId).single(),
+    supabase.from('classroom_members').select('*, profile:profiles(id, username, display_name, avatar_url)').eq('classroom_id', classroomId),
+    supabase.from('classroom_assignments').select('*').eq('classroom_id', classroomId).order('created_at', { ascending: false }),
+  ])
 
   if (!classroom) notFound()
 
-  // Fetch members
-  const { data: members } = await supabase
-    .from('classroom_members')
-    .select('*, profile:profiles(id, username, display_name, avatar_url)')
-    .eq('classroom_id', classroomId)
-
   const myRole = members?.find((m) => m.user_id === user.id)?.role ?? null
-  if (!myRole) redirect('/classroom')
-
-  // Fetch assignments
-  const { data: assignments } = await supabase
-    .from('classroom_assignments')
-    .select('*')
-    .eq('classroom_id', classroomId)
-    .order('created_at', { ascending: false })
+  if (!myRole) notFound()
 
   const isTeacher = myRole === 'teacher'
 
