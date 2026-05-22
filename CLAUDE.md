@@ -127,6 +127,13 @@ CREATE POLICY "members_insert_owner" ON project_members FOR INSERT WITH CHECK (
 - **Çözüm:** Border yerine `ring-*` ve `hover:ring-*` kullan
 - Örnek: `MemberHoverCard.tsx` → `ring-1 ring-primary/40` ve `hover:ring-1 hover:ring-white/15`
 
+### DropdownMenuTrigger `asChild` Prop Yok
+- Bu projenin shadcn/ui versiyonunda `DropdownMenuTrigger` **`asChild` prop desteklemiyor**
+- `MenuPrimitive.Trigger.Props` tipinde `asChild` yok — TypeScript build hatası verir
+- **Çözüm:** `asChild` kullanma, `Button` componentini `DropdownMenuTrigger` içine sarma
+- Bunun yerine `DropdownMenuTrigger`'a doğrudan `className` ver: `<DropdownMenuTrigger className="flex items-center ...">`
+- Örnek: `ReadingListButton.tsx` — `Button` yerine styled `DropdownMenuTrigger`
+
 ### Bildirim Link'i Çalışmıyor (comment tipi)
 - Comment notification payload'ında `project_id` **mutlaka** olmalı, yoksa link oluşturulamaz
 - `CommentPanel.tsx`'te bildirim insert'inde `project_id: projectId` eklendi
@@ -193,7 +200,40 @@ components/games/
 components/idea/
   NewIdeaForm.tsx                     # Yeni fikir modal formu
   IdeaRoomClient.tsx                  # Realtime mesajlaşma + join request yönetimi
-supabase/schema.sql                   # Tek SQL dosyası — tüm şema + RLS + idea tabloları
+components/reader/
+  ViewTracker.tsx                     # Bölüm görüntülenme sayacı — useEffect + rpc('increment_chapter_view')
+  ReactionBar.tsx                     # 3 alkış butonu (🔥💧⚡) — optimistic UI, /api/reactions
+  ReadingListButton.tsx               # Okuma listesi dropdown (Sonra Oku/Okuyorum/Bitirdim)
+  FollowButton.tsx                    # Yazar takip/bırak toggle — /api/follows
+components/
+  FeedbackModal.tsx                   # Geri bildirim modal — controlled (open/onClose), 4 tip
+app/(app)/admin/
+  layout.tsx                          # Email guard (notFound() for non-admin) + üst nav bar
+  page.tsx                            # 6 istatistik kartı + son 5 feedback
+  users/page.tsx                      # Tüm kullanıcılar tablosu
+  projects/page.tsx                   # Tüm projeler tablosu
+  feedback/page.tsx                   # Feedback inbox — durum filtreleme, status cycle (client)
+app/api/
+  reactions/route.ts                  # GET ?chapter_id= → counts+userReactions | POST toggle
+  reading-list/route.ts               # POST upsert | DELETE ?project_id=
+  follows/route.ts                    # POST toggle follow/unfollow
+  feedback/route.ts                   # POST feedback insert (auth guard)
+  writing-goal/route.ts               # GET (hedef+ilerleme+streak) | POST (hedef güncelle)
+  badges/check/route.ts               # POST tüm rozet koşullarını kontrol et
+  editorial-picks/route.ts            # GET editöryal seçki skoru (reactions×3+bookmarks×2+views×1)
+lib/badges.ts                         # BADGE_META + awardBadge + checkAllBadges
+types/index.ts                        # ReactionType, ReadingListStatus, BadgeCode, WeeklyStats, EditorialPick...
+supabase/schema.sql                   # Tek SQL dosyası — tüm şema + RLS + idea + faz1 + faz2 tabloları
+components/dashboard/
+  WritingGoalCard.tsx                 # Client: günlük hedef progress + streak + inline edit
+  WeeklyStatsRow.tsx                  # 4 metrik kartı (bu hafta)
+  BadgesRow.tsx                       # Kazanılan rozet satırı (badge.length === 0 ise gizli)
+components/profile/
+  BadgesGrid.tsx                      # Tüm 8 rozet grid (kazanılmış + gri/soluk)
+components/home/
+  EditorialPicksSection.tsx           # Client: editorial picks fetch + 3 proje kartı
+docs/superpowers/plans/
+  2026-05-21-phase1-reader-engagement.md  # Faz 1 implementasyon planı (13 görev)
 ```
 
 ---
@@ -227,6 +267,43 @@ ChapterEditorPage (server)
 
 ---
 
+## Okuyucu Sayfası Mimarisi (Faz 1)
+
+```
+/projects/[slug]/read/page.tsx (server)         — proje kapağı, yazar profili, bölüm listesi
+  ├── ReadingListButton (client)                 — okuma listesi dropdown
+  └── FollowButton (client)                      — yazar takip/bırak
+
+/projects/[slug]/read/[chapterId]/page.tsx (server)
+  ├── ViewTracker (client)                       — sayfa yüklenince view count +1 (useEffect, bir kez)
+  └── ReactionBar (client)                       — alkış butonları (🔥💧⚡)
+```
+
+- `ViewTracker` render edilir edilmez `rpc('increment_chapter_view')` çağırır — `useRef(tracked)` ile çift çağrı önlenir
+- `increment_chapter_view` SECURITY DEFINER function: sadece `status='final'` + `visibility='published'` chapter'lara increment
+- `ReactionBar` optimistic UI: butona basınca sayı hemen güncellenir, POST /api/reactions sonucu confirm/revert
+- `ReadingListButton` + `FollowButton` — sadece giriş yapmış kullanıcılara gösterilir (server component null check)
+- `notify_chapter_followers` DB trigger: chapter `status → 'final'` olduğunda `follows` tablosundan takipçileri bulur, her birine `new_chapter` bildirimi insert eder
+
+### Faz 1 Yeni DB Tabloları
+
+| Tablo | Amaç | Kritik Constraint |
+|-------|------|-------------------|
+| `chapter_reactions` | Bölüm alkışları | `UNIQUE(chapter_id, user_id, reaction)` — bir kullanıcı aynı reaksiyonu bir kez |
+| `reading_lists` | Okuma listesi durumu | `UNIQUE(user_id, project_id)` — UPSERT ile güncellenir |
+| `follows` | Yazar takip | `PRIMARY KEY(follower_id, following_id)` + `CHECK(follower_id != following_id)` |
+
+```sql
+-- Kontrol: chapter view count column
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS view_count int NOT NULL DEFAULT 0;
+
+-- İndeksler (performans)
+CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
+CREATE INDEX IF NOT EXISTS idx_reading_lists_project ON reading_lists(project_id);
+```
+
+---
+
 ## Bildirim Sistemi
 
 Desteklenen tipler ve linkleri:
@@ -240,8 +317,12 @@ Desteklenen tipler ve linkleri:
 | `mention` | Bahsedildin | `/projects/${project_id}/write/${chapter_id}` |
 | `invite` | Davet | Buton (InviteActions) |
 | `suggestion` | Yeni öneri | `/projects/${project_id}/write/${chapter_id}/suggestions-list` |
+| `new_chapter` | Yeni bölüm yayınlandı | `/projects/${project_slug}/read/${chapter_id}` |
+| `new_follower` | Yeni takipçi | `/u/${follower_username}` |
 
 **Önemli:** Comment payload'ında `project_id` **zorunlu**, yoksa link oluşturulamaz.
+**new_chapter payload:** `chapter_id`, `chapter_title`, `project_id`, `project_title`, `project_slug`, `author_id`
+**new_follower payload:** `follower_id`, `follower_display_name`, `follower_username`
 
 Tüm bildirim kartı tıklanabilir (overlay link tekniği, `relative` + `absolute inset-0` Link).
 Davet kartlarında InviteActions butonları `z-10` ile üstte durur.
@@ -365,6 +446,32 @@ RLS: Herkese okuma açık, yazma sadece giriş yapanlara, silme sadece kendi kay
 
 ---
 
+### Faz 1 — Okuyucu Bağı (`/projects/[slug]/read/...`) — IMPLEMENT EDİLDİ ✅
+- **View counter:** Bölüm okunduğunda `view_count` artırılır — SECURITY DEFINER guard ile
+- **3 Reaksiyon (alkış):** 🔥 Ateş, 💧 Damla, ⚡ Şimşek — toggle sistemi, bir reaksiyon birden fazla kez verilmez
+- **Okuma Listesi:** Sonra Oku / Okuyorum / Bitirdim — dropdown, project bazında, UPSERT
+- **Yazar Takip:** Takip et / Bırak toggle — follower count gösterilir (> 0 ise)
+- **Yeni bölüm bildirimi:** `notify_chapter_followers` DB trigger — chapter finalize edilince takipçilere otomatik bildirim
+- **Yeni takipçi bildirimi:** Follow API'da insert — `/api/follows` yeni takipçi eklenince bildirim gönderir
+- **Editöryal seçki algoritması:** `reads×1 + reactions×3 + comments×2 + bookmarks×2` — son 7 gün, min 10 unique reader (henüz UI'da gösterilmiyor — ileride keşfet sayfasında)
+
+---
+
+## Platform Faz Yol Haritası
+
+| Faz | Ad | Durum | İçerik |
+|-----|-----|-------|--------|
+| **Faz 1** | Okuyucu Bağı | ✅ Tamamlandı | View counter, 3 reaksiyon, okuma listesi, yazar takibi, yeni bölüm bildirimi |
+| **Faz 2** | Yazar Motivasyonu | ✅ Tamamlandı | Günlük yazı hedefi + server streak, 8 rozet sistemi, haftalık istatistik, editöryal seçki UI |
+| **Faz 3** | Okul Modülü | ⏳ Gelecek | Öğretmen-öğrenci arayüzü, sınıf yönetimi, görev atama, güvenli ortam |
+| **Faz 4** | Sosyal & Büyüme | ⏳ Gelecek | Profil sayfaları, kullanıcı keşfet, yorum thread'leri, onboarding akışı |
+
+**Editöryal Seçki Algoritması (Faz 2'de implement edildi):**
+- Skor = `reactions×3 + reading_list_adds×2 + views×1`
+- Pencere: son 7 gün, sadece `visibility='published'` projeler
+- Top 3 proje, anasayfada "Bu Hafta Öne Çıkanlar" olarak gösterilir
+- Seçkiye giren proje sahibine otomatik `editorial_pick` rozeti verilir
+
 ---
 
 ## Mobil / Responsive Düzeltmeler
@@ -403,8 +510,17 @@ Screenshot dosyaları `./desktop-*.png`, `./mobile-*.png` olarak kaydedilir.
 
 ## Henüz Uygulanmamış / Bekleyen
 
-- **Faz 1 tamamlandı** — alkış sistemi (🔥💧⚡), okuma listesi, takip et, view counter, yeni bölüm bildirimi — **Supabase'e schema.sql uygulanmalı**: chapter_reactions, reading_lists, follows tabloları + triggers
-- **RLS politikaları Supabase'de aktif değil** — `supabase/schema.sql`'deki güncel politikalar (members_select_member, members_insert_owner, idea tabloları) Supabase Dashboard'da SQL Editor'dan çalıştırılmalı
-- **Fikir Odası DB tabloları** — `idea_threads`, `idea_messages`, `idea_join_requests` Supabase'e uygulanmamış olabilir
+### Supabase'e Schema Uygulanmalı (KRİTİK)
+Kod hazır ama DB'de tablolar yok — `supabase/schema.sql` Supabase Dashboard > SQL Editor'dan çalıştırılmalı:
+- **Faz 1 tabloları:** `chapter_reactions`, `reading_lists`, `follows` + `notify_chapter_followers` trigger + `increment_chapter_view` function
+- **Faz 2 tabloları:** `user_writing_goals` (streak_current, streak_best, streak_last_date dahil), `user_badges`
+- **Feedback RLS:** `feedback_select_admin` + `feedback_update_admin` (admin email görebilsin/güncelleyebilsin)
+- **Fikir Odası tabloları:** `idea_threads`, `idea_messages`, `idea_join_requests`
+- **RLS politikaları:** `members_select_member`, `members_insert_owner`, `chapters_select_member`, `notifications_insert_service`
+- **Yeni enum değerleri:** `notification_type` → `new_chapter`, `new_follower`
+- **Yeni kolon:** `chapters.view_count int NOT NULL DEFAULT 0`
+
+### Diğer Bekleyenler
+- **`totalViews` haftalık istatistik** — şu an 0 gösterir; Faz 3'te chapter_reads tablosu ile gerçek veri gelecek
 - Davet akışı tam test edilmedi (roles gerektiriyor)
 - Google OAuth "test" modunda — production'a geçmek için Google Cloud Console'da "Publish App" gerekiyor
