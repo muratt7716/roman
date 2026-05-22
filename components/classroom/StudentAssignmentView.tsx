@@ -29,9 +29,17 @@ export function StudentAssignmentView({ assignment, classroomId, initialSubmissi
     setLoading(false)
   }
 
-  function continueWriting() {
-    if (!submission?.project_id) return
-    router.push(`/projects/${submission.project_id}/write`)
+  async function continueWriting() {
+    setLoading(true)
+    const res = await fetch(
+      `/api/classroom/${classroomId}/assignments/${assignment.id}/start`,
+      { method: 'POST' }
+    )
+    if (res.ok) {
+      const { submission_id, project_id, chapter_id } = await res.json()
+      router.push(`/projects/${project_id}/write/${chapter_id}?submission_id=${submission_id}`)
+    }
+    setLoading(false)
   }
 
   const isLocked = submission?.status === 'submitted' || submission?.status === 'graded'
@@ -58,9 +66,10 @@ export function StudentAssignmentView({ assignment, classroomId, initialSubmissi
       {submission?.status === 'draft' && (
         <button
           onClick={continueWriting}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/20 text-primary text-sm font-medium hover:bg-primary/30 transition-colors"
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/20 text-primary text-sm font-medium hover:bg-primary/30 transition-colors disabled:opacity-50"
         >
-          <PenLine className="w-4 h-4" /> Yazmaya Devam Et
+          <PenLine className="w-4 h-4" /> {loading ? 'Yükleniyor...' : 'Yazmaya Devam Et'}
         </button>
       )}
 
