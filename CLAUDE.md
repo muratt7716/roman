@@ -457,13 +457,66 @@ RLS: Herkese okuma açık, yazma sadece giriş yapanlara, silme sadece kendi kay
 
 ---
 
+### Faz 3 — Okul Modülü — IMPLEMENT EDİLDİ ✅
+
+**Mimari:** 4 yeni bağımsız tablo + `join_classroom_by_code` SECURITY DEFINER fonksiyonu. Öğrenci teslimi mevcut `projects` kaydına FK bağlanır — TipTap editörü + versiyon geçmişi bedava gelir.
+
+**Yeni Dosyalar:**
+```
+supabase/schema.sql                   # classrooms, classroom_members, classroom_assignments, assignment_submissions + RLS
+types/index.ts                        # Classroom, ClassroomMember, ClassroomAssignment, AssignmentSubmission tipleri
+app/api/classroom/route.ts            # GET: kullanıcı sınıfları | POST: sınıf oluştur
+app/api/classroom/join/route.ts       # POST: join_classroom_by_code() RPC
+app/api/classroom/[classroomId]/route.ts           # GET: detay+üyeler | DELETE
+app/api/classroom/[classroomId]/assignments/route.ts          # GET: ödev listesi | POST: ödev oluştur
+app/api/classroom/[classroomId]/assignments/[assignmentId]/route.ts   # GET: ödev+teslimler | PATCH: güncelle
+app/api/classroom/[classroomId]/assignments/[assignmentId]/start/route.ts  # POST: idempotent project+chapter+submission oluştur
+app/api/submissions/[submissionId]/route.ts   # PATCH: submit | grade | reopen
+components/classroom/ClassroomCard.tsx        # Sınıf kartı (rol badge)
+components/classroom/AssignmentCard.tsx       # Ödev kartı (status+tarih)
+components/classroom/JoinCodeDisplay.tsx      # Büyük font kod + kopyala
+components/classroom/GradePanel.tsx           # Not+yorum formu (client)
+components/classroom/SubmissionList.tsx       # Öğretmen: tüm teslimler accordion
+components/classroom/StudentAssignmentView.tsx  # Öğrenci: başla/devam/teslim et
+components/editor/SubmitButton.tsx            # Teslim Et butonu (editörde, submission_id varsa)
+app/(app)/classroom/page.tsx                  # Öğretmen/öğrenci sınıf listesi
+app/(app)/classroom/new/page.tsx              # Sınıf oluştur formu
+app/(app)/classroom/join/page.tsx             # Kod giriş ekranı
+app/(app)/classroom/[classroomId]/page.tsx    # Sınıf paneli (rol bazlı)
+app/(app)/classroom/[classroomId]/assignments/new/page.tsx    # Ödev oluştur
+app/(app)/classroom/[classroomId]/assignments/[assignmentId]/page.tsx  # Ödev detayı (rol bazlı)
+```
+
+**Modifiye Edilen Dosyalar:**
+```
+components/editor/TipTapEditor.tsx      # editable?: boolean prop eklendi
+components/editor/ChapterEditorClient.tsx  # locked + submissionId prop + SubmitButton entegrasyonu
+app/(app)/projects/[slug]/write/[chapterId]/page.tsx  # searchParams submission_id okuma + locked flag
+components/shared/Navbar.tsx            # /classroom "Akademi" linki (desktop + mobile)
+```
+
+**Kritik Kararlar:**
+- `join_classroom_by_code` SECURITY DEFINER: join kodu araması RLS bypass eder — öğrenci sınıfı görmeden katılabilir
+- `cls_members_insert` WITH CHECK `AND role = 'student'`: öğrenci kendini öğretmen olarak ekleyemez; sunucu API öğretmen ekler
+- `start` API idempotent: zaten başlamışsa mevcut submission döner, çift proje oluşmaz
+- Orphan cleanup: chapter/submission INSERT başarısız olursa project silinir
+- `locked = status === 'submitted' || status === 'graded'`: teslim sonrası editör `editable={false}` + toolbar gizlenir
+
+**Faz 3 Yeni DB Tabloları (supabase/schema.sql'de mevcut — Supabase'e uygulanmalı):**
+- `classrooms`: id, owner_id, name, description, join_code, created_at
+- `classroom_members`: classroom_id, user_id, role (teacher/student), joined_at
+- `classroom_assignments`: id, classroom_id, title, description, due_date, visibility (private/class_visible)
+- `assignment_submissions`: id, assignment_id, student_id, project_id, status (draft/submitted/graded), grade, teacher_comment
+
+---
+
 ## Platform Faz Yol Haritası
 
 | Faz | Ad | Durum | İçerik |
 |-----|-----|-------|--------|
 | **Faz 1** | Okuyucu Bağı | ✅ Tamamlandı | View counter, 3 reaksiyon, okuma listesi, yazar takibi, yeni bölüm bildirimi |
 | **Faz 2** | Yazar Motivasyonu | ✅ Tamamlandı | Günlük yazı hedefi + server streak, 8 rozet sistemi, haftalık istatistik, editöryal seçki UI |
-| **Faz 3** | Okul Modülü | ⏳ Gelecek | Öğretmen-öğrenci arayüzü, sınıf yönetimi, görev atama, güvenli ortam |
+| **Faz 3** | Okul Modülü | ✅ Tamamlandı | Öğretmen-öğrenci arayüzü, sınıf yönetimi, görev atama, not sistemi, güvenli ortam |
 | **Faz 4** | Sosyal & Büyüme | ⏳ Gelecek | Profil sayfaları, kullanıcı keşfet, yorum thread'leri, onboarding akışı |
 
 **Editöryal Seçki Algoritması (Faz 2'de implement edildi):**
@@ -519,8 +572,9 @@ Kod hazır ama DB'de tablolar yok — `supabase/schema.sql` Supabase Dashboard >
 - **RLS politikaları:** `members_select_member`, `members_insert_owner`, `chapters_select_member`, `notifications_insert_service`
 - **Yeni enum değerleri:** `notification_type` → `new_chapter`, `new_follower`
 - **Yeni kolon:** `chapters.view_count int NOT NULL DEFAULT 0`
+- **Faz 3 tabloları:** `classrooms`, `classroom_members`, `classroom_assignments`, `assignment_submissions` + `join_classroom_by_code` SECURITY DEFINER function + tüm RLS politikaları
 
 ### Diğer Bekleyenler
-- **`totalViews` haftalık istatistik** — şu an 0 gösterir; Faz 3'te chapter_reads tablosu ile gerçek veri gelecek
+- **`totalViews` haftalık istatistik** — şu an 0 gösterir; ileriki fazda chapter_reads tablosu ile gerçek veri gelecek
 - Davet akışı tam test edilmedi (roles gerektiriyor)
 - Google OAuth "test" modunda — production'a geçmek için Google Cloud Console'da "Publish App" gerekiyor
