@@ -41,7 +41,7 @@ export default function NewAssignmentPage({ params }: PageProps) {
       const data = await res.json()
       if (res.ok) {
         toast.success('Ödev başarıyla atandı! 📝')
-        router.push(`/classroom/${classroomId}`)
+        router.push(`/classroom/${classroomId}/assignments/${data.assignment.id}`)
         router.refresh()
       } else {
         toast.error(data.error || 'Ödev oluşturulamadı.')

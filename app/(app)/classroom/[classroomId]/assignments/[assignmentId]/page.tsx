@@ -34,6 +34,7 @@ export default async function AssignmentPage({ params }: PageProps) {
   if (!classroom || !assignment || !myMembership) notFound()
 
   const isTeacher = myMembership.role === 'teacher'
+  const isPast = assignment.due_date ? new Date(assignment.due_date) < new Date() : false
 
   if (isTeacher) {
     // ----------------------------------------------------
@@ -84,7 +85,7 @@ export default async function AssignmentPage({ params }: PageProps) {
             <h1 className="text-2xl md:text-3xl font-display font-black text-white">{assignment.title}</h1>
             
             {assignment.due_date && (
-              <p className="text-xs text-slate-400 flex items-center gap-1.5 pt-1">
+              <p className={cn('text-xs flex items-center gap-1.5 pt-1', isPast ? 'text-red-400' : 'text-slate-400')}>
                 <Calendar className="w-4 h-4 text-violet-400" />
                 Son Teslim Tarihi: {new Date(assignment.due_date).toLocaleDateString('tr-TR', {
                   day: 'numeric',
@@ -128,7 +129,6 @@ export default async function AssignmentPage({ params }: PageProps) {
       .maybeSingle()
 
     const hasSubmitted = submission?.status === 'submitted' || submission?.status === 'graded'
-    const isPast = assignment.due_date ? new Date(assignment.due_date) < new Date() : false
 
     // Countdown / Friendly Alert calculation
     let timeLeftText = 'Süresiz Görev 🧭'
