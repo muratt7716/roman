@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { EditorialPicksSection } from '@/components/home/EditorialPicksSection'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -281,6 +282,9 @@ export default function RedesignedLandingPage() {
           </div>
         </motion.div>
       </section>
+
+      {/* ── EDITORIAL PICKS ── */}
+      <EditorialPicksSection />
 
       {/* ── STATS SECTION ── */}
       <section className="relative py-16 px-4 bg-black/[0.15]">
