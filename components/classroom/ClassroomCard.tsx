@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { cn } from '@/lib/utils'
 import { Users, BookOpen } from 'lucide-react'
 import type { Classroom, ClassroomRole } from '@/types'
 
@@ -17,11 +18,10 @@ export function ClassroomCard({ classroom, role, memberCount = 0, assignmentCoun
     >
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-display font-semibold text-white line-clamp-1">{classroom.name}</h3>
-        <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-          role === 'teacher'
-            ? 'bg-violet-500/20 text-violet-300'
-            : 'bg-sky-500/20 text-sky-300'
-        }`}>
+        <span className={cn(
+          'shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full',
+          role === 'teacher' ? 'bg-violet-500/20 text-violet-300' : 'bg-sky-500/20 text-sky-300'
+        )}>
           {role === 'teacher' ? 'Öğretmen' : 'Öğrenci'}
         </span>
       </div>
