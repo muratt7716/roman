@@ -12,7 +12,7 @@ export async function GET(_req: Request, { params }: Params) {
   if (!user) return NextResponse.json({ error: 'Giriş yapman gerekiyor.' }, { status: 401 })
 
   const [{ data: assignment }, { data: myMembership }] = await Promise.all([
-    supabase.from('classroom_assignments').select('*').eq('id', assignmentId).single(),
+    supabase.from('classroom_assignments').select('*').eq('id', assignmentId).eq('classroom_id', classroomId).single(),
     supabase.from('classroom_members').select('role').eq('classroom_id', classroomId).eq('user_id', user.id).single(),
   ])
 
@@ -65,6 +65,7 @@ export async function PATCH(req: Request, { params }: Params) {
     .from('classroom_assignments')
     .update(updates)
     .eq('id', assignmentId)
+    .eq('classroom_id', classroomId)
     .select()
     .single()
 

@@ -27,7 +27,7 @@ export default async function AssignmentPage({ params }: PageProps) {
     { data: myMembership }
   ] = await Promise.all([
     supabase.from('classrooms').select('*').eq('id', classroomId).single(),
-    supabase.from('classroom_assignments').select('*').eq('id', assignmentId).single(),
+    supabase.from('classroom_assignments').select('*').eq('id', assignmentId).eq('classroom_id', classroomId).single(),
     supabase.from('classroom_members').select('role').eq('classroom_id', classroomId).eq('user_id', user.id).single(),
   ])
 

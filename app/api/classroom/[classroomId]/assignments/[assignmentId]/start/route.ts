@@ -51,6 +51,7 @@ export async function POST(_req: Request, { params }: Params) {
     .from('classroom_assignments')
     .select('title')
     .eq('id', assignmentId)
+    .eq('classroom_id', classroomId)
     .single()
   if (!assignment) return NextResponse.json({ error: 'Ödev bulunamadı.' }, { status: 404 })
 
