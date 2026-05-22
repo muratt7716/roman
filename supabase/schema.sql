@@ -876,7 +876,7 @@ CREATE POLICY "cls_members_select" ON classroom_members FOR SELECT USING (
   user_id = auth.uid()
   OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
 );
-CREATE POLICY "cls_members_insert" ON classroom_members FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "cls_members_insert" ON classroom_members FOR INSERT WITH CHECK (auth.uid() = user_id AND role = 'student');
 CREATE POLICY "cls_members_delete" ON classroom_members FOR DELETE USING (
   user_id = auth.uid()
   OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
@@ -941,6 +941,8 @@ CREATE POLICY "submissions_update_teacher_grade" ON assignment_submissions FOR U
     JOIN classrooms c ON c.id = ca.classroom_id
     WHERE ca.id = assignment_id AND c.owner_id = auth.uid()
   )
+) WITH CHECK (
+  status IN ('submitted', 'graded')
 );
 
 -- Chapter Reactions
