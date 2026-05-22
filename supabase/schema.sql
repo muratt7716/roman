@@ -760,6 +760,189 @@ CREATE POLICY "badges_insert_self" ON user_badges FOR INSERT WITH CHECK (auth.ui
 
 CREATE INDEX IF NOT EXISTS idx_user_badges_user ON user_badges(user_id);
 
+-- ============================================================
+-- CLASSROOMS (Faz 3)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS classrooms (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_id    uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  name        text NOT NULL CHECK (char_length(name) BETWEEN 2 AND 100),
+  description text CHECK (char_length(description) <= 500),
+  join_code   text NOT NULL UNIQUE CHECK (join_code ~ '^[A-Z0-9]{6}$'),
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_classrooms_owner     ON classrooms(owner_id);
+CREATE INDEX IF NOT EXISTS idx_classrooms_join_code ON classrooms(join_code);
+
+CREATE TABLE IF NOT EXISTS classroom_members (
+  classroom_id uuid NOT NULL REFERENCES classrooms(id) ON DELETE CASCADE,
+  user_id      uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  role         text NOT NULL CHECK (role IN ('teacher','student')),
+  joined_at    timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (classroom_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_classroom_members_user ON classroom_members(user_id);
+
+CREATE TABLE IF NOT EXISTS classroom_assignments (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  classroom_id uuid NOT NULL REFERENCES classrooms(id) ON DELETE CASCADE,
+  title        text NOT NULL CHECK (char_length(title) BETWEEN 3 AND 200),
+  description  text CHECK (char_length(description) <= 2000),
+  due_date     timestamptz,
+  visibility   text NOT NULL DEFAULT 'private' CHECK (visibility IN ('private','class_visible')),
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_assignments_classroom ON classroom_assignments(classroom_id);
+
+CREATE TABLE IF NOT EXISTS assignment_submissions (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  assignment_id   uuid NOT NULL REFERENCES classroom_assignments(id) ON DELETE CASCADE,
+  student_id      uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  project_id      uuid REFERENCES projects(id) ON DELETE SET NULL,
+  status          text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','submitted','graded')),
+  grade           int  CHECK (grade BETWEEN 0 AND 100),
+  teacher_comment text CHECK (char_length(teacher_comment) <= 1000),
+  submitted_at    timestamptz,
+  graded_at       timestamptz,
+  UNIQUE (assignment_id, student_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_submissions_assignment ON assignment_submissions(assignment_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_student    ON assignment_submissions(student_id);
+
+-- SECURITY DEFINER: join kodu ile sınıfa katılma (RLS bypass gerektirir)
+CREATE OR REPLACE FUNCTION join_classroom_by_code(p_code text)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_classroom classrooms%ROWTYPE;
+  v_user_id   uuid := auth.uid();
+BEGIN
+  IF v_user_id IS NULL THEN
+    RETURN json_build_object('error', 'Giriş yapman gerekiyor.');
+  END IF;
+
+  SELECT * INTO v_classroom FROM classrooms WHERE join_code = upper(p_code);
+
+  IF NOT FOUND THEN
+    RETURN json_build_object('error', 'Sınıf bulunamadı.');
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM classroom_members
+    WHERE classroom_id = v_classroom.id AND user_id = v_user_id
+  ) THEN
+    RETURN json_build_object('classroom_id', v_classroom.id, 'already_member', true);
+  END IF;
+
+  INSERT INTO classroom_members (classroom_id, user_id, role)
+  VALUES (v_classroom.id, v_user_id, 'student');
+
+  RETURN json_build_object('classroom_id', v_classroom.id, 'already_member', false);
+END;
+$$;
+
+-- RLS: classrooms
+ALTER TABLE classrooms ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "classrooms_select_member" ON classrooms;
+DROP POLICY IF EXISTS "classrooms_insert_owner"  ON classrooms;
+DROP POLICY IF EXISTS "classrooms_update_owner"  ON classrooms;
+DROP POLICY IF EXISTS "classrooms_delete_owner"  ON classrooms;
+
+CREATE POLICY "classrooms_select_member" ON classrooms FOR SELECT USING (
+  owner_id = auth.uid()
+  OR EXISTS (SELECT 1 FROM classroom_members WHERE classroom_id = id AND user_id = auth.uid())
+);
+CREATE POLICY "classrooms_insert_owner" ON classrooms FOR INSERT WITH CHECK (auth.uid() = owner_id);
+CREATE POLICY "classrooms_update_owner" ON classrooms FOR UPDATE USING (auth.uid() = owner_id);
+CREATE POLICY "classrooms_delete_owner" ON classrooms FOR DELETE USING (auth.uid() = owner_id);
+
+-- RLS: classroom_members
+ALTER TABLE classroom_members ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "cls_members_select" ON classroom_members;
+DROP POLICY IF EXISTS "cls_members_insert" ON classroom_members;
+DROP POLICY IF EXISTS "cls_members_delete" ON classroom_members;
+
+CREATE POLICY "cls_members_select" ON classroom_members FOR SELECT USING (
+  user_id = auth.uid()
+  OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+CREATE POLICY "cls_members_insert" ON classroom_members FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "cls_members_delete" ON classroom_members FOR DELETE USING (
+  user_id = auth.uid()
+  OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+
+-- RLS: classroom_assignments
+ALTER TABLE classroom_assignments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "assignments_select_member"  ON classroom_assignments;
+DROP POLICY IF EXISTS "assignments_insert_teacher" ON classroom_assignments;
+DROP POLICY IF EXISTS "assignments_update_teacher" ON classroom_assignments;
+DROP POLICY IF EXISTS "assignments_delete_teacher" ON classroom_assignments;
+
+CREATE POLICY "assignments_select_member" ON classroom_assignments FOR SELECT USING (
+  EXISTS (SELECT 1 FROM classroom_members WHERE classroom_id = classroom_assignments.classroom_id AND user_id = auth.uid())
+  OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_assignments.classroom_id AND owner_id = auth.uid())
+);
+CREATE POLICY "assignments_insert_teacher" ON classroom_assignments FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+CREATE POLICY "assignments_update_teacher" ON classroom_assignments FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+CREATE POLICY "assignments_delete_teacher" ON classroom_assignments FOR DELETE USING (
+  EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+
+-- RLS: assignment_submissions
+ALTER TABLE assignment_submissions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "submissions_select_own_or_teacher" ON assignment_submissions;
+DROP POLICY IF EXISTS "submissions_select_class_visible"  ON assignment_submissions;
+DROP POLICY IF EXISTS "submissions_insert_student"        ON assignment_submissions;
+DROP POLICY IF EXISTS "submissions_update_student_draft"  ON assignment_submissions;
+DROP POLICY IF EXISTS "submissions_update_teacher_grade"  ON assignment_submissions;
+
+CREATE POLICY "submissions_select_own_or_teacher" ON assignment_submissions FOR SELECT USING (
+  student_id = auth.uid()
+  OR EXISTS (
+    SELECT 1 FROM classroom_assignments ca
+    JOIN classrooms c ON c.id = ca.classroom_id
+    WHERE ca.id = assignment_id AND c.owner_id = auth.uid()
+  )
+  OR (
+    EXISTS (SELECT 1 FROM classroom_assignments ca WHERE ca.id = assignment_id AND ca.visibility = 'class_visible')
+    AND EXISTS (
+      SELECT 1 FROM classroom_assignments ca
+      JOIN classroom_members cm ON cm.classroom_id = ca.classroom_id
+      WHERE ca.id = assignment_id AND cm.user_id = auth.uid()
+    )
+  )
+);
+CREATE POLICY "submissions_insert_student" ON assignment_submissions FOR INSERT WITH CHECK (
+  auth.uid() = student_id
+);
+CREATE POLICY "submissions_update_student_draft" ON assignment_submissions FOR UPDATE USING (
+  student_id = auth.uid() AND status = 'draft'
+) WITH CHECK (grade IS NULL AND teacher_comment IS NULL);
+CREATE POLICY "submissions_update_teacher_grade" ON assignment_submissions FOR UPDATE USING (
+  EXISTS (
+    SELECT 1 FROM classroom_assignments ca
+    JOIN classrooms c ON c.id = ca.classroom_id
+    WHERE ca.id = assignment_id AND c.owner_id = auth.uid()
+  )
+);
+
 -- Chapter Reactions
 CREATE POLICY "reactions_select_all"  ON chapter_reactions FOR SELECT USING (true);
 CREATE POLICY "reactions_insert_auth" ON chapter_reactions FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_id = auth.uid());
