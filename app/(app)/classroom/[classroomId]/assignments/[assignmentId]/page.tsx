@@ -192,7 +192,7 @@ export default async function AssignmentPage({ params }: PageProps) {
             </h1>
             
             {assignment.due_date && (
-              <p className="text-xs text-slate-400 flex items-center gap-1.5">
+              <p className={cn('text-xs flex items-center gap-1.5', isPast ? 'text-red-400' : 'text-slate-400')}>
                 <Clock className="w-4 h-4 text-sky-400" />
                 Teslim Hedefi: {new Date(assignment.due_date).toLocaleDateString('tr-TR', {
                   day: 'numeric',
