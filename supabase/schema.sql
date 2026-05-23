@@ -889,7 +889,13 @@ CREATE POLICY "cls_members_select" ON classroom_members FOR SELECT USING (
   user_id = auth.uid()
   OR auth_is_classroom_owner(classroom_id)
 );
-CREATE POLICY "cls_members_insert" ON classroom_members FOR INSERT WITH CHECK (auth.uid() = user_id AND role = 'student');
+CREATE POLICY "cls_members_insert" ON classroom_members FOR INSERT WITH CHECK (
+  auth.uid() = user_id
+  AND (
+    role = 'student'
+    OR (role = 'teacher' AND auth_is_classroom_owner(classroom_id))
+  )
+);
 CREATE POLICY "cls_members_delete" ON classroom_members FOR DELETE USING (
   user_id = auth.uid()
   OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
