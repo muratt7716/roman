@@ -814,6 +814,19 @@ CREATE TABLE IF NOT EXISTS assignment_submissions (
 CREATE INDEX IF NOT EXISTS idx_submissions_assignment ON assignment_submissions(assignment_id);
 CREATE INDEX IF NOT EXISTS idx_submissions_student    ON assignment_submissions(student_id);
 
+-- SECURITY DEFINER: classroom owner kontrolü (RLS döngüsünü kırar)
+-- classrooms_select_member → classroom_members sorgular,
+-- cls_members_select → classrooms sorgularsa sonsuz döngü olur.
+-- Bu fonksiyon classrooms tablosunu RLS bypass ile okur, döngü kırılır.
+CREATE OR REPLACE FUNCTION auth_is_classroom_owner(p_classroom_id uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT owner_id = auth.uid() FROM classrooms WHERE id = p_classroom_id
+$$;
+
 -- SECURITY DEFINER: join kodu ile sınıfa katılma (RLS bypass gerektirir)
 CREATE OR REPLACE FUNCTION join_classroom_by_code(p_code text)
 RETURNS json
@@ -874,7 +887,7 @@ DROP POLICY IF EXISTS "cls_members_delete" ON classroom_members;
 
 CREATE POLICY "cls_members_select" ON classroom_members FOR SELECT USING (
   user_id = auth.uid()
-  OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+  OR auth_is_classroom_owner(classroom_id)
 );
 CREATE POLICY "cls_members_insert" ON classroom_members FOR INSERT WITH CHECK (auth.uid() = user_id AND role = 'student');
 CREATE POLICY "cls_members_delete" ON classroom_members FOR DELETE USING (
