@@ -10,6 +10,10 @@ export const BADGE_META: Record<BadgeCode, { label: string; icon: string; desc: 
   followed:         { label: 'Takip Edildi',     icon: '🌟', desc: '5 takipçiye ulaştın' },
   reader_friend:    { label: 'Okur Dostu',       icon: '📚', desc: 'Projen 10 kez listeye eklendi' },
   editorial_pick:   { label: 'Editör Seçkisi',   icon: '🏆', desc: 'Editöryal seçkiye girdin' },
+  first_submission: { label: 'İlk Teslim',       icon: '📝', desc: 'İlk ödevini teslim ettin' },
+  consistent_writer:{ label: 'Düzenli Yazar',    icon: '📅', desc: '3 ödevi zamanında teslim ettin' },
+  star_student:     { label: 'Yıldız Öğrenci',   icon: '⭐', desc: 'Bir ödevden tam puan aldın' },
+  peer_reader:      { label: 'Okur Arkadaş',     icon: '🤝', desc: 'Sınıf arkadaşının yazısını okudun' },
 }
 
 export const ALL_BADGE_CODES = Object.keys(BADGE_META) as BadgeCode[]

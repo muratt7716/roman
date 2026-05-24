@@ -223,6 +223,10 @@ export type BadgeCode =
   | 'followed'
   | 'reader_friend'
   | 'editorial_pick'
+  | 'first_submission'
+  | 'consistent_writer'
+  | 'star_student'
+  | 'peer_reader'
 
 export interface UserWritingGoal {
   user_id: string
@@ -264,7 +268,7 @@ export interface EditorialPick {
   score: number
 }
 
-export type ClassroomRole = 'teacher' | 'student'
+export type ClassroomRole = 'teacher' | 'student' | 'parent'
 export type SubmissionStatus = 'draft' | 'submitted' | 'graded'
 export type AssignmentVisibility = 'private' | 'class_visible'
 
@@ -306,4 +310,12 @@ export interface AssignmentSubmission {
   submitted_at: string | null
   graded_at: string | null
   student?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>
+}
+
+export interface AssignmentTemplate {
+  id: string
+  owner_id: string
+  title: string
+  description: string | null
+  created_at: string
 }
