@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { awardBadge } from '@/lib/badges'
 
 interface Params { params: Promise<{ classroomId: string; assignmentId: string }> }
 
@@ -104,6 +105,15 @@ export async function POST(_req: Request, { params }: Params) {
     await supabase.from('projects').delete().eq('id', project.id)
     return NextResponse.json({ error: subError.message }, { status: 500 })
   }
+
+  // Streak: bugün yazdı olarak işaretle
+  const today = new Date().toISOString().slice(0, 10)
+  await supabase
+    .from('user_writing_goals')
+    .upsert(
+      { user_id: user.id, streak_last_date: today },
+      { onConflict: 'user_id', ignoreDuplicates: false }
+    )
 
   return NextResponse.json({
     submission_id: submission.id,

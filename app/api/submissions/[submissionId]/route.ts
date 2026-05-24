@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { awardBadge, checkAllBadges } from '@/lib/badges'
 
 interface Params { params: Promise<{ submissionId: string }> }
 
@@ -24,6 +25,8 @@ export async function PATCH(req: Request, { params }: Params) {
       .select()
       .single()
     if (error || !data) return NextResponse.json({ error: 'Teslim edilemedi.' }, { status: 400 })
+    // Rozet kontrolü
+    await checkAllBadges(supabase, user.id)
     return NextResponse.json({ submission: data })
   }
 
@@ -60,6 +63,10 @@ export async function PATCH(req: Request, { params }: Params) {
       .select()
       .single()
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    // star_student rozeti: not >= 90 ise öğrenciye ver
+    if (grade >= 90) {
+      await awardBadge(supabase, data.student_id, 'star_student')
+    }
     return NextResponse.json({ submission: data })
   }
 
