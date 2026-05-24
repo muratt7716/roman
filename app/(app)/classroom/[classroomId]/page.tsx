@@ -54,7 +54,8 @@ export default async function ClassroomPage({ params }: PageProps) {
   const isParent  = myMembership.role === 'parent'
 
   if (isParent) {
-    const studentId = myMembership.student_id as string
+    const studentId = myMembership.student_id
+    if (!studentId) notFound()
     const { data: studentProfile } = await supabase
       .from('profiles')
       .select('display_name, username, avatar_url')
