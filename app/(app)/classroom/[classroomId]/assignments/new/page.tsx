@@ -7,6 +7,7 @@ import { ArrowLeft, BookOpen, Sparkles, Calendar, Eye, EyeOff } from 'lucide-rea
 import { toast } from 'sonner'
 import { use } from 'react'
 import { cn } from '@/lib/utils'
+import { TemplatePickerModal } from '@/components/classroom/TemplatePickerModal'
 
 interface PageProps {
   params: Promise<{ classroomId: string }>
@@ -19,6 +20,7 @@ export default function NewAssignmentPage({ params }: PageProps) {
   const [dueDate, setDueDate] = useState('')
   const [visibility, setVisibility] = useState<'private' | 'class_visible'>('private')
   const [loading, setLoading] = useState(false)
+  const [templateOpen, setTemplateOpen] = useState(false)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
@@ -79,7 +81,16 @@ export default function NewAssignmentPage({ params }: PageProps) {
 
         {/* Title */}
         <div className="space-y-2">
-          <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Ödev Başlığı *</label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Ödev Başlığı *</label>
+            <button
+              type="button"
+              onClick={() => setTemplateOpen(true)}
+              className="text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors flex items-center gap-1"
+            >
+              <BookOpen className="w-3.5 h-3.5" /> Şablon Seç
+            </button>
+          </div>
           <input
             type="text"
             required
@@ -172,6 +183,13 @@ export default function NewAssignmentPage({ params }: PageProps) {
         </button>
       </form>
 
+      <TemplatePickerModal
+        open={templateOpen}
+        onClose={() => setTemplateOpen(false)}
+        onSelect={(t, d) => { setTitle(t); setDescription(d) }}
+        currentTitle={title}
+        currentDescription={description}
+      />
     </div>
   )
 }
