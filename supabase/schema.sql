@@ -779,7 +779,8 @@ CREATE INDEX IF NOT EXISTS idx_classrooms_join_code ON classrooms(join_code);
 CREATE TABLE IF NOT EXISTS classroom_members (
   classroom_id uuid NOT NULL REFERENCES classrooms(id) ON DELETE CASCADE,
   user_id      uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  role         text NOT NULL CHECK (role IN ('teacher','student')),
+  role         text NOT NULL CHECK (role IN ('teacher','student','parent')),
+  student_id   uuid REFERENCES profiles(id) ON DELETE SET NULL,
   joined_at    timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (classroom_id, user_id)
 );
@@ -862,6 +863,30 @@ BEGIN
 END;
 $$;
 
+-- ============================================================
+-- ASSIGNMENT TEMPLATES (Faz 4)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS assignment_templates (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_id    uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  title       text NOT NULL CHECK (char_length(title) BETWEEN 3 AND 200),
+  description text CHECK (char_length(description) <= 2000),
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_assignment_templates_owner ON assignment_templates(owner_id);
+
+ALTER TABLE assignment_templates ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "templates_select_owner" ON assignment_templates;
+DROP POLICY IF EXISTS "templates_insert_owner" ON assignment_templates;
+DROP POLICY IF EXISTS "templates_delete_owner" ON assignment_templates;
+
+CREATE POLICY "templates_select_owner" ON assignment_templates FOR SELECT USING (owner_id = auth.uid());
+CREATE POLICY "templates_insert_owner" ON assignment_templates FOR INSERT WITH CHECK (owner_id = auth.uid());
+CREATE POLICY "templates_delete_owner" ON assignment_templates FOR DELETE USING (owner_id = auth.uid());
+
 -- RLS: classrooms
 ALTER TABLE classrooms ENABLE ROW LEVEL SECURITY;
 
@@ -894,6 +919,7 @@ CREATE POLICY "cls_members_insert" ON classroom_members FOR INSERT WITH CHECK (
   AND (
     role = 'student'
     OR (role = 'teacher' AND auth_is_classroom_owner(classroom_id))
+    OR (role = 'parent' AND auth_is_classroom_owner(classroom_id))
   )
 );
 CREATE POLICY "cls_members_delete" ON classroom_members FOR DELETE USING (
@@ -938,6 +964,14 @@ CREATE POLICY "submissions_select_own_or_teacher" ON assignment_submissions FOR 
     SELECT 1 FROM classroom_assignments ca
     JOIN classrooms c ON c.id = ca.classroom_id
     WHERE ca.id = assignment_id AND c.owner_id = auth.uid()
+  )
+  OR EXISTS (
+    SELECT 1 FROM classroom_members cm
+    JOIN classroom_assignments ca ON ca.classroom_id = cm.classroom_id
+    WHERE ca.id = assignment_id
+      AND cm.user_id = auth.uid()
+      AND cm.role = 'parent'
+      AND cm.student_id = student_id
   )
   OR (
     EXISTS (SELECT 1 FROM classroom_assignments ca WHERE ca.id = assignment_id AND ca.visibility = 'class_visible')
