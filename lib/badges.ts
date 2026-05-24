@@ -131,5 +131,53 @@ export async function checkAllBadges(
   })
 
   // editorial_pick: checked separately in editorial-picks API — skip here
+
+  // first_submission: kullanıcının en az 1 teslimi var
+  await maybeAward('first_submission', async () => {
+    const { count } = await supabase
+      .from('assignment_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('student_id', userId)
+      .in('status', ['submitted', 'graded'])
+    return (count ?? 0) >= 1
+  })
+
+  // consistent_writer: kullanıcının en az 3 teslimi var
+  await maybeAward('consistent_writer', async () => {
+    const { count } = await supabase
+      .from('assignment_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('student_id', userId)
+      .in('status', ['submitted', 'graded'])
+    return (count ?? 0) >= 3
+  })
+
+  // star_student: en az bir teslimde not >= 90
+  await maybeAward('star_student', async () => {
+    const { count } = await supabase
+      .from('assignment_submissions')
+      .select('id', { count: 'exact', head: true })
+      .eq('student_id', userId)
+      .eq('status', 'graded')
+      .gte('grade', 90)
+    return (count ?? 0) >= 1
+  })
+
+  // peer_reader: başkasına ait en az 2 chapter'a reaksiyon vermiş
+  await maybeAward('peer_reader', async () => {
+    const { data: userChapters } = await supabase
+      .from('chapters')
+      .select('id, project_id')
+      .neq('created_by', userId)
+    const chapterIds = (userChapters ?? []).map((c: { id: string }) => c.id)
+    if (chapterIds.length === 0) return false
+    const { count } = await supabase
+      .from('chapter_reactions')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .in('chapter_id', chapterIds)
+    return (count ?? 0) >= 2
+  })
+
   return newlyAwarded
 }
