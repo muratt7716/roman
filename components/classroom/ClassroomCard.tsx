@@ -12,6 +12,7 @@ interface Props {
 
 export function ClassroomCard({ classroom, role, memberCount = 0, assignmentCount = 0 }: Props) {
   const isTeacher = role === 'teacher'
+  const isParent  = role === 'parent'
   
   return (
     <Link
@@ -42,12 +43,14 @@ export function ClassroomCard({ classroom, role, memberCount = 0, assignmentCoun
           </h3>
           <span className={cn(
             'shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border',
-            isTeacher 
-              ? 'bg-violet-500/10 text-violet-300 border-violet-500/20' 
+            isTeacher
+              ? 'bg-violet-500/10 text-violet-300 border-violet-500/20'
+              : isParent
+              ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
               : 'bg-sky-500/10 text-sky-300 border-sky-500/20'
           )}>
             <GraduationCap className="w-3 h-3" />
-            {isTeacher ? 'Öğretmen' : 'Öğrenci'}
+            {isTeacher ? 'Öğretmen' : isParent ? 'Veli' : 'Öğrenci'}
           </span>
         </div>
 

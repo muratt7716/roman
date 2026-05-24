@@ -30,9 +30,9 @@ export function StudentAssignmentView({ assignment, classroomId, initialSubmissi
     setLoading(false)
   }
 
-  function continueWriting() {
-    if (!submission?.project_id) return
-    router.push(`/projects/${submission.project_id}/write`)
+  // start API is idempotent — re-calling returns existing submission + chapter_id
+  async function continueWriting() {
+    await startWriting()
   }
 
   const isLocked = submission?.status === 'submitted' || submission?.status === 'graded'
