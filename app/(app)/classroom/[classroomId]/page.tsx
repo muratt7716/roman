@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
-import { 
-  Users, Plus, GraduationCap, Trophy, BookOpen, 
-  Sparkles, Star, Crown, Zap, Flame, Trash2, Calendar
+import {
+  Users, Plus, GraduationCap, Trophy, BookOpen,
+  Sparkles, Star, Crown, Zap, Flame, Trash2, Calendar, BarChart2
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { JoinCodeDisplay } from '@/components/classroom/JoinCodeDisplay'
@@ -80,8 +80,16 @@ export default async function ClassroomPage({ params }: PageProps) {
             )}
           </div>
 
-          <div className="shrink-0 max-w-xs w-full">
-            <JoinCodeDisplay code={classroom.join_code} />
+          <div className="shrink-0 flex flex-col items-end gap-3">
+            <div className="max-w-xs w-full">
+              <JoinCodeDisplay code={classroom.join_code} />
+            </div>
+            <Link
+              href={`/classroom/${classroomId}/analytics`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 text-sm font-semibold transition-colors border border-violet-500/20"
+            >
+              <BarChart2 className="w-4 h-4" /> Sınıf İstatistikleri
+            </Link>
           </div>
         </div>
 
