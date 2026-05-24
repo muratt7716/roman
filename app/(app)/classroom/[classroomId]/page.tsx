@@ -8,6 +8,8 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { JoinCodeDisplay } from '@/components/classroom/JoinCodeDisplay'
 import { AssignmentCard } from '@/components/classroom/AssignmentCard'
+import { ParentView } from '@/components/classroom/ParentView'
+import { AddParentForm } from '@/components/classroom/AddParentForm'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -34,10 +36,55 @@ export default async function ClassroomPage({ params }: PageProps) {
 
   if (!classroom) notFound()
 
-  const myRole = members?.find((m) => m.user_id === user.id)?.role ?? null
-  if (!myRole) notFound()
+  const myMembership = members?.find((m) => m.user_id === user.id) ?? null
+  if (!myMembership) notFound()
 
-  const isTeacher = myRole === 'teacher'
+  const isTeacher = myMembership.role === 'teacher'
+  const isParent  = myMembership.role === 'parent'
+
+  if (isParent) {
+    const studentId = myMembership.student_id as string
+    const { data: studentProfile } = await supabase
+      .from('profiles')
+      .select('display_name, username, avatar_url')
+      .eq('id', studentId)
+      .single()
+
+    const { data: assignments } = await supabase
+      .from('classroom_assignments')
+      .select('*')
+      .eq('classroom_id', classroomId)
+      .order('created_at', { ascending: false })
+
+    const assignmentIds = (assignments ?? []).map((a: any) => a.id)
+    const { data: subs } = assignmentIds.length > 0
+      ? await supabase.from('assignment_submissions').select('*').eq('student_id', studentId).in('assignment_id', assignmentIds)
+      : { data: [] }
+
+    const { data: streakData } = await supabase
+      .from('user_writing_goals')
+      .select('streak_current')
+      .eq('user_id', studentId)
+      .single()
+
+    return (
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 space-y-8">
+        <Link
+          href="/classroom"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors uppercase tracking-wider cursor-pointer"
+        >
+          ← Sınıflarıma Dön
+        </Link>
+        <ParentView
+          studentName={studentProfile?.display_name ?? studentProfile?.username ?? 'Öğrenci'}
+          studentAvatar={studentProfile?.avatar_url ?? null}
+          assignments={(assignments ?? []) as any}
+          submissions={(subs ?? []) as any}
+          streak={streakData?.streak_current ?? 0}
+        />
+      </div>
+    )
+  }
 
   if (isTeacher) {
     // Teacher View
@@ -179,15 +226,26 @@ export default async function ClassroomPage({ params }: PageProps) {
 
                   <span className={cn(
                     "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border shrink-0",
-                    member.role === 'teacher' 
-                      ? "bg-violet-500/10 text-violet-300 border-violet-500/20" 
+                    member.role === 'teacher'
+                      ? "bg-violet-500/10 text-violet-300 border-violet-500/20"
+                      : member.role === 'parent'
+                      ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
                       : "bg-sky-500/10 text-sky-300 border-sky-500/20"
                   )}>
-                    {member.role === 'teacher' ? 'Öğretmen' : 'Öğrenci'}
+                    {member.role === 'teacher' ? 'Öğretmen' : member.role === 'parent' ? 'Veli' : 'Öğrenci'}
                   </span>
                 </div>
               ))}
             </div>
+
+            <AddParentForm
+              classroomId={classroomId}
+              students={(members ?? []).filter((m: any) => m.role === 'student').map((m: any) => ({
+                user_id: m.user_id,
+                name: m.profile?.display_name ?? m.profile?.username ?? 'Öğrenci',
+              }))}
+              onAdded={() => {}}
+            />
           </div>
 
         </div>

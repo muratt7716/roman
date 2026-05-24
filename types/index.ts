@@ -285,6 +285,7 @@ export interface ClassroomMember {
   classroom_id: string
   user_id: string
   role: ClassroomRole
+  student_id: string | null
   joined_at: string
   profile?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>
 }
