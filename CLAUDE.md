@@ -510,6 +510,44 @@ components/shared/Navbar.tsx            # /classroom "Akademi" linki (desktop + 
 
 ---
 
+### Faz 4 — Akademi Güçlendirme — IMPLEMENT EDİLDİ ✅
+
+**Yeni Dosyalar:**
+```
+lib/assignmentTemplates.ts                                          # 20 sabit Türkçe yazma şablonu
+app/api/classroom/templates/route.ts                                # GET şablon listesi | POST şablon kaydet
+app/api/classroom/[classroomId]/analytics/route.ts                  # Teslim oranı + streak + not dağılımı
+app/api/classroom/[classroomId]/members/route.ts                    # POST veli ekle (username lookup)
+components/classroom/TemplatePickerModal.tsx                        # Platform + öğretmen şablonları modal
+components/classroom/PeerReadingList.tsx                            # Akran okuma listesi (deadline sonrası)
+components/classroom/AnalyticsPanel.tsx                             # Teslim oranı + streak + not bar chart
+components/classroom/ParentView.tsx                                 # Veli: çocuğun ödevleri + notlar + streak
+components/classroom/AddParentForm.tsx                              # Öğretmen: veli kullanıcı adı + öğrenci seç
+app/(app)/classroom/[classroomId]/analytics/page.tsx                # Analitik sayfa (öğretmene özel)
+```
+
+**Değiştirilen Dosyalar:**
+```
+supabase/schema.sql          # assignment_templates tablosu + classroom_members.student_id + parent RLS
+types/index.ts               # BadgeCode +4 · ClassroomRole +parent · AssignmentTemplate · ClassroomMember.student_id
+lib/badges.ts                # BADGE_META +4 rozet · checkAllBadges +4 kontrol bloğu
+app/api/classroom/[classroomId]/assignments/[assignmentId]/start/route.ts  # streak tetikleyici
+app/api/submissions/[submissionId]/route.ts                         # submit → checkAllBadges, grade → star_student
+app/(app)/classroom/[classroomId]/assignments/new/page.tsx          # Şablon Seç butonu + TemplatePickerModal
+app/(app)/classroom/[classroomId]/assignments/[assignmentId]/page.tsx  # PeerReadingList bölümü
+app/(app)/classroom/[classroomId]/page.tsx                          # isParent dalı + AddParentForm + İstatistikler linki
+app/(app)/dashboard/page.tsx                                        # Akademi Özeti kartı (3 metrik)
+```
+
+**Faz 4 Yeni DB (supabase/schema.sql'de mevcut — Supabase'e uygulanmalı):**
+- `assignment_templates`: id, owner_id, title, description, created_at (öğretmen şablonları)
+- `classroom_members.student_id`: uuid FK → profiles.id (veli-öğrenci bağlantısı)
+- `classroom_members.role` CHECK: `('teacher','student','parent')` — parent eklendi
+- `cls_members_insert` policy: parent dalı eklendi
+- `submissions_select_own_or_teacher` policy: parent dalı eklendi
+
+---
+
 ## Platform Faz Yol Haritası
 
 | Faz | Ad | Durum | İçerik |
@@ -517,7 +555,8 @@ components/shared/Navbar.tsx            # /classroom "Akademi" linki (desktop + 
 | **Faz 1** | Okuyucu Bağı | ✅ Tamamlandı | View counter, 3 reaksiyon, okuma listesi, yazar takibi, yeni bölüm bildirimi |
 | **Faz 2** | Yazar Motivasyonu | ✅ Tamamlandı | Günlük yazı hedefi + server streak, 8 rozet sistemi, haftalık istatistik, editöryal seçki UI |
 | **Faz 3** | Okul Modülü | ✅ Tamamlandı | Öğretmen-öğrenci arayüzü, sınıf yönetimi, görev atama, not sistemi, güvenli ortam |
-| **Faz 4** | Sosyal & Büyüme | ⏳ Gelecek | Profil sayfaları, kullanıcı keşfet, yorum thread'leri, onboarding akışı |
+| **Faz 4** | Akademi Güçlendirme | ✅ Tamamlandı | Rozet/streak entegrasyonu, analitik panel, şablon bankası, akran okuma, veli paneli |
+| **Faz 5** | Sosyal & Büyüme | ⏳ Gelecek | Profil sayfaları, kullanıcı keşfet, yorum thread'leri, onboarding akışı |
 
 **Editöryal Seçki Algoritması (Faz 2'de implement edildi):**
 - Skor = `reactions×3 + reading_list_adds×2 + views×1`
