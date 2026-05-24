@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Plus, BookOpen, Bell, Users, PenLine, Settings } from 'lucide-react'
+import { Plus, BookOpen, Bell, Users, PenLine, Settings, GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -28,6 +28,7 @@ export default async function DashboardPage() {
     { data: versionStats },
     { data: followerData },
     { data: badgeData },
+    { data: academicData },
   ] = await Promise.all([
     supabase
       .from('projects')
@@ -55,6 +56,10 @@ export default async function DashboardPage() {
       .select('*')
       .eq('user_id', user.id)
       .order('earned_at', { ascending: false }),
+    supabase
+      .from('assignment_submissions')
+      .select('id, status, grade')
+      .eq('student_id', user.id),
   ])
 
   const owned = (ownedProjects ?? []) as ProjectWithOwner[]
@@ -97,6 +102,13 @@ export default async function DashboardPage() {
   }
 
   const badges = (badgeData ?? []) as UserBadge[]
+
+  const submissions = (academicData ?? []) as { id: string; status: string; grade: number | null }[]
+  const totalSubmitted = submissions.filter(s => s.status !== 'draft').length
+  const graded = submissions.filter(s => s.status === 'graded' && s.grade !== null)
+  const avgGrade = graded.length > 0
+    ? Math.round(graded.reduce((sum, s) => sum + (s.grade ?? 0), 0) / graded.length)
+    : null
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-12">
@@ -141,6 +153,32 @@ export default async function DashboardPage() {
 
       {/* Rozetler */}
       <BadgesRow badges={badges} />
+
+      {/* Akademi Özeti */}
+      {totalSubmitted > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-xl font-display font-bold text-white flex items-center gap-2">
+            <GraduationCap className="w-5 h-5 text-violet-400" />
+            Akademi Özeti
+          </h2>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="glass-card rounded-2xl p-5 border border-white/[0.05] text-center">
+              <p className="text-3xl font-black text-white">{totalSubmitted}</p>
+              <p className="text-xs text-slate-400 mt-1">Teslim Edilen</p>
+            </div>
+            <div className="glass-card rounded-2xl p-5 border border-white/[0.05] text-center">
+              <p className="text-3xl font-black text-white">{graded.length}</p>
+              <p className="text-xs text-slate-400 mt-1">Notlandırıldı</p>
+            </div>
+            <div className="glass-card rounded-2xl p-5 border border-white/[0.05] text-center">
+              <p className="text-3xl font-black text-white">
+                {avgGrade !== null ? avgGrade : '—'}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">Not Ortalaması</p>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Bekleyen Başvurular */}
       {pending.length > 0 && (
