@@ -903,6 +903,12 @@ CREATE POLICY "classrooms_insert_owner" ON classrooms FOR INSERT WITH CHECK (aut
 CREATE POLICY "classrooms_update_owner" ON classrooms FOR UPDATE USING (auth.uid() = owner_id);
 CREATE POLICY "classrooms_delete_owner" ON classrooms FOR DELETE USING (auth.uid() = owner_id);
 
+-- Faz 4: student_id kolonu (veli-öğrenci bağlantısı) — idempotent
+ALTER TABLE classroom_members ADD COLUMN IF NOT EXISTS student_id uuid REFERENCES profiles(id) ON DELETE SET NULL;
+-- Faz 4: role CHECK'e parent ekle (varsa constraint'i yeniden oluştur)
+ALTER TABLE classroom_members DROP CONSTRAINT IF EXISTS classroom_members_role_check;
+ALTER TABLE classroom_members ADD CONSTRAINT classroom_members_role_check CHECK (role IN ('teacher','student','parent'));
+
 -- RLS: classroom_members
 ALTER TABLE classroom_members ENABLE ROW LEVEL SECURITY;
 
