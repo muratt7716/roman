@@ -933,6 +933,16 @@ CREATE POLICY "cls_members_delete" ON classroom_members FOR DELETE USING (
   OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
 );
 
+-- Backfill: sınıf sahibinin classroom_members satırı eksikse ekle (SQL Editor admin olarak çalışır)
+INSERT INTO classroom_members (classroom_id, user_id, role)
+SELECT c.id, c.owner_id, 'teacher'
+FROM classrooms c
+WHERE NOT EXISTS (
+  SELECT 1 FROM classroom_members cm
+  WHERE cm.classroom_id = c.id AND cm.user_id = c.owner_id
+)
+ON CONFLICT DO NOTHING;
+
 -- RLS: classroom_assignments
 ALTER TABLE classroom_assignments ENABLE ROW LEVEL SECURITY;
 

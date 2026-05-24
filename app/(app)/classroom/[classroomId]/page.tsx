@@ -36,7 +36,18 @@ export default async function ClassroomPage({ params }: PageProps) {
 
   if (!classroom) notFound()
 
-  const myMembership = members?.find((m) => m.user_id === user.id) ?? null
+  let myMembership = members?.find((m) => m.user_id === user.id) ?? null
+
+  // Resilience: owner may lack a membership row if it was created before RLS fix
+  if (!myMembership && classroom.owner_id === user.id) {
+    await supabase.from('classroom_members').insert({ classroom_id: classroomId, user_id: user.id, role: 'teacher' })
+    const { data: refreshed } = await supabase
+      .from('classroom_members')
+      .select('*, profile:profiles(id, username, display_name, avatar_url)')
+      .eq('classroom_id', classroomId)
+    myMembership = refreshed?.find((m: { user_id: string }) => m.user_id === user.id) ?? null
+  }
+
   if (!myMembership) notFound()
 
   const isTeacher = myMembership.role === 'teacher'
