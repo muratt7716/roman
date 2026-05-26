@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LogOut, User, Bell, LayoutDashboard,
   Compass, Users, Lightbulb, Wand2, Gamepad2, Menu, X, ChevronRight,
-  MessageSquarePlus, ShieldCheck, GraduationCap
+  MessageSquarePlus, ShieldCheck, GraduationCap, Zap
 } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -75,6 +75,7 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                     { href: '/explore',   label: 'Keşfet',   icon: <Compass className="w-4 h-4 text-primary" /> },
                     { href: '/writers',   label: 'Yazarlar',  icon: <Users className="w-4 h-4 text-pink-400" /> },
                     { href: '/classroom', label: 'Akademi',  icon: <GraduationCap className="w-4 h-4 text-violet-400" /> },
+                    { href: '/sprint',    label: 'Sprint',   icon: <Zap className="w-4 h-4 text-amber-400" /> },
                     { href: '/dashboard', label: 'Panel',    icon: <LayoutDashboard className="w-4 h-4 text-sky-400" /> },
                   ].map(({ href, label, icon }) => (
                     <Link key={href} href={href} className={cn(
@@ -136,6 +137,12 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                     <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]">
                       <Link href="/classroom" className="flex w-full items-center gap-2.5 text-[13px] text-muted-foreground hover:text-white font-medium">
                         <GraduationCap className="w-4 h-4 text-violet-400" /> Akademi
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]">
+                      <Link href="/sprint" className="flex w-full items-center gap-2.5 text-[13px] text-muted-foreground hover:text-white font-medium">
+                        <Zap className="w-4 h-4 text-amber-400" /> Sprint
                       </Link>
                     </DropdownMenuItem>
 
@@ -257,6 +264,7 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                 { href: '/writers', label: 'Yazarlar', icon: <Users className="w-4 h-4 text-pink-400" /> },
                 ...(profile ? [
                   { href: '/classroom', label: 'Akademi', icon: <GraduationCap className="w-4 h-4 text-violet-400" /> },
+                  { href: '/sprint', label: 'Sprint', icon: <Zap className="w-4 h-4 text-amber-400" /> },
                   { href: '/dashboard', label: 'Panel', icon: <LayoutDashboard className="w-4 h-4 text-sky-400" /> }
                 ] : []),
               ].map(({ href, label, icon }) => (
