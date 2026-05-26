@@ -6,7 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import { InviteButton } from '@/components/writers/InviteButton'
 import { BookOpen, Users, PenLine, ExternalLink, Award, Sparkles, FolderGit } from 'lucide-react'
-import type { ProjectWithOwner } from '@/types'
+import { FollowButton } from '@/components/reader/FollowButton'
+import { BadgesGrid } from '@/components/profile/BadgesGrid'
+import type { ProjectWithOwner, UserBadge } from '@/types'
 import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -43,6 +45,12 @@ export default async function UserProfilePage({ params }: Props) {
   const [
     { data: ownedProjects },
     { data: memberships },
+    { count: followerCount },
+    { count: _followingCount },
+    { data: isFollowingRow },
+    { data: badges },
+    { data: writingGoal },
+    { count: sprintCount },
   ] = await Promise.all([
     supabase
       .from('projects')
@@ -54,7 +62,41 @@ export default async function UserProfilePage({ params }: Props) {
       .from('project_members')
       .select('project:projects(id, title, genre), role:project_roles(name)')
       .eq('user_id', profile.id),
+    supabase
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('following_id', profile.id),
+    supabase
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('follower_id', profile.id),
+    currentUser
+      ? supabase
+          .from('follows')
+          .select('follower_id')
+          .eq('follower_id', currentUser.id)
+          .eq('following_id', profile.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }) as any,
+    supabase
+      .from('user_badges')
+      .select('*')
+      .eq('user_id', profile.id),
+    supabase
+      .from('user_writing_goals')
+      .select('streak_best')
+      .eq('user_id', profile.id)
+      .maybeSingle(),
+    supabase
+      .from('sprint_participants')
+      .select('sprint_id', { count: 'exact', head: true })
+      .eq('user_id', profile.id)
+      .not('finished_at', 'is', null),
   ])
+
+  const isFollowing = !!isFollowingRow
+  const earnedBadges = (badges ?? []) as UserBadge[]
+  const streakBest = writingGoal?.streak_best ?? 0
 
   const uniqueRoles = [...new Set(
     (memberships ?? []).map((m: any) => m.role?.name).filter(Boolean)
@@ -118,7 +160,14 @@ export default async function UserProfilePage({ params }: Props) {
                   </span>
 
                   {!isOwnProfile && currentUser && (
-                    <InviteButton targetUserId={profile.id} targetUsername={profile.username} className="text-xs py-1.5 h-auto px-4 shadow-[0_0_15px_rgba(124,58,237,0.25)]" />
+                    <div className="flex items-center gap-2">
+                      <FollowButton
+                        authorId={profile.id}
+                        initialFollowing={isFollowing}
+                        followerCount={followerCount ?? 0}
+                      />
+                      <InviteButton targetUserId={profile.id} targetUsername={profile.username} className="text-xs py-1.5 h-auto px-4 shadow-[0_0_15px_rgba(124,58,237,0.25)]" />
+                    </div>
                   )}
                   {isOwnProfile && (
                     <Link 
@@ -157,18 +206,26 @@ export default async function UserProfilePage({ params }: Props) {
           </div>
 
           {/* ── STATS CARDS SECTION (Glassmorphic metrics layout) ── */}
-          <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-white/[0.05]">
-            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-4 rounded-xl transition-all duration-300 group">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mt-8 pt-8 border-t border-white/[0.05]">
+            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-3 sm:p-4 rounded-xl transition-all duration-300 group">
               <p className="text-2xl sm:text-3xl font-display font-bold text-violet-400 group-hover:scale-105 transition-transform duration-300">{ownedProjects?.length ?? 0}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">Proje Sahibi</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">Proje</p>
             </div>
-            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-4 rounded-xl transition-all duration-300 group">
+            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-3 sm:p-4 rounded-xl transition-all duration-300 group">
               <p className="text-2xl sm:text-3xl font-display font-bold text-sky-400 group-hover:scale-105 transition-transform duration-300">{memberships?.length ?? 0}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">Katkı Sağladı</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">Katkı</p>
             </div>
-            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-4 rounded-xl transition-all duration-300 group">
-              <p className="text-2xl sm:text-3xl font-display font-bold text-amber-400 group-hover:scale-105 transition-transform duration-300">{uniqueRoles.length}</p>
-              <p className="text-[10px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">Aktif Rol</p>
+            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-3 sm:p-4 rounded-xl transition-all duration-300 group">
+              <p className="text-2xl sm:text-3xl font-display font-bold text-pink-400 group-hover:scale-105 transition-transform duration-300">{followerCount ?? 0}</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">Takipçi</p>
+            </div>
+            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-3 sm:p-4 rounded-xl transition-all duration-300 group">
+              <p className="text-2xl sm:text-3xl font-display font-bold text-amber-400 group-hover:scale-105 transition-transform duration-300">{streakBest}</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">🔥 Seri</p>
+            </div>
+            <div className="text-center bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.02] hover:border-white/[0.06] p-3 sm:p-4 rounded-xl transition-all duration-300 group">
+              <p className="text-2xl sm:text-3xl font-display font-bold text-emerald-400 group-hover:scale-105 transition-transform duration-300">{sprintCount ?? 0}</p>
+              <p className="text-[9px] sm:text-xs text-muted-foreground/80 mt-1 uppercase tracking-wider font-semibold">⚡ Sprint</p>
             </div>
           </div>
 
@@ -183,6 +240,19 @@ export default async function UserProfilePage({ params }: Props) {
             </div>
           )}
         </div>
+
+        {/* ── BADGES SECTION ── */}
+        {earnedBadges.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                <Award className="w-4 h-4 text-amber-400" />
+              </div>
+              <h2 className="text-2xl font-display font-semibold text-white">Kazanılan Rozetler</h2>
+            </div>
+            <BadgesGrid badges={earnedBadges} />
+          </section>
+        )}
 
         {/* ── OWNED PROJECTS GRID (Highly visually pleasing layout) ── */}
         <section className="space-y-6">
