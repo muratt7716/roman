@@ -232,6 +232,21 @@ components/profile/
   BadgesGrid.tsx                      # Tüm 8 rozet grid (kazanılmış + gri/soluk)
 components/home/
   EditorialPicksSection.tsx           # Client: editorial picks fetch + 3 proje kartı
+components/sprint/
+  SprintCard.tsx                      # Sprint kartı
+  SprintRoom.tsx                      # Timer + realtime + bitirme UI
+  SprintLeaderboard.tsx               # Sprint sonu sıralama
+app/(app)/sprint/
+  page.tsx                            # Sprint listesi + bireysel sprint başlat
+  [sprintId]/page.tsx                 # Sprint odası
+  new/page.tsx                        # Bireysel sprint oluştur + redirect
+app/api/sprint/
+  route.ts                            # GET liste | POST bireysel sprint
+  [sprintId]/join/route.ts            # POST katıl
+  [sprintId]/finish/route.ts          # POST bitir + streak + rozet
+  community/route.ts                  # Admin: topluluk sprinti oluştur
+  cron/route.ts                       # Vercel Cron: günlük 3 sprint
+vercel.json                           # Vercel Cron tanımı (günlük 00:00 UTC)
 docs/superpowers/plans/
   2026-05-21-phase1-reader-engagement.md  # Faz 1 implementasyon planı (13 görev)
 ```
@@ -556,7 +571,8 @@ app/(app)/dashboard/page.tsx                                        # Akademi Ö
 | **Faz 2** | Yazar Motivasyonu | ✅ Tamamlandı | Günlük yazı hedefi + server streak, 8 rozet sistemi, haftalık istatistik, editöryal seçki UI |
 | **Faz 3** | Okul Modülü | ✅ Tamamlandı | Öğretmen-öğrenci arayüzü, sınıf yönetimi, görev atama, not sistemi, güvenli ortam |
 | **Faz 4** | Akademi Güçlendirme | ✅ Tamamlandı | Rozet/streak entegrasyonu, analitik panel, şablon bankası, akran okuma, veli paneli |
-| **Faz 5** | Sosyal & Büyüme | ⏳ Gelecek | Profil sayfaları, kullanıcı keşfet, yorum thread'leri, onboarding akışı |
+| **Faz 5** | Yazı Sprintleri | ✅ Tamamlandı | Topluluk + bireysel sprintler, canlı katılımcı sayacı, Vercel Cron, rozet entegrasyonu |
+| **Faz 6** | Sosyal & Büyüme | ⏳ Gelecek | Profil sayfaları, kullanıcı keşfet, yorum thread'leri, onboarding akışı |
 
 **Editöryal Seçki Algoritması (Faz 2'de implement edildi):**
 - Skor = `reactions×3 + reading_list_adds×2 + views×1`
