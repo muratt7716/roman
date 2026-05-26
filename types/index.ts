@@ -227,6 +227,8 @@ export type BadgeCode =
   | 'consistent_writer'
   | 'star_student'
   | 'peer_reader'
+  | 'first_sprint'
+  | 'sprint_warrior'
 
 export interface UserWritingGoal {
   user_id: string
@@ -319,4 +321,29 @@ export interface AssignmentTemplate {
   title: string
   description: string | null
   created_at: string
+}
+
+export type SprintStatus = 'scheduled' | 'active' | 'finished'
+
+export interface WritingSprint {
+  id: string
+  title: string
+  duration_minutes: number
+  starts_at: string
+  ends_at: string
+  status: SprintStatus
+  created_by: string | null
+  is_community: boolean
+  created_at: string
+  participant_count?: number
+}
+
+export interface SprintParticipant {
+  sprint_id: string
+  user_id: string
+  word_count: number
+  start_word_ref: number
+  joined_at: string
+  finished_at: string | null
+  profile?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>
 }

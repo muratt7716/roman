@@ -14,6 +14,8 @@ export const BADGE_META: Record<BadgeCode, { label: string; icon: string; desc: 
   consistent_writer:{ label: 'Düzenli Yazar',    icon: '📅', desc: '3 ödevi zamanında teslim ettin' },
   star_student:     { label: 'Yıldız Öğrenci',   icon: '⭐', desc: 'Bir ödevden tam puan aldın' },
   peer_reader:      { label: 'Okur Arkadaş',     icon: '🤝', desc: 'Sınıf arkadaşının yazısını okudun' },
+  first_sprint:     { label: 'İlk Sprint',       icon: '⚡', desc: 'İlk yazı sprintini tamamladın' },
+  sprint_warrior:   { label: 'Sprint Savaşçısı',  icon: '🏃', desc: '10 sprint tamamladın' },
 }
 
 export const ALL_BADGE_CODES = Object.keys(BADGE_META) as BadgeCode[]
@@ -177,6 +179,26 @@ export async function checkAllBadges(
       .eq('user_id', userId)
       .in('chapter_id', chapterIds)
     return (count ?? 0) >= 2
+  })
+
+  // first_sprint: at least 1 finished sprint
+  await maybeAward('first_sprint', async () => {
+    const { count } = await supabase
+      .from('sprint_participants')
+      .select('sprint_id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .not('finished_at', 'is', null)
+    return (count ?? 0) >= 1
+  })
+
+  // sprint_warrior: 10+ finished sprints
+  await maybeAward('sprint_warrior', async () => {
+    const { count } = await supabase
+      .from('sprint_participants')
+      .select('sprint_id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .not('finished_at', 'is', null)
+    return (count ?? 0) >= 10
   })
 
   return newlyAwarded
