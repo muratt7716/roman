@@ -572,7 +572,7 @@ app/(app)/dashboard/page.tsx                                        # Akademi Ö
 | **Faz 3** | Okul Modülü | ✅ Tamamlandı | Öğretmen-öğrenci arayüzü, sınıf yönetimi, görev atama, not sistemi, güvenli ortam |
 | **Faz 4** | Akademi Güçlendirme | ✅ Tamamlandı | Rozet/streak entegrasyonu, analitik panel, şablon bankası, akran okuma, veli paneli |
 | **Faz 5** | Yazı Sprintleri | ✅ Tamamlandı | Topluluk + bireysel sprintler, canlı katılımcı sayacı, Vercel Cron, rozet entegrasyonu |
-| **Faz 6** | Sosyal & Büyüme | ⏳ Gelecek | Profil sayfaları, kullanıcı keşfet, yorum thread'leri, onboarding akışı |
+| **Faz 6** | Sosyal & Büyüme | 🔄 Devam Ediyor | Profil güçlendirme ✅, onboarding, yorum thread'leri, kullanıcı keşfet |
 
 **Editöryal Seçki Algoritması (Faz 2'de implement edildi):**
 - Skor = `reactions×3 + reading_list_adds×2 + views×1`
