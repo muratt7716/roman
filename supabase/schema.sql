@@ -1029,3 +1029,52 @@ CREATE POLICY "readinglist_delete_own"  ON reading_lists FOR DELETE USING (user_
 CREATE POLICY "follows_select_all"  ON follows FOR SELECT USING (true);
 CREATE POLICY "follows_insert_auth" ON follows FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND follower_id = auth.uid());
 CREATE POLICY "follows_delete_own"  ON follows FOR DELETE USING (follower_id = auth.uid());
+
+-- ============================================================
+-- FAZ 5: YAZI SPRİNTLERİ
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS writing_sprints (
+  id               uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  title            text NOT NULL DEFAULT 'Yazı Sprinti',
+  duration_minutes int  NOT NULL CHECK (duration_minutes IN (15, 25, 45)),
+  starts_at        timestamptz NOT NULL,
+  ends_at          timestamptz NOT NULL,
+  status           text NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled','active','finished')),
+  created_by       uuid REFERENCES profiles(id) ON DELETE SET NULL,
+  is_community     boolean NOT NULL DEFAULT true,
+  created_at       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_sprints_starts_at ON writing_sprints(starts_at);
+CREATE INDEX IF NOT EXISTS idx_sprints_status    ON writing_sprints(status);
+
+CREATE TABLE IF NOT EXISTS sprint_participants (
+  sprint_id      uuid NOT NULL REFERENCES writing_sprints(id) ON DELETE CASCADE,
+  user_id        uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  word_count     int  NOT NULL DEFAULT 0,
+  start_word_ref int  NOT NULL DEFAULT 0,
+  joined_at      timestamptz NOT NULL DEFAULT now(),
+  finished_at    timestamptz,
+  PRIMARY KEY (sprint_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sprint_participants_user ON sprint_participants(user_id);
+
+-- RLS: writing_sprints
+ALTER TABLE writing_sprints ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "sprints_select_all"    ON writing_sprints;
+DROP POLICY IF EXISTS "sprints_insert_auth"   ON writing_sprints;
+DROP POLICY IF EXISTS "sprints_update_auth"   ON writing_sprints;
+CREATE POLICY "sprints_select_all"  ON writing_sprints FOR SELECT USING (true);
+CREATE POLICY "sprints_insert_auth" ON writing_sprints FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "sprints_update_auth" ON writing_sprints FOR UPDATE USING (auth.uid() IS NOT NULL);
+
+-- RLS: sprint_participants
+ALTER TABLE sprint_participants ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "sp_select_all"   ON sprint_participants;
+DROP POLICY IF EXISTS "sp_insert_self"  ON sprint_participants;
+DROP POLICY IF EXISTS "sp_update_self"  ON sprint_participants;
+CREATE POLICY "sp_select_all"  ON sprint_participants FOR SELECT USING (true);
+CREATE POLICY "sp_insert_self" ON sprint_participants FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "sp_update_self" ON sprint_participants FOR UPDATE USING (auth.uid() = user_id);
