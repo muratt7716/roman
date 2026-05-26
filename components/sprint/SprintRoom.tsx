@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Zap, PenLine, CheckCircle2, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { SprintLeaderboard } from './SprintLeaderboard'
 import { cn } from '@/lib/utils'
 import type { WritingSprint, SprintParticipant } from '@/types'
 
@@ -26,14 +25,14 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
   const isActiveNow   = nowMs >= startTime && nowMs < endTime
   const isFinishedNow = nowMs >= endTime
 
-  const [timeLeft, setTimeLeft]           = useState(Math.max(0, Math.ceil((endTime - Date.now()) / 1000)))
-  const [participants, setParticipants]   = useState<SprintParticipant[]>(initialParticipants)
-  const [joined, setJoined]               = useState(isJoinedProp)
-  const [joining, setJoining]             = useState(false)
-  const [finished, setFinished]           = useState(isFinishedNow)
-  const [wordCount, setWordCount]         = useState(0)
-  const [submitting, setSubmitting]       = useState(false)
-  const [done, setDone]                   = useState(false)
+  const [timeLeft, setTimeLeft]         = useState(Math.max(0, Math.ceil((endTime - Date.now()) / 1000)))
+  const [participants, setParticipants] = useState<SprintParticipant[]>(initialParticipants)
+  const [joined, setJoined]             = useState(isJoinedProp)
+  const [joining, setJoining]           = useState(false)
+  const [finished, setFinished]         = useState(isFinishedNow)
+  const [wordCount, setWordCount]       = useState(0)
+  const [submitting, setSubmitting]     = useState(false)
+  const [done, setDone]                 = useState(false)
   const [selectedProjectId, setSelectedProjectId] = useState(userProjects[0]?.id ?? '')
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -101,15 +100,18 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
     ? `/projects/${selectedProjectId}/write/${selectedProject.defaultChapterId}`
     : `/projects/${selectedProjectId}/write`
 
+  // Sprint bitti ekranı — sadece kişisel teşvik, sıralama yok
   if (done || (isFinishedNow && !joined)) {
     return (
-      <div className="space-y-6">
-        <div className="glass-card rounded-2xl p-6 border border-white/[0.05] text-center space-y-2">
-          <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-          <p className="text-white font-bold text-lg">Sprint Bitti!</p>
-          <p className="text-slate-400 text-sm">{wordCount > 0 ? `${wordCount} kelime yazdın 🔥` : 'Sprint sona erdi.'}</p>
-        </div>
-        <SprintLeaderboard participants={participants} currentUserId={currentUserId} />
+      <div className="glass-card rounded-2xl p-8 border border-white/[0.05] text-center space-y-3">
+        <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
+        <p className="text-white font-bold text-xl">Harika iş çıkardın! ✨</p>
+        {wordCount > 0 && (
+          <p className="text-2xl font-display font-black text-primary">{wordCount} kelime</p>
+        )}
+        <p className="text-slate-400 text-sm">
+          {participants.length} yazar bu sprintte birlikte yazdı.
+        </p>
       </div>
     )
   }
@@ -129,9 +131,12 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
             ? '00:00'
             : new Date(sprint.starts_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
         </div>
+        {/* Sadece "kaç kişi yazıyor" — kimse kimseyle yarışmıyor */}
         <p className="text-xs text-slate-400 flex items-center justify-center gap-2">
           <Users className="w-3.5 h-3.5" />
-          {participants.length} katılımcı yazıyor
+          {participants.length > 0
+            ? `${participants.length} yazar şu an birlikte yazıyor`
+            : 'İlk katılan sen ol'}
         </p>
       </div>
 
@@ -161,7 +166,7 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
               className="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.5)] transition-all disabled:opacity-50 cursor-pointer"
             >
               <Zap className="w-4 h-4" />
-              {joining ? 'Katılınıyor…' : 'Sprinte Katıl!'}
+              {joining ? 'Katılınıyor…' : 'Birlikte Yaz!'}
             </button>
           ) : (
             <div className="glass-card rounded-xl p-4 border border-emerald-500/20 space-y-4">
@@ -195,31 +200,27 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
         </div>
       )}
 
-      {/* Sprint bitti, kelime gir */}
+      {/* Sprint bitti — kişisel kelime girişi, sıralama yok */}
       {finished && joined && !done && (
-        <div className="glass-card rounded-2xl p-6 border border-amber-500/20 space-y-4">
-          <p className="text-amber-400 font-bold text-sm">⏰ Sprint bitti! Kaç kelime yazdın?</p>
+        <div className="glass-card rounded-2xl p-6 border border-violet-500/20 space-y-4">
+          <p className="text-violet-300 font-bold text-sm">✨ Sprint bitti! Bu oturumda kaç kelime yazdın?</p>
+          <p className="text-xs text-slate-500">Sadece senin için kaydedilir — streak'ine sayılır.</p>
           <input
             type="number"
             min={0}
-            value={wordCount}
+            value={wordCount || ''}
             onChange={e => setWordCount(Number(e.target.value))}
-            placeholder="Kelime sayısı"
+            placeholder="Kelime sayısı (isteğe bağlı)"
             className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-primary/50"
           />
           <button
             onClick={handleFinish}
             disabled={submitting}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold disabled:opacity-50 cursor-pointer"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold disabled:opacity-50 cursor-pointer hover:opacity-90 transition-opacity"
           >
-            {submitting ? 'Kaydediliyor…' : 'Sonucu Kaydet'}
+            {submitting ? 'Kaydediliyor…' : 'Sprinti Tamamla'}
           </button>
         </div>
-      )}
-
-      {/* Sıralama (aktifken de göster) */}
-      {participants.some(p => p.finished_at) && (
-        <SprintLeaderboard participants={participants} currentUserId={currentUserId} />
       )}
     </div>
   )
