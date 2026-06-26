@@ -52,7 +52,7 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
       })
       .subscribe()
 
-    return () => { supabase.removeChannel(channel) }
+    return () => { channel.unsubscribe(); supabase.removeChannel(channel) }
   }, [chapter.id, supabase])
 
   return (

@@ -68,6 +68,7 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
   const [showFontPicker, setShowFontPicker] = useState(false)
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
+  const aiAbortRef = useRef<AbortController | null>(null)
 
   async function getAiSuggestion() {
     const usageKey = 'kb_ai_suggest_uses'
@@ -81,6 +82,9 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       return
     }
 
+    aiAbortRef.current?.abort()
+    aiAbortRef.current = new AbortController()
+
     setAiLoading(true)
     setAiSuggestion(null)
     try {
@@ -89,6 +93,7 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, chapterTitle }),
+        signal: aiAbortRef.current.signal,
       })
       const data = await res.json()
       if (data.suggestion) {
@@ -97,7 +102,8 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       } else {
         setAiSuggestion(data.error ? `Hata: ${data.error}` : 'Yanıt alınamadı. Sunucu loglarını kontrol et.')
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       setAiSuggestion('Bağlantı hatası. Biraz sonra tekrar dene.')
     }
     setAiLoading(false)
