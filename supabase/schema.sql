@@ -151,8 +151,11 @@ CREATE TABLE IF NOT EXISTS comments (
   content         text NOT NULL,
   selection_range jsonb,
   resolved        boolean NOT NULL DEFAULT false,
+  parent_id       uuid REFERENCES comments(id) ON DELETE CASCADE,
   created_at      timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE comments ADD COLUMN IF NOT EXISTS parent_id uuid REFERENCES comments(id) ON DELETE CASCADE;
 
 CREATE TABLE IF NOT EXISTS brainstorm_notes (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
