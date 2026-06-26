@@ -15,8 +15,35 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('projects').select('title').eq('slug', slug).single()
-  return { title: data ? `${data.title} — Oku · Kalem Birliği` : 'Oku — Kalem Birliği' }
+  const { data } = await supabase
+    .from('projects')
+    .select('title, synopsis, cover_image_url, owner:profiles!projects_owner_id_fkey(display_name, username)')
+    .eq('slug', slug)
+    .single()
+  if (!data) return { title: 'Oku — Kalem Birliği' }
+
+  const owner = data.owner as any
+  const authorName = owner?.display_name ?? owner?.username ?? 'Kalem Birliği'
+  const description = data.synopsis
+    ? `${data.synopsis.slice(0, 155)}…`
+    : `${authorName} tarafından yazılan "${data.title}" projesini oku.`
+
+  return {
+    title: `${data.title} — Kalem Birliği`,
+    description,
+    openGraph: {
+      title: data.title,
+      description,
+      type: 'article',
+      ...(data.cover_image_url ? { images: [{ url: data.cover_image_url, width: 1200, height: 630, alt: data.title }] } : {}),
+    },
+    twitter: {
+      card: data.cover_image_url ? 'summary_large_image' : 'summary',
+      title: data.title,
+      description,
+      ...(data.cover_image_url ? { images: [data.cover_image_url] } : {}),
+    },
+  }
 }
 
 export default async function ReadPage({ params }: Props) {

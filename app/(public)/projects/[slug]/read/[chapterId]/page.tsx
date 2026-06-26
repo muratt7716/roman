@@ -15,8 +15,29 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug, chapterId } = await params
   const supabase = await createClient()
-  const { data } = await supabase.from('chapters').select('title').eq('id', chapterId).single()
-  return { title: data ? `${data.title} — Kalem Birliği` : 'Bölüm — Kalem Birliği' }
+  const [{ data: chapter }, { data: project }] = await Promise.all([
+    supabase.from('chapters').select('title').eq('id', chapterId).single(),
+    supabase.from('projects').select('title, cover_image_url').eq('slug', slug).single(),
+  ])
+  if (!chapter || !project) return { title: 'Bölüm — Kalem Birliği' }
+
+  const description = `"${project.title}" · ${chapter.title} — Kalem Birliği'nde oku.`
+  return {
+    title: `${chapter.title} · ${project.title} — Kalem Birliği`,
+    description,
+    openGraph: {
+      title: `${chapter.title} · ${project.title}`,
+      description,
+      type: 'article',
+      ...(project.cover_image_url ? { images: [{ url: project.cover_image_url, width: 1200, height: 630, alt: project.title }] } : {}),
+    },
+    twitter: {
+      card: project.cover_image_url ? 'summary_large_image' : 'summary',
+      title: `${chapter.title} · ${project.title}`,
+      description,
+      ...(project.cover_image_url ? { images: [project.cover_image_url] } : {}),
+    },
+  }
 }
 
 export default async function ChapterReadPage({ params }: Props) {
