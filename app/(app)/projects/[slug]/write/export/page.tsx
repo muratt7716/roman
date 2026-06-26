@@ -30,26 +30,27 @@ export default async function ExportPage({ params }: Props) {
     .eq('project_id', id)
     .order('order_index')
 
-  // Her bölümün son versiyonunu çek
+  // Her bölümün son versiyonunu tek sorguda çek
   const chapterIds = (chapters ?? []).map(c => c.id)
-  const chaptersWithContent: { title: string; content: string; word_count: number; order_index: number }[] = []
+  const { data: allVersions } = chapterIds.length > 0
+    ? await supabase
+        .from('chapter_versions')
+        .select('chapter_id, content, created_at')
+        .in('chapter_id', chapterIds)
+        .order('created_at', { ascending: false })
+    : { data: [] }
 
-  for (const ch of (chapters ?? [])) {
-    const { data: version } = await supabase
-      .from('chapter_versions')
-      .select('content')
-      .eq('chapter_id', ch.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
-    chaptersWithContent.push({
-      title: ch.title,
-      content: version?.content ?? '',
-      word_count: ch.word_count,
-      order_index: ch.order_index,
-    })
+  const latestContent: Record<string, string> = {}
+  for (const v of allVersions ?? []) {
+    if (!latestContent[v.chapter_id]) latestContent[v.chapter_id] = v.content ?? ''
   }
+
+  const chaptersWithContent = (chapters ?? []).map(ch => ({
+    title: ch.title,
+    content: latestContent[ch.id] ?? '',
+    word_count: ch.word_count,
+    order_index: ch.order_index,
+  }))
 
   const totalWords = chaptersWithContent.reduce((s, c) => s + c.word_count, 0)
 
