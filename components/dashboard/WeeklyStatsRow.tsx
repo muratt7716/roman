@@ -9,7 +9,7 @@ const ITEMS = [
   { key: 'wordsWritten',      label: 'Kelime',   icon: PenLine,  color: 'text-violet-400'  },
   { key: 'reactionsReceived', label: 'Alkış',    icon: Heart,    color: 'text-rose-400'    },
   { key: 'newFollowers',      label: 'Takipçi',  icon: UserPlus, color: 'text-sky-400'     },
-  { key: 'totalViews',        label: 'Okunma',   icon: Eye,      color: 'text-emerald-400' },
+  { key: 'totalViews',        label: 'Toplam Okunma', icon: Eye, color: 'text-emerald-400' },
 ] as const
 
 export function WeeklyStatsRow({ stats }: Props) {

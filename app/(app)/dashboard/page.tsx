@@ -80,9 +80,11 @@ export default async function DashboardPage() {
   // Count reactions on user's chapters in last 7 days
   const { data: userChapters } = await supabase
     .from('chapters')
-    .select('id')
+    .select('id, view_count')
     .eq('created_by', user.id)
-  const chapterIds = (userChapters ?? []).map((c: { id: string }) => c.id)
+  const chapterIds = (userChapters ?? []).map((c: { id: string; view_count: number }) => c.id)
+  const totalViewCount = (userChapters ?? []).reduce((s: number, c: { id: string; view_count: number }) => s + (c.view_count ?? 0), 0)
+
   const { count: reactionCount } = chapterIds.length > 0
     ? await supabase
         .from('chapter_reactions')
@@ -98,7 +100,7 @@ export default async function DashboardPage() {
     wordsWritten: (versionStats ?? []).reduce((s: number, v: { word_count: number }) => s + (v.word_count ?? 0), 0),
     reactionsReceived: reactionCount ?? 0,
     newFollowers: (followerData as unknown as number) ?? 0,
-    totalViews: 0,
+    totalViews: totalViewCount,
   }
 
   const badges = (badgeData ?? []) as UserBadge[]
