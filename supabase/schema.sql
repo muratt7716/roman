@@ -32,6 +32,7 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 -- Yeni notification tipleri (idempotent — varsa hata vermez)
 ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'new_chapter';
 ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'new_follower';
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'reaction';
 
 DO $$ BEGIN
   CREATE TYPE brainstorm_note_type AS ENUM ('plot', 'character', 'lore', 'relationship', 'sticky');

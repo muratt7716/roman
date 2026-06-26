@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Bell, CheckCircle, UserPlus, FileText, ThumbsUp, ThumbsDown, MessageSquare, AtSign, BookOpen } from 'lucide-react'
+import { Bell, CheckCircle, UserPlus, FileText, ThumbsUp, ThumbsDown, MessageSquare, AtSign, BookOpen, Flame } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { InviteActions } from '@/components/notifications/InviteActions'
@@ -19,6 +19,7 @@ const TYPE_META: Record<string, { label: string; icon: React.ElementType; color:
   suggestion:  { label: 'Yeni öneri taslağı var',     icon: Bell,          color: 'text-amber-400 bg-amber-500/15' },
   new_chapter: { label: 'Yeni bölüm yayınlandı',      icon: BookOpen,      color: 'text-violet-400 bg-violet-500/15' },
   new_follower: { label: 'Seni takip etmeye başladı', icon: UserPlus,      color: 'text-emerald-400 bg-emerald-500/15' },
+  reaction:     { label: 'Bölümüne alkış geldi',      icon: Flame,         color: 'text-orange-400 bg-orange-500/15' },
 }
 
 function getNotifDetail(n: any): { title: string; subtitle?: string; link?: string } {
@@ -75,6 +76,11 @@ function getNotifDetail(n: any): { title: string; subtitle?: string; link?: stri
       return {
         title: `${p.follower_display_name ?? p.follower_username ?? 'Biri'} seni takip etmeye başladı`,
         link: p.follower_username ? `/u/${p.follower_username}` : undefined,
+      }
+    case 'reaction':
+      return {
+        title: `${p.reactor_display_name ?? p.reactor_username ?? 'Biri'} "${p.chapter_title ?? 'bir bölümüne'}" ${p.emoji ?? '❤️'} attı`,
+        link: p.project_slug && p.chapter_id ? `/projects/${p.project_slug}/read/${p.chapter_id}` : undefined,
       }
     default:
       return { title: TYPE_META[n.type]?.label ?? n.type }

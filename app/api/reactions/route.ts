@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+const REACTION_EMOJI: Record<string, string> = { fire: '🔥', drop: '💧', bolt: '⚡' }
+
 // GET /api/reactions?chapter_id=xxx
-// Returns: { counts: { fire: N, drop: N, bolt: N }, userReactions: string[] }
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const chapterId = searchParams.get('chapter_id')
@@ -28,8 +29,7 @@ export async function GET(req: Request) {
 }
 
 // POST /api/reactions
-// Body: { chapter_id: string, reaction: 'fire'|'drop'|'bolt' }
-// Toggles: adds if not present, removes if present
+// Body: { chapter_id, reaction: 'fire'|'drop'|'bolt' }
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -52,9 +52,42 @@ export async function POST(req: Request) {
     const { error } = await supabase.from('chapter_reactions').delete().eq('id', existing.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ active: false })
-  } else {
-    const { error } = await supabase.from('chapter_reactions').insert({ chapter_id, user_id: user.id, reaction })
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ active: true })
   }
+
+  const { error } = await supabase.from('chapter_reactions').insert({ chapter_id, user_id: user.id, reaction })
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Yazar farklıysa bildirim gönder
+  const { data: chapter } = await supabase
+    .from('chapters')
+    .select('title, created_by, project:projects(id, slug)')
+    .eq('id', chapter_id)
+    .single()
+
+  if (chapter && chapter.created_by && chapter.created_by !== user.id) {
+    const { data: reactor } = await supabase
+      .from('profiles')
+      .select('display_name, username')
+      .eq('id', user.id)
+      .single()
+
+    const project = (Array.isArray(chapter.project) ? chapter.project[0] : chapter.project) as { id: string; slug: string } | null
+
+    await supabase.from('notifications').insert({
+      user_id: chapter.created_by,
+      type: 'reaction',
+      payload: {
+        chapter_id,
+        chapter_title: chapter.title,
+        project_id: project?.id,
+        project_slug: project?.slug,
+        reactor_display_name: reactor?.display_name,
+        reactor_username: reactor?.username,
+        reaction,
+        emoji: REACTION_EMOJI[reaction],
+      },
+    })
+  }
+
+  return NextResponse.json({ active: true })
 }
