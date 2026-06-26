@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { InviteButton } from '@/components/writers/InviteButton'
+import { SearchInput } from '@/components/shared/SearchInput'
 import { Users, BookOpen, PenLine, Star, Sparkles, Award } from 'lucide-react'
 import type { Profile } from '@/types'
 import { cn } from '@/lib/utils'
@@ -17,11 +18,11 @@ const STATUS_CONFIG = {
 }
 
 interface Props {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; q?: string }>
 }
 
 export default async function WritersPage({ searchParams }: Props) {
-  const { status } = await searchParams
+  const { status, q } = await searchParams
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -39,6 +40,7 @@ export default async function WritersPage({ searchParams }: Props) {
   if (status && ['open', 'active', 'busy'].includes(status)) {
     query = query.eq('writing_status', status)
   }
+  if (q) query = query.or(`display_name.ilike.%${q}%,username.ilike.%${q}%`)
 
   const { data: rawWriters } = await query
 
@@ -75,6 +77,9 @@ export default async function WritersPage({ searchParams }: Props) {
             </div>
           </div>
         </div>
+
+        {/* ── SEARCH ── */}
+        <SearchInput placeholder="Yazar adı veya kullanıcı adı ara..." />
 
         {/* ── FILTERING SECTION (Premium custom badges) ── */}
         <div className="flex flex-wrap items-center gap-2.5 p-2 bg-white/[0.02] border border-white/[0.06] rounded-2xl max-w-2xl">

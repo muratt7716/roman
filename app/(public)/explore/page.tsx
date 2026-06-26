@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { SearchInput } from '@/components/shared/SearchInput'
 import { BookOpen, Compass } from 'lucide-react'
 import type { ProjectWithOwner } from '@/types'
 import { cn } from '@/lib/utils'
@@ -13,11 +14,11 @@ export const dynamic = 'force-dynamic'
 const GENRES = ['Tümü', 'Fantastik', 'Bilim Kurgu', 'Romantik', 'Gerilim', 'Macera', 'Tarihi', 'Distopya']
 
 interface Props {
-  searchParams: Promise<{ genre?: string; status?: string }>
+  searchParams: Promise<{ genre?: string; status?: string; q?: string }>
 }
 
 export default async function ExplorePage({ searchParams }: Props) {
-  const { genre, status } = await searchParams
+  const { genre, status, q } = await searchParams
   const supabase = await createClient()
 
   let query = supabase
@@ -29,6 +30,7 @@ export default async function ExplorePage({ searchParams }: Props) {
 
   if (genre && genre !== 'Tümü') query = query.eq('genre', genre)
   if (status === 'recruiting') query = query.eq('collaboration_status', 'recruiting')
+  if (q) query = query.ilike('title', `%${q}%`)
 
   const { data: projects } = await query
 
@@ -61,6 +63,11 @@ export default async function ExplorePage({ searchParams }: Props) {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* ── SEARCH + FILTERS ── */}
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <SearchInput placeholder="Proje adı ara..." />
         </div>
 
         {/* ── FILTERS SECTION (Premium custom rounded badges) ── */}
