@@ -60,7 +60,7 @@ export default async function UserProfilePage({ params }: Props) {
       .order('updated_at', { ascending: false }),
     supabase
       .from('project_members')
-      .select('project:projects(id, title, genre), role:project_roles(name)')
+      .select('project:projects(id, slug, title, genre, visibility), role:project_roles(name)')
       .eq('user_id', profile.id),
     supabase
       .from('follows')
@@ -293,29 +293,45 @@ export default async function UserProfilePage({ params }: Props) {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {memberships.map((m: any, i: number) => m.project && (
-                <Link
-                  key={i}
-                  href={`/projects/${m.project.id}/overview`}
-                  className="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-primary/30 transition-all duration-300 group hover:translate-y-[-1px]"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
-                      <PenLine className="w-3.5 h-3.5 text-primary" />
+              {memberships.map((m: any, i: number) => {
+                if (!m.project) return null
+                const isPublic = ['open', 'published'].includes(m.project.visibility)
+                const href = isPublic ? `/projects/${m.project.slug}/read` : undefined
+                const Inner = (
+                  <>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20 shrink-0">
+                        <PenLine className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-sm text-white group-hover:text-primary transition-colors truncate block">{m.project.title}</span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wide block mt-0.5">{m.project.genre || 'Tür Belirtilmemiş'}</span>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <span className="font-semibold text-sm text-white group-hover:text-primary transition-colors truncate block">{m.project.title}</span>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wide block mt-0.5">{m.project.genre || 'Tür Belirtilmemiş'}</span>
-                    </div>
+                    {m.role?.name && (
+                      <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-muted-foreground/90 shrink-0">
+                        {m.role.name}
+                      </span>
+                    )}
+                  </>
+                )
+                return href ? (
+                  <Link
+                    key={i}
+                    href={href}
+                    className="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-primary/30 transition-all duration-300 group hover:translate-y-[-1px]"
+                  >
+                    {Inner}
+                  </Link>
+                ) : (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.05] opacity-60"
+                  >
+                    {Inner}
                   </div>
-                  
-                  {m.role?.name && (
-                    <span className="text-[10px] font-semibold px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/[0.08] text-muted-foreground/90 shrink-0">
-                      {m.role.name}
-                    </span>
-                  )}
-                </Link>
-              ))}
+                )
+              })}
             </div>
           </section>
         )}
