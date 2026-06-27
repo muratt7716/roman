@@ -629,25 +629,57 @@ export default function RedesignedLandingPage() {
           transition={{ duration: 0.7, ease }}
           className="relative max-w-4xl mx-auto text-center space-y-6"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-semibold leading-tight text-white">
-            Kelimeniz <span className="text-gradient">Yarım Kalmasın</span>
-          </h2>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Hemen şimdi kaydolun, ilk ortak evreninizi yaratın ve kalemi güçlü diğer yazarlar ile birlik kurgular oluşturmaya başlayın.
-          </p>
-          
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              href="/signup"
-              className={cn(
-                buttonVariants({ size: 'lg' }), 
-                'w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-5 rounded-xl font-semibold shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all'
-              )}
-            >
-              Hemen Ücretsiz Başla
-            </Link>
-          </div>
-          <p className="text-[11px] text-muted-foreground/60">Kurulum veya kredi kartı bilgisi gerekmez · Tüm temel özellikler ücretsizdir</p>
+          {isLoggedIn ? (
+            <>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-semibold leading-tight text-white">
+                Kaldığın Yerden <span className="text-gradient">Devam Et</span>
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                Projelerine dön, yeni bir bölüm yaz ya da ekibinle birlikte evreni genişlet.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link
+                  href="/dashboard"
+                  className={cn(
+                    buttonVariants({ size: 'lg' }),
+                    'w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-5 rounded-xl font-semibold shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all gap-2'
+                  )}
+                >
+                  <PenLine className="w-4 h-4" /> Dashboard'a Git
+                </Link>
+                <Link
+                  href="/projects/new"
+                  className={cn(
+                    buttonVariants({ variant: 'outline', size: 'lg' }),
+                    'w-full sm:w-auto text-muted-foreground hover:text-white px-8 py-5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] transition-all gap-2'
+                  )}
+                >
+                  <Plus className="w-4 h-4" /> Yeni Proje Oluştur
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-semibold leading-tight text-white">
+                Kelimeniz <span className="text-gradient">Yarım Kalmasın</span>
+              </h2>
+              <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+                Hemen şimdi kaydolun, ilk ortak evreninizi yaratın ve kalemi güçlü diğer yazarlar ile birlik kurgular oluşturmaya başlayın.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link
+                  href="/signup"
+                  className={cn(
+                    buttonVariants({ size: 'lg' }),
+                    'w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-5 rounded-xl font-semibold shadow-[0_0_40px_rgba(124,58,237,0.4)] transition-all'
+                  )}
+                >
+                  Hemen Ücretsiz Başla
+                </Link>
+              </div>
+              <p className="text-[11px] text-muted-foreground/60">Kurulum veya kredi kartı bilgisi gerekmez · Tüm temel özellikler ücretsizdir</p>
+            </>
+          )}
         </motion.div>
       </section>
 
