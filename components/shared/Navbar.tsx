@@ -50,7 +50,7 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
 
         <div className="relative max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
 
-          <Link href="/" className="flex items-center gap-2.5 group font-sans" aria-label="Kalem Birliği anasayfa">
+          <Link href="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-2.5 group font-sans" aria-label="Kalem Birliği anasayfa">
             <img
               src="/logo.png"
               className="w-8 h-8 rounded-xl object-cover border border-white/[0.08] shadow-[0_0_16px_rgba(124,58,237,0.2)] group-hover:scale-105 group-hover:shadow-[0_0_22px_rgba(124,58,237,0.45)] transition-all duration-300"
