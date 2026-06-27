@@ -3,19 +3,19 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  ArrowRight, 
-  Users, 
-  Zap, 
-  BookOpen, 
-  PenLine, 
-  Star, 
-  GitBranch, 
-  MessageSquare, 
-  Sparkles, 
-  Clock, 
-  User, 
-  Check, 
+import {
+  ArrowRight,
+  Users,
+  Zap,
+  BookOpen,
+  PenLine,
+  Star,
+  GitBranch,
+  MessageSquare,
+  Sparkles,
+  Clock,
+  User,
+  Check,
   Layers,
   ChevronRight,
   Send,
@@ -24,6 +24,7 @@ import {
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { EditorialPicksSection } from '@/components/home/EditorialPicksSection'
+import { createClient } from '@/lib/supabase/client'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -88,8 +89,16 @@ const STATS = [
 export default function RedesignedLandingPage() {
   const [activeTab, setActiveTab] = useState<'codex' | 'timeline' | 'brainstorm'>('codex')
   const [typewriterText, setTypewriterText] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const fullText = 'Karanlık ormanın derinliklerinde, Aria kayıp tapınağın kapısına ulaştığında rüzgar aniden kesildi. Ellerindeki fenerin titreyen ışığı, kapıdaki kadim rünleri aydınlatıyordu...'
-  
+
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session)
+    })
+  }, [])
+
   useEffect(() => {
     let index = 0
     const interval = setInterval(() => {
@@ -137,28 +146,53 @@ export default function RedesignedLandingPage() {
           Kafa karıştırıcı araçları geride bırakın. Kalem Birliği, gözü yormayan sade arayüzü ile ekibinizi kurup, canlı kurgu evreninizi tasarlayabileceğiniz gerçek zamanlı ortak yazarlık platformudur.
         </motion.p>
 
-        <motion.div 
-          {...fadeUp(0.4)} 
+        <motion.div
+          {...fadeUp(0.4)}
           className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto px-4"
         >
-          <Link
-            href="/signup"
-            className={cn(
-              buttonVariants({ size: 'lg' }), 
-              'w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-6 rounded-xl font-medium shadow-[0_0_30px_rgba(124,58,237,0.3)] hover:shadow-[0_0_40px_rgba(124,58,237,0.45)] transition-all duration-300 gap-2 text-base'
-            )}
-          >
-            Ücretsiz Başla <ArrowRight className="w-4 h-4" />
-          </Link>
-          <Link
-            href="/explore"
-            className={cn(
-              buttonVariants({ variant: 'outline', size: 'lg' }), 
-              'w-full sm:w-auto text-muted-foreground hover:text-white px-8 py-6 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-300 text-base'
-            )}
-          >
-            Evrenleri Keşfet
-          </Link>
+          {isLoggedIn ? (
+            <>
+              <Link
+                href="/dashboard"
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-6 rounded-xl font-medium shadow-[0_0_30px_rgba(124,58,237,0.3)] hover:shadow-[0_0_40px_rgba(124,58,237,0.45)] transition-all duration-300 gap-2 text-base'
+                )}
+              >
+                <PenLine className="w-4 h-4" /> Yazmaya Devam Et
+              </Link>
+              <Link
+                href="/projects/new"
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'lg' }),
+                  'w-full sm:w-auto text-muted-foreground hover:text-white px-8 py-6 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-300 gap-2 text-base'
+                )}
+              >
+                <Plus className="w-4 h-4" /> Yeni Proje
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                className={cn(
+                  buttonVariants({ size: 'lg' }),
+                  'w-full sm:w-auto bg-primary hover:bg-primary/90 text-white px-8 py-6 rounded-xl font-medium shadow-[0_0_30px_rgba(124,58,237,0.3)] hover:shadow-[0_0_40px_rgba(124,58,237,0.45)] transition-all duration-300 gap-2 text-base'
+                )}
+              >
+                Ücretsiz Başla <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/explore"
+                className={cn(
+                  buttonVariants({ variant: 'outline', size: 'lg' }),
+                  'w-full sm:w-auto text-muted-foreground hover:text-white px-8 py-6 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15] transition-all duration-300 text-base'
+                )}
+              >
+                Evrenleri Keşfet
+              </Link>
+            </>
+          )}
         </motion.div>
 
         {/* Dynamic scroll indicator */}
