@@ -89,12 +89,12 @@ export default function JoinClassroomPage() {
       {/* Adım göstergesi */}
       <div className="flex items-center gap-2 text-xs text-slate-500">
         {(['search', 'select', 'password'] as Step[]).map((s, i) => (
-          <>
-            <span key={s} className={step === s ? 'text-primary font-semibold' : 'text-slate-500'}>
+          <span key={s} className="flex items-center gap-2">
+            <span className={step === s ? 'text-primary font-semibold' : 'text-slate-500'}>
               {i + 1}. {s === 'search' ? 'Ara' : s === 'select' ? 'Sınıf Seç' : 'Şifre Gir'}
             </span>
-            {i < 2 && <ChevronRight key={s + '-arrow'} className="w-3 h-3" />}
-          </>
+            {i < 2 && <ChevronRight className="w-3 h-3" />}
+          </span>
         ))}
       </div>
 
