@@ -79,11 +79,11 @@ const FEATURES = [
   },
 ]
 
-const STATS = [
-  { value: '12K+', label: 'Aktif Yazar', desc: 'Yaratıcı zihin tek bir çatı altında' },
-  { value: '3.6M', label: 'Kelime Yazıldı', desc: 'Canlı paylaşılan kurgusal kelimeler' },
-  { value: '920+', label: 'Ortak Proje', desc: 'Birlikte yazılan roman ve senaryo' },
-  { value: '%98', label: 'Yazar Memnuniyeti', desc: 'Kafa karıştırmayan arayüz tasarımı' },
+const FEATURES_HIGHLIGHT = [
+  { icon: '⚡', label: 'Gerçek Zamanlı İşbirliği', desc: 'Ekibinle aynı anda aynı sayfada yaz' },
+  { icon: '🔒', label: 'Otomatik Sürüm Geçmişi', desc: 'Her kelimen saklanır, hiçbir şey kaybolmaz' },
+  { icon: '🤖', label: 'Yapay Zeka Desteği', desc: 'Tıkandığında AI\'dan yazma önerisi al' },
+  { icon: '🎓', label: 'Okul & Atölye Modu', desc: 'Öğretmen-öğrenci ödev ve değerlendirme sistemi' },
 ]
 
 export default function RedesignedLandingPage() {
@@ -325,9 +325,9 @@ export default function RedesignedLandingPage() {
 
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {STATS.map((s, i) => (
+            {FEATURES_HIGHLIGHT.map((f, i) => (
               <motion.div
-                key={s.label}
+                key={f.label}
                 initial={{ opacity: 0, y: 16 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
@@ -335,10 +335,10 @@ export default function RedesignedLandingPage() {
                 className="bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-colors p-4 sm:p-6 rounded-2xl text-center flex flex-col justify-between"
               >
                 <div>
-                  <p className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-gradient">{s.value}</p>
-                  <p className="text-xs sm:text-sm font-semibold text-white/90 mt-1.5 sm:mt-2">{s.label}</p>
+                  <p className="text-3xl sm:text-4xl mb-2">{f.icon}</p>
+                  <p className="text-xs sm:text-sm font-semibold text-white/90">{f.label}</p>
                 </div>
-                <p className="hidden sm:block text-xs text-muted-foreground mt-2 leading-relaxed">{s.desc}</p>
+                <p className="hidden sm:block text-xs text-muted-foreground mt-2 leading-relaxed">{f.desc}</p>
               </motion.div>
             ))}
           </div>
