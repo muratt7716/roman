@@ -6,7 +6,7 @@ export function LiteraryBackground() {
   return (
     <div
       aria-hidden="true"
-      className="pointer-events-none select-none fixed inset-0 z-0 overflow-hidden hidden sm:block"
+      className="pointer-events-none select-none fixed inset-0 z-[5] overflow-hidden hidden sm:block"
     >
       {/* Sol üst — tüy kalem */}
       <div className="absolute -left-6 top-24 w-16 h-[150px] text-white/[0.10] rotate-[20deg]">
