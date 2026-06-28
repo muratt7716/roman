@@ -80,10 +80,10 @@ const FEATURES = [
 ]
 
 const FEATURES_HIGHLIGHT = [
-  { icon: '⚡', label: 'Gerçek Zamanlı İşbirliği', desc: 'Ekibinle aynı anda aynı sayfada yaz' },
-  { icon: '🔒', label: 'Otomatik Sürüm Geçmişi', desc: 'Her kelimen saklanır, hiçbir şey kaybolmaz' },
-  { icon: '⏱️', label: 'Yazma Sprintleri', desc: 'Zamanlayıcıyla odaklan, ekibinle sprint yap' },
-  { icon: '🎓', label: 'Okul & Atölye Modu', desc: 'Öğretmen-öğrenci ödev ve değerlendirme sistemi' },
+  { icon: '⚡', label: 'Gerçek Zamanlı İşbirliği', desc: 'Ekibinle aynı anda aynı sayfada yaz', href: null },
+  { icon: '🔒', label: 'Otomatik Sürüm Geçmişi', desc: 'Her kelimen saklanır, hiçbir şey kaybolmaz', href: null },
+  { icon: '⏱️', label: 'Yazma Sprintleri', desc: 'Zamanlayıcıyla odaklan, ekibinle sprint yap', href: '/sprint' },
+  { icon: '🎓', label: 'Akademi & Atölye', desc: 'Sınıf yönetimi, ödev takibi, not sistemi', href: '/classroom' },
 ]
 
 export default function RedesignedLandingPage() {
@@ -325,22 +325,33 @@ export default function RedesignedLandingPage() {
 
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {FEATURES_HIGHLIGHT.map((f, i) => (
-              <motion.div
-                key={f.label}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-50px' }}
-                transition={{ duration: 0.6, ease, delay: i * 0.08 }}
-                className="bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-colors p-4 sm:p-6 rounded-2xl text-center flex flex-col justify-between"
-              >
-                <div>
-                  <p className="text-3xl sm:text-4xl mb-2">{f.icon}</p>
-                  <p className="text-xs sm:text-sm font-semibold text-white/90">{f.label}</p>
-                </div>
-                <p className="hidden sm:block text-xs text-muted-foreground mt-2 leading-relaxed">{f.desc}</p>
-              </motion.div>
-            ))}
+            {FEATURES_HIGHLIGHT.map((f, i) => {
+              const inner = (
+                <>
+                  <div>
+                    <p className="text-3xl sm:text-4xl mb-2">{f.icon}</p>
+                    <p className="text-xs sm:text-sm font-semibold text-white/90">{f.label}</p>
+                  </div>
+                  <p className="hidden sm:block text-xs text-muted-foreground mt-2 leading-relaxed">{f.desc}</p>
+                  {f.href && <p className="text-[10px] text-primary mt-2 font-medium">Keşfet →</p>}
+                </>
+              )
+              const cardClass = `bg-white/[0.02] border border-white/[0.04] transition-colors p-4 sm:p-6 rounded-2xl text-center flex flex-col justify-between${f.href ? ' hover:border-primary/40 hover:bg-white/[0.04] cursor-pointer' : ' hover:border-white/[0.08]'}`
+              return (
+                <motion.div
+                  key={f.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-50px' }}
+                  transition={{ duration: 0.6, ease, delay: i * 0.08 }}
+                  className={cardClass}
+                >
+                  {f.href ? (
+                    <Link href={f.href} className="contents">{inner}</Link>
+                  ) : inner}
+                </motion.div>
+              )
+            })}
           </div>
         </div>
       </section>
