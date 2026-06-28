@@ -833,7 +833,34 @@ AS $$
 $$;
 
 -- SECURITY DEFINER: join kodu ile sınıfa katılma (RLS bypass gerektirir)
-CREATE OR REPLACE FUNCTION join_classroom_by_code(p_code text)
+-- Yeni sütunlar (school_name + password)
+ALTER TABLE classrooms ADD COLUMN IF NOT EXISTS school_name text NOT NULL DEFAULT '';
+ALTER TABLE classrooms ADD COLUMN IF NOT EXISTS password    text NOT NULL DEFAULT '';
+
+CREATE INDEX IF NOT EXISTS idx_classrooms_school ON classrooms(school_name);
+
+-- Okul adına göre sınıf arama (şifre döndürmez, herkes çağırabilir)
+CREATE OR REPLACE FUNCTION search_classrooms(p_school text, p_name text DEFAULT NULL)
+RETURNS TABLE(id uuid, name text, school_name text, member_count bigint)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT c.id, c.name, c.school_name,
+    COUNT(cm.user_id)::bigint
+  FROM classrooms c
+  LEFT JOIN classroom_members cm ON cm.classroom_id = c.id
+  WHERE c.school_name ILIKE '%' || p_school || '%'
+    AND (p_name IS NULL OR c.name ILIKE '%' || p_name || '%')
+  GROUP BY c.id, c.name, c.school_name
+  ORDER BY c.school_name, c.name;
+END;
+$$;
+
+-- Şifreyle sınıfa katıl
+CREATE OR REPLACE FUNCTION join_classroom_by_password(p_classroom_id uuid, p_password text)
 RETURNS json
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -847,10 +874,14 @@ BEGIN
     RETURN json_build_object('error', 'Giriş yapman gerekiyor.');
   END IF;
 
-  SELECT * INTO v_classroom FROM classrooms WHERE join_code = upper(p_code);
+  SELECT * INTO v_classroom FROM classrooms WHERE id = p_classroom_id;
 
   IF NOT FOUND THEN
     RETURN json_build_object('error', 'Sınıf bulunamadı.');
+  END IF;
+
+  IF v_classroom.password != p_password THEN
+    RETURN json_build_object('error', 'Şifre yanlış.');
   END IF;
 
   IF EXISTS (
@@ -864,6 +895,18 @@ BEGIN
   VALUES (v_classroom.id, v_user_id, 'student');
 
   RETURN json_build_object('classroom_id', v_classroom.id, 'already_member', false);
+END;
+$$;
+
+-- Eski join_code fonksiyonunu koru (geriye uyumluluk)
+CREATE OR REPLACE FUNCTION join_classroom_by_code(p_code text)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN json_build_object('error', 'Bu yöntem artık kullanılmıyor. Lütfen sınıf arama ile katıl.');
 END;
 $$;
 

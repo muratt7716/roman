@@ -278,8 +278,9 @@ export interface Classroom {
   id: string
   owner_id: string
   name: string
+  school_name: string
   description: string | null
-  join_code: string
+  password?: string
   created_at: string
 }
 
