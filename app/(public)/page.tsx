@@ -82,7 +82,7 @@ const FEATURES = [
 const FEATURES_HIGHLIGHT = [
   { icon: '⚡', label: 'Gerçek Zamanlı İşbirliği', desc: 'Ekibinle aynı anda aynı sayfada yaz' },
   { icon: '🔒', label: 'Otomatik Sürüm Geçmişi', desc: 'Her kelimen saklanır, hiçbir şey kaybolmaz' },
-  { icon: '🤖', label: 'Yapay Zeka Desteği', desc: 'Tıkandığında AI\'dan yazma önerisi al' },
+  { icon: '⏱️', label: 'Yazma Sprintleri', desc: 'Zamanlayıcıyla odaklan, ekibinle sprint yap' },
   { icon: '🎓', label: 'Okul & Atölye Modu', desc: 'Öğretmen-öğrenci ödev ve değerlendirme sistemi' },
 ]
 
