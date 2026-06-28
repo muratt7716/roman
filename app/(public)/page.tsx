@@ -25,6 +25,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { EditorialPicksSection } from '@/components/home/EditorialPicksSection'
 import { createClient } from '@/lib/supabase/client'
+import { QuillSVG, OpenBookSVG, InkwellSVG, PenNibSVG, InkDotsSVG } from '@/components/ui/LiteraryDecor'
 
 const ease = [0.16, 1, 0.3, 1] as const
 
@@ -122,8 +123,18 @@ export default function RedesignedLandingPage() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.007)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.007)_1px,transparent_1px)] bg-[size:40px_40px]" />
       </div>
 
+      {/* Ink dots scattered */}
+      <div aria-hidden="true" className="absolute inset-0 w-full h-full text-white/[0.09] z-0 pointer-events-none select-none hidden sm:block overflow-hidden">
+        <InkDotsSVG />
+      </div>
+
       {/* ── HERO SECTION ── */}
       <section className="relative pt-24 pb-20 md:pt-32 md:pb-28 px-4 flex flex-col items-center justify-center text-center max-w-7xl mx-auto">
+        {/* Literary decor */}
+        <div aria-hidden="true" className="absolute right-4 sm:right-12 top-16 w-24 h-[140px] text-white/[0.11] rotate-[-15deg] z-0 pointer-events-none select-none hidden sm:block">
+          <QuillSVG />
+        </div>
+
         <motion.div {...fadeUp(0)} className="mb-6">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-white/[0.03] border border-white/[0.08] text-violet-300">
             <Sparkles className="w-3 h-3 text-primary animate-pulse" />
@@ -322,6 +333,11 @@ export default function RedesignedLandingPage() {
 
       {/* ── STATS SECTION ── */}
       <section className="relative py-16 px-4 bg-black/[0.15]">
+        {/* Literary decor */}
+        <div aria-hidden="true" className="absolute right-8 bottom-6 w-16 h-[75px] text-white/[0.11] rotate-[5deg] z-0 pointer-events-none select-none hidden sm:block">
+          <InkwellSVG />
+        </div>
+
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {STATS.map((s, i) => (
@@ -520,6 +536,11 @@ export default function RedesignedLandingPage() {
 
       {/* ── FEATURES GRID ── */}
       <section className="relative py-24 px-4 border-t border-white/[0.04] bg-white/[0.01]">
+        {/* Literary decor */}
+        <div aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 w-20 h-16 text-white/[0.10] rotate-[8deg] z-0 pointer-events-none select-none hidden md:block">
+          <OpenBookSVG />
+        </div>
+
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <span className="text-primary text-xs font-semibold tracking-wider uppercase">Teknik Donanım</span>
@@ -618,6 +639,11 @@ export default function RedesignedLandingPage() {
 
       {/* ── CALL TO ACTION (CTA) ── */}
       <section className="relative py-28 px-4 border-t border-white/[0.04]">
+        {/* Literary decor */}
+        <div aria-hidden="true" className="absolute left-8 bottom-10 w-14 h-[78px] text-white/[0.12] rotate-[-20deg] z-0 pointer-events-none select-none hidden sm:block">
+          <PenNibSVG />
+        </div>
+
         <div aria-hidden="true" className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-[600px] h-[350px] bg-violet-600/5 rounded-full blur-[100px]" />
         </div>
