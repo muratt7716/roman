@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/shared/Navbar'
+import { LiteraryBackground } from '@/components/ui/LiteraryBackground'
 import type { Profile } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -58,6 +59,7 @@ export default async function PublicLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-dvh">
+      <LiteraryBackground />
       <Navbar profile={profile} unreadCount={unreadCount} isAdmin={isAdmin} />
       <main className="pt-16">{children}</main>
     </div>
