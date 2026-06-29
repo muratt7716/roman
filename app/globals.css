@@ -265,3 +265,12 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Print CSS for magazine reader */
+@media print {
+  nav, header, .print\:hidden { display: none !important; }
+  body { background: white !important; color: black !important; }
+  .prose { color: black !important; }
+  .prose * { color: black !important; }
+  article { page-break-inside: avoid; }
+}
