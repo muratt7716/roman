@@ -38,14 +38,19 @@ export default async function ClassroomPage({ params }: PageProps) {
 
   let myMembership = members?.find((m) => m.user_id === user.id) ?? null
 
-  // Resilience: owner may lack a membership row if it was created before RLS fix
+  // Resilience: owner may lack a membership row if RLS blocked the insert
   if (!myMembership && classroom.owner_id === user.id) {
+    // Try to insert (may be blocked silently by old RLS policy)
     await supabase.from('classroom_members').insert({ classroom_id: classroomId, user_id: user.id, role: 'teacher' })
     const { data: refreshed } = await supabase
       .from('classroom_members')
       .select('*, profile:profiles(id, username, display_name, avatar_url)')
       .eq('classroom_id', classroomId)
     myMembership = refreshed?.find((m: { user_id: string }) => m.user_id === user.id) ?? null
+    // If insert was silently blocked by RLS, synthesize membership — owner always has access
+    if (!myMembership) {
+      myMembership = { user_id: user.id, classroom_id: classroomId, role: 'teacher', joined_at: new Date().toISOString(), student_id: null, profile: null } as any
+    }
   }
 
   if (!myMembership) notFound()
