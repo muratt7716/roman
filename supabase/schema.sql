@@ -1125,3 +1125,114 @@ DROP POLICY IF EXISTS "sp_update_self"  ON sprint_participants;
 CREATE POLICY "sp_select_all"  ON sprint_participants FOR SELECT USING (true);
 CREATE POLICY "sp_insert_self" ON sprint_participants FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "sp_update_self" ON sprint_participants FOR UPDATE USING (auth.uid() = user_id);
+
+-- ============================================================
+-- SINIF DERGİSİ (Faz 6)
+-- ============================================================
+
+ALTER TYPE notification_type ADD VALUE IF NOT EXISTS 'magazine_published';
+
+CREATE TABLE IF NOT EXISTS class_magazines (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  classroom_id uuid NOT NULL REFERENCES classrooms(id) ON DELETE CASCADE,
+  title        text NOT NULL CHECK (char_length(title) BETWEEN 1 AND 200),
+  issue_number int  NOT NULL DEFAULT 1,
+  status       text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','published')),
+  published_at timestamptz,
+  created_at   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS magazine_sections (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  magazine_id uuid NOT NULL REFERENCES class_magazines(id) ON DELETE CASCADE,
+  type        text NOT NULL CHECK (type IN ('hikaye','siir','makale','senaryo','serbest')),
+  sort_order  int  NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS magazine_entries (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  section_id    uuid NOT NULL REFERENCES magazine_sections(id) ON DELETE CASCADE,
+  submission_id uuid NOT NULL REFERENCES assignment_submissions(id) ON DELETE CASCADE,
+  display_name  text,
+  is_featured   bool NOT NULL DEFAULT false,
+  sort_order    int  NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_magazines_classroom   ON class_magazines(classroom_id);
+CREATE INDEX IF NOT EXISTS idx_mag_sections_magazine ON magazine_sections(magazine_id);
+CREATE INDEX IF NOT EXISTS idx_mag_entries_section   ON magazine_entries(section_id);
+
+-- RLS: class_magazines
+ALTER TABLE class_magazines ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "magazines_select" ON class_magazines;
+CREATE POLICY "magazines_select" ON class_magazines FOR SELECT USING (
+  status = 'published'
+  OR EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+  OR EXISTS (SELECT 1 FROM classroom_members WHERE classroom_id = class_magazines.classroom_id AND user_id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "magazines_insert" ON class_magazines;
+CREATE POLICY "magazines_insert" ON class_magazines FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "magazines_update" ON class_magazines;
+CREATE POLICY "magazines_update" ON class_magazines FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "magazines_delete" ON class_magazines;
+CREATE POLICY "magazines_delete" ON class_magazines FOR DELETE USING (
+  EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+);
+
+-- RLS: magazine_sections
+ALTER TABLE magazine_sections ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "mag_sections_select" ON magazine_sections;
+CREATE POLICY "mag_sections_select" ON magazine_sections FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM class_magazines m
+    WHERE m.id = magazine_id AND (
+      m.status = 'published'
+      OR EXISTS (SELECT 1 FROM classrooms c WHERE c.id = m.classroom_id AND c.owner_id = auth.uid())
+      OR EXISTS (SELECT 1 FROM classroom_members cm WHERE cm.classroom_id = m.classroom_id AND cm.user_id = auth.uid())
+    )
+  )
+);
+
+DROP POLICY IF EXISTS "mag_sections_all" ON magazine_sections;
+CREATE POLICY "mag_sections_all" ON magazine_sections FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM class_magazines m
+    JOIN classrooms c ON c.id = m.classroom_id
+    WHERE m.id = magazine_id AND c.owner_id = auth.uid() AND m.status = 'draft'
+  )
+);
+
+-- RLS: magazine_entries
+ALTER TABLE magazine_entries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "mag_entries_select" ON magazine_entries;
+CREATE POLICY "mag_entries_select" ON magazine_entries FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM magazine_sections s
+    JOIN class_magazines m ON m.id = s.magazine_id
+    WHERE s.id = section_id AND (
+      m.status = 'published'
+      OR EXISTS (SELECT 1 FROM classrooms c WHERE c.id = m.classroom_id AND c.owner_id = auth.uid())
+      OR EXISTS (SELECT 1 FROM classroom_members cm WHERE cm.classroom_id = m.classroom_id AND cm.user_id = auth.uid())
+    )
+  )
+);
+
+DROP POLICY IF EXISTS "mag_entries_all" ON magazine_entries;
+CREATE POLICY "mag_entries_all" ON magazine_entries FOR ALL USING (
+  EXISTS (
+    SELECT 1 FROM magazine_sections s
+    JOIN class_magazines m ON m.id = s.magazine_id
+    JOIN classrooms c ON c.id = m.classroom_id
+    WHERE s.id = section_id AND c.owner_id = auth.uid() AND m.status = 'draft'
+  )
+);

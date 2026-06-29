@@ -348,3 +348,49 @@ export interface SprintParticipant {
   finished_at: string | null
   profile?: Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>
 }
+
+export interface ClassMagazine {
+  id: string
+  classroom_id: string
+  title: string
+  issue_number: number
+  status: 'draft' | 'published'
+  published_at: string | null
+  created_at: string
+}
+
+export type MagazineSectionType = 'hikaye' | 'siir' | 'makale' | 'senaryo' | 'serbest'
+
+export const MAGAZINE_SECTION_LABELS: Record<MagazineSectionType, string> = {
+  hikaye: 'Hikayeler',
+  siir: 'Şiirler',
+  makale: 'Makaleler',
+  senaryo: 'Senaryolar',
+  serbest: 'Serbest',
+}
+
+export interface MagazineSection {
+  id: string
+  magazine_id: string
+  type: MagazineSectionType
+  sort_order: number
+  entries?: MagazineEntry[]
+}
+
+export interface MagazineEntry {
+  id: string
+  section_id: string
+  submission_id: string
+  display_name: string | null
+  is_featured: boolean
+  sort_order: number
+  submission?: {
+    id: string
+    student_id: string
+    project_id: string | null
+    status: string
+    student?: { display_name: string | null; username: string }
+    assignment?: { title: string }
+    latest_content?: string
+  }
+}
