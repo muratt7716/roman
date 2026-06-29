@@ -1179,7 +1179,8 @@ CREATE POLICY "magazines_insert" ON class_magazines FOR INSERT WITH CHECK (
 
 DROP POLICY IF EXISTS "magazines_update" ON class_magazines;
 CREATE POLICY "magazines_update" ON class_magazines FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
+  status = 'draft'
+  AND EXISTS (SELECT 1 FROM classrooms WHERE id = classroom_id AND owner_id = auth.uid())
 );
 
 DROP POLICY IF EXISTS "magazines_delete" ON class_magazines;

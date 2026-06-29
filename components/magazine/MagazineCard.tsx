@@ -31,7 +31,7 @@ export function MagazineCard({ magazine, classroomId, isTeacher }: Props) {
       </div>
       <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-500">
         {magazine.status === 'published'
-          ? <><CheckCircle2 className="w-3 h-3 text-green-400" />{new Date(magazine.published_at!).toLocaleDateString('tr')}</>
+          ? <><CheckCircle2 className="w-3 h-3 text-green-400" />{magazine.published_at ? new Date(magazine.published_at).toLocaleDateString('tr') : ''}</>
           : <><Clock className="w-3 h-3" />Düzenleniyor</>
         }
       </div>
