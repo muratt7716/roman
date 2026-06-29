@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { Plus, GraduationCap, ArrowRight, BookOpen, Compass, Search } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ClassroomCard } from '@/components/classroom/ClassroomCard'
+import { DeleteClassroomButton } from '@/components/classroom/DeleteClassroomButton'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -167,13 +168,18 @@ export default async function ClassroomListPage() {
                 {teacherClasses.map((m: any) => {
                   const stats = countsMap.get(m.classroom.id)
                   return (
-                    <ClassroomCard
-                      key={m.classroom.id}
-                      classroom={m.classroom}
-                      role={m.role}
-                      memberCount={stats?.memberCount}
-                      assignmentCount={stats?.assignmentCount}
-                    />
+                    <div key={m.classroom.id} className="relative group">
+                      <ClassroomCard
+                        classroom={m.classroom}
+                        role={m.role}
+                        memberCount={stats?.memberCount}
+                        assignmentCount={stats?.assignmentCount}
+                      />
+                      <DeleteClassroomButton
+                        classroomId={m.classroom.id}
+                        classroomName={m.classroom.name}
+                      />
+                    </div>
                   )
                 })}
               </div>
