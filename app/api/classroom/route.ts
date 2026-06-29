@@ -17,6 +17,10 @@ export async function GET() {
   return NextResponse.json({ classrooms: data ?? [] })
 }
 
+function generateJoinCode() {
+  return Array.from({ length: 6 }, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 32)]).join('')
+}
+
 // POST /api/classroom — sınıf oluştur
 // Body: { name, school_name, password, description? }
 export async function POST(req: Request) {
@@ -40,6 +44,7 @@ export async function POST(req: Request) {
       name: name.trim(),
       school_name: school_name.trim(),
       password: password.trim(),
+      join_code: generateJoinCode(),
       description: description?.trim() || null,
     })
     .select()
