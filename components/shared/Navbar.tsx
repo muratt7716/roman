@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LogOut, User, Bell, LayoutDashboard,
   Compass, Users, Lightbulb, Wand2, Gamepad2, Menu, X, ChevronRight,
-  MessageSquarePlus, ShieldCheck, GraduationCap, Zap
+  MessageSquarePlus, ShieldCheck, GraduationCap, Zap, BookOpen
 } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -177,6 +177,12 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                     <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]">
                       <Link href="/oyun" className="flex w-full items-center gap-2.5 text-[13px] text-muted-foreground hover:text-white font-medium">
                         <Gamepad2 className="w-4 h-4 text-emerald-400" /> Kelime Oyunu
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]">
+                      <Link href="/discover/magazines" className="flex w-full items-center gap-2.5 text-[13px] text-muted-foreground hover:text-white font-medium">
+                        <BookOpen className="w-4 h-4 text-primary" /> Sınıf Dergileri
                       </Link>
                     </DropdownMenuItem>
 

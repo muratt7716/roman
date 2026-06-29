@@ -143,12 +143,21 @@ export default async function ClassroomPage({ params }: PageProps) {
             <div className="max-w-xs w-full">
               <JoinCodeDisplay code={classroom.join_code} />
             </div>
-            <Link
-              href={`/classroom/${classroomId}/analytics`}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 text-sm font-semibold transition-colors border border-violet-500/20"
-            >
-              <BarChart2 className="w-4 h-4" /> Sınıf İstatistikleri
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/classroom/${classroomId}/magazine`}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/[0.06] text-slate-300 hover:text-white hover:border-white/[0.12] text-sm transition-all"
+              >
+                <BookOpen className="w-4 h-4 text-primary" />
+                Dergi
+              </Link>
+              <Link
+                href={`/classroom/${classroomId}/analytics`}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 text-sm font-semibold transition-colors border border-violet-500/20"
+              >
+                <BarChart2 className="w-4 h-4" /> Sınıf İstatistikleri
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -336,7 +345,7 @@ export default async function ClassroomPage({ params }: PageProps) {
 
         {/* Kişiselleştirilmiş Karşılama Başlığı */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-white/[0.04] relative z-10">
-          <div className="space-y-2">
+          <div className="space-y-2 flex-1">
             <div className="flex items-center gap-2">
               <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20">
                 Sınıf: {classroom.name}
@@ -349,6 +358,13 @@ export default async function ClassroomPage({ params }: PageProps) {
               Öğretmeninin verdiği görevleri (ödevleri) tamamlayarak yazarlık seviyeni yükselt ve XP kazan!
             </p>
           </div>
+          <Link
+            href={`/classroom/${classroomId}/magazine`}
+            className="shrink-0 flex items-center gap-2 px-3 py-2 rounded-xl border border-white/[0.06] text-slate-300 hover:text-white hover:border-white/[0.12] text-sm transition-all"
+          >
+            <BookOpen className="w-4 h-4 text-primary" />
+            Dergi
+          </Link>
         </div>
 
         {/* Oyunlaştırma Metrikleri Satırı (XP + Streak + İstatistikler) */}
