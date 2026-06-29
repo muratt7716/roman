@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Star, Eye, EyeOff, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import type { MagazineEntry } from '@/types'
 
 interface Props {
@@ -17,19 +18,21 @@ export function EntryCard({ entry, magazineId, sectionId, onUpdate, onRemove }: 
 
   async function patch(changes: Record<string, unknown>) {
     setLoading(true)
-    await fetch(`/api/magazine/${magazineId}/sections/${sectionId}/entries/${entry.id}`, {
+    const res = await fetch(`/api/magazine/${magazineId}/sections/${sectionId}/entries/${entry.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(changes),
     })
-    onUpdate(entry.id, changes as Partial<MagazineEntry>)
+    if (res.ok) onUpdate(entry.id, changes as Partial<MagazineEntry>)
+    else toast.error('Güncelleme başarısız.')
     setLoading(false)
   }
 
   async function remove() {
     setLoading(true)
-    await fetch(`/api/magazine/${magazineId}/sections/${sectionId}/entries/${entry.id}`, { method: 'DELETE' })
-    onRemove(entry.id)
+    const res = await fetch(`/api/magazine/${magazineId}/sections/${sectionId}/entries/${entry.id}`, { method: 'DELETE' })
+    if (res.ok) onRemove(entry.id)
+    else toast.error('Kaldırma işlemi başarısız.')
     setLoading(false)
   }
 
