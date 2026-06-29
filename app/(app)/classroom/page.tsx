@@ -125,7 +125,7 @@ export default async function ClassroomListPage() {
                   <div className="w-8 h-8 rounded-lg bg-sky-500/15 flex items-center justify-center">
                     <Compass className="w-4 h-4 text-sky-400" />
                   </div>
-                  <h2 className="text-xl font-display font-bold text-white tracking-wide">Öğrenci Olduğum Sınıflar (Quest Hubs)</h2>
+                  <h2 className="text-xl font-display font-bold text-white tracking-wide">Öğrenci Olduğum Sınıflar</h2>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-sky-500/10 text-sky-300 border border-sky-500/20 rounded-full">
                   {studentClasses.length} Aktif Sınıf
@@ -157,7 +157,7 @@ export default async function ClassroomListPage() {
                   <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center">
                     <BookOpen className="w-4 h-4 text-violet-400" />
                   </div>
-                  <h2 className="text-xl font-display font-bold text-white tracking-wide">Yönettiğim Sınıflar (Öğretmen Paneli)</h2>
+                  <h2 className="text-xl font-display font-bold text-white tracking-wide">Yönettiğim Sınıflar</h2>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-violet-500/10 text-violet-300 border border-violet-500/20 rounded-full">
                   {teacherClasses.length} Sınıf

@@ -89,7 +89,7 @@ export function GradePanel({ submission, onGraded }: Props) {
           className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-white transition-colors"
         >
           <RotateCcw className="w-3 h-3" />
-          {reopening ? 'Açılıyor...' : "Revize Et (Draft'a Döndür)"}
+          {reopening ? 'Açılıyor...' : "Revize Et (Taslağa Döndür)"}
         </button>
       )}
     </div>

@@ -135,7 +135,7 @@ export default async function ClassroomPage({ params }: PageProps) {
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-violet-500/10 text-violet-300 border border-violet-500/20">
-                Öğretmen Paneli 🎓
+                Öğretmen Görünümü 🎓
               </span>
             </div>
             <h1 className="text-3xl font-display font-black text-white">{classroom.name}</h1>
@@ -380,9 +380,9 @@ export default async function ClassroomPage({ params }: PageProps) {
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Yazarlık XP</span>
+                <span className="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Yazarlık Puanı</span>
                 <span className="text-xs px-2 py-0.5 bg-sky-500/10 text-sky-300 rounded border border-sky-500/20 font-mono font-bold">
-                  LEVEL {currentLevel}
+                  SEVİYE {currentLevel}
                 </span>
               </div>
               
@@ -398,7 +398,7 @@ export default async function ClassroomPage({ params }: PageProps) {
             <div className="space-y-2 mt-6">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-500">Mevcut Seviye İlerlemesi</span>
-                <span className="font-mono text-slate-300 font-bold">{xpProgress} / {levelThreshold} XP</span>
+                <span className="font-mono text-slate-300 font-bold">{xpProgress} / {levelThreshold} puan</span>
               </div>
               <div className="w-full bg-slate-900 border border-white/[0.04] rounded-full h-3 overflow-hidden">
                 <div 
@@ -470,7 +470,7 @@ export default async function ClassroomPage({ params }: PageProps) {
               <Zap className="w-4 h-4 text-sky-400" />
             </div>
             <h2 className="text-xl font-display font-bold text-white tracking-wide">
-              Aktif Görevler (Ödev Quests)
+              Aktif Ödevler
             </h2>
           </div>
 

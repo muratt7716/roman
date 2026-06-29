@@ -63,12 +63,12 @@ export function AnalyticsPanel({ submissionRate, streaks, gradeDistribution, mem
         ))}
       </section>
 
-      {/* Streak Tablosu */}
+      {/* Günlük Yazma Serileri */}
       <section className="space-y-3">
         <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-          <Flame className="w-4 h-4 text-orange-400" /> Aktif Streakler
+          <Flame className="w-4 h-4 text-orange-400" /> Günlük Yazma Serileri
         </h3>
-        {streaks.length === 0 && <p className="text-sm text-slate-500">Aktif streak yok.</p>}
+        {streaks.length === 0 && <p className="text-sm text-slate-500">Henüz aktif yazma serisi yok.</p>}
         {[...streaks]
           .sort((a, b) => b.streak_current - a.streak_current)
           .map(s => {

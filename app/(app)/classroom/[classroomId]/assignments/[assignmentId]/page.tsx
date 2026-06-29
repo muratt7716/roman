@@ -209,7 +209,7 @@ export default async function AssignmentPage({ params }: PageProps) {
           href={`/classroom/${classroomId}`}
           className="inline-flex items-center gap-2 text-xs font-semibold text-sky-400 hover:text-white transition-colors uppercase tracking-widest relative z-10 cursor-pointer"
         >
-          ← Sınıf Lobisine Dön
+          ← Sınıf Sayfasına Dön
         </Link>
 
         {/* Gamified Briefing Card */}
@@ -220,7 +220,7 @@ export default async function AssignmentPage({ params }: PageProps) {
             <div className="flex items-center gap-2">
               <span className="text-[9px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-300 border border-sky-500/20 flex items-center gap-1">
                 <Sparkles className="w-3 h-3 text-sky-400" />
-                AKTİF QUEST (GÖREV)
+                AKTİF GÖREV
               </span>
             </div>
             
