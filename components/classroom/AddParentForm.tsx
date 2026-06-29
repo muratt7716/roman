@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { UserPlus } from 'lucide-react'
 
 interface Student {
@@ -11,14 +12,14 @@ interface Student {
 interface Props {
   classroomId: string
   students: Student[]
-  onAdded: () => void
 }
 
-export function AddParentForm({ classroomId, students, onAdded }: Props) {
+export function AddParentForm({ classroomId, students }: Props) {
   const [username, setUsername] = useState('')
   const [studentId, setStudentId] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -36,7 +37,7 @@ export function AddParentForm({ classroomId, students, onAdded }: Props) {
       setMsg({ type: 'success', text: 'Veli eklendi.' })
       setUsername('')
       setStudentId('')
-      onAdded()
+      router.refresh()
     } else {
       setMsg({ type: 'error', text: data.error ?? 'Hata oluştu.' })
     }

@@ -270,7 +270,6 @@ export default async function ClassroomPage({ params }: PageProps) {
                 user_id: m.user_id,
                 name: m.profile?.display_name ?? m.profile?.username ?? 'Öğrenci',
               }))}
-              onAdded={() => {}}
             />
           </div>
 
