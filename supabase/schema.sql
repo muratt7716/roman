@@ -832,8 +832,8 @@ AS $$
   SELECT owner_id = auth.uid() FROM classrooms WHERE id = p_classroom_id
 $$;
 
--- SECURITY DEFINER: join kodu ile sınıfa katılma (RLS bypass gerektirir)
--- Yeni sütunlar (school_name + password)
+-- Idempotent sütun eklemeleri (tablo daha önce join_code olmadan oluşturulduysa ekle)
+ALTER TABLE classrooms ADD COLUMN IF NOT EXISTS join_code   text UNIQUE;
 ALTER TABLE classrooms ADD COLUMN IF NOT EXISTS school_name text NOT NULL DEFAULT '';
 ALTER TABLE classrooms ADD COLUMN IF NOT EXISTS password    text NOT NULL DEFAULT '';
 
@@ -907,6 +907,64 @@ SET search_path = public
 AS $$
 BEGIN
   RETURN json_build_object('error', 'Bu yöntem artık kullanılmıyor. Lütfen sınıf arama ile katıl.');
+END;
+$$;
+
+-- Sınıf oluşturma: PostgREST schema cache bypass, join_code dahil her şeyi burada halleder
+CREATE OR REPLACE FUNCTION create_classroom(
+  p_name        text,
+  p_school_name text,
+  p_password    text,
+  p_description text DEFAULT NULL
+)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user_id      uuid := auth.uid();
+  v_join_code    text;
+  v_classroom_id uuid;
+  v_row          json;
+BEGIN
+  IF v_user_id IS NULL THEN
+    RETURN json_build_object('error', 'Giriş yapman gerekiyor.');
+  END IF;
+
+  IF char_length(trim(p_name)) < 2 OR char_length(trim(p_name)) > 100 THEN
+    RETURN json_build_object('error', 'Sınıf adı 2-100 karakter olmalı.');
+  END IF;
+
+  -- Eşsiz join_code üret (çakışma olana kadar tekrarla)
+  LOOP
+    SELECT array_to_string(
+      array(
+        SELECT substr('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', (floor(random() * 32) + 1)::int, 1)
+        FROM generate_series(1, 6)
+      ), ''
+    ) INTO v_join_code;
+    EXIT WHEN NOT EXISTS (SELECT 1 FROM classrooms WHERE join_code = v_join_code);
+  END LOOP;
+
+  INSERT INTO classrooms (owner_id, name, school_name, password, join_code, description)
+  VALUES (
+    v_user_id,
+    trim(p_name),
+    trim(p_school_name),
+    trim(p_password),
+    v_join_code,
+    nullif(trim(coalesce(p_description, '')), '')
+  )
+  RETURNING id INTO v_classroom_id;
+
+  -- Öğretmen üyeliğini de burada ekle (RLS bypass ile güvenli)
+  INSERT INTO classroom_members (classroom_id, user_id, role)
+  VALUES (v_classroom_id, v_user_id, 'teacher')
+  ON CONFLICT DO NOTHING;
+
+  SELECT row_to_json(c) INTO v_row FROM classrooms c WHERE id = v_classroom_id;
+  RETURN v_row;
 END;
 $$;
 
@@ -1237,3 +1295,6 @@ CREATE POLICY "mag_entries_all" ON magazine_entries FOR ALL USING (
     WHERE s.id = section_id AND c.owner_id = auth.uid() AND m.status = 'draft'
   )
 );
+
+-- PostgREST schema cache'ini yenile (şema güncellemesinden sonra otomatik tetiklenir)
+NOTIFY pgrst, 'reload schema';

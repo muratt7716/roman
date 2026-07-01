@@ -56,7 +56,7 @@ export default async function ReadPage({ params }: Props) {
     .eq('slug', slug)
     .single()
 
-  if (!project || project.visibility !== 'published') notFound()
+  if (!project) notFound()
 
   const { data: chapters } = await supabase
     .from('chapters')
@@ -126,7 +126,13 @@ export default async function ReadPage({ params }: Props) {
         </div>
       )}
 
-      {(!chapters || chapters.length === 0) ? (
+      {project.visibility !== 'published' ? (
+        <div className="text-center py-16 glass rounded-xl">
+          <BookOpen className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+          <p className="font-medium mb-1">Bu proje henüz yayınlanmadı</p>
+          <p className="text-sm text-muted-foreground">Yazar içerikleri hazırladığında burada okuyabileceksin.</p>
+        </div>
+      ) : (!chapters || chapters.length === 0) ? (
         <div className="text-center py-16 glass rounded-xl">
           <BookOpen className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground">Henüz yayınlanmış bölüm yok.</p>
