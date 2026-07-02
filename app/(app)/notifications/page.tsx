@@ -160,10 +160,10 @@ export default async function NotificationsPage() {
                 {detail.link && !isInvite && (
                   <Link href={detail.link} className="absolute inset-0 rounded-xl" aria-label={detail.title} />
                 )}
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${meta.color} relative z-10`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${meta.color}${detail.link && !isInvite ? ' pointer-events-none' : ' relative z-10'}`}>
                   <Icon className="w-4 h-4" />
                 </div>
-                <div className="flex-1 min-w-0 relative z-10">
+                <div className={`flex-1 min-w-0${detail.link && !isInvite ? ' pointer-events-none' : ' relative z-10'}`}>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <p className="text-sm font-medium">{detail.title}</p>
