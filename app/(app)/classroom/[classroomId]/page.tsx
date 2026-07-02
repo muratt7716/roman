@@ -49,6 +49,17 @@ export default async function ClassroomPage({ params }: PageProps) {
     }
   }
 
+  // Fallback: if profile join dropped the row, query membership directly (no profile join)
+  if (!myMembership) {
+    const { data: myRow } = await supabase
+      .from('classroom_members')
+      .select('user_id, role, classroom_id, joined_at')
+      .eq('classroom_id', classroomId)
+      .eq('user_id', user.id)
+      .single()
+    if (myRow) myMembership = { ...myRow, profile: null } as any
+  }
+
   if (!myMembership) notFound()
 
   const isTeacher = myMembership.role === 'teacher'

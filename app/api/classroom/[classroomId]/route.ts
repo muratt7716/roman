@@ -20,7 +20,19 @@ export async function GET(_req: Request, { params }: Params) {
 
   if (!classroom) return NextResponse.json({ error: 'Sınıf bulunamadı.' }, { status: 404 })
 
-  const myRole = members?.find((m) => m.user_id === user.id)?.role ?? null
+  let myRole = members?.find((m) => m.user_id === user.id)?.role ?? null
+
+  // Fallback: if profile join dropped the row, query membership directly
+  if (!myRole) {
+    const { data: myRow } = await supabase
+      .from('classroom_members')
+      .select('role')
+      .eq('classroom_id', classroomId)
+      .eq('user_id', user.id)
+      .single()
+    myRole = myRow?.role ?? null
+  }
+
   if (!myRole) return NextResponse.json({ error: 'Bu sınıfa erişim yetkin yok.' }, { status: 403 })
 
   return NextResponse.json({ classroom, members: members ?? [], myRole })
