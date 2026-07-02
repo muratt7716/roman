@@ -37,7 +37,7 @@ export default async function ClassroomAnalyticsPage({ params }: PageProps) {
 
   const { data: membersData } = await supabase
     .from('classroom_members')
-    .select('user_id, role, profile:profiles(id, username, display_name)')
+    .select('user_id, role, profile:profiles!left(id, username, display_name)')
     .eq('classroom_id', classroomId)
     .eq('role', 'student')
 

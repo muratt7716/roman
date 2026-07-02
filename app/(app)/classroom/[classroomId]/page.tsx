@@ -28,7 +28,7 @@ export default async function ClassroomPage({ params }: PageProps) {
   // Fetch classroom data, members, and assignments in parallel
   const [{ data: classroom }, { data: members }, { data: assignments }] = await Promise.all([
     supabase.from('classrooms').select('*').eq('id', classroomId).single(),
-    supabase.from('classroom_members').select('*, profile:profiles(id, username, display_name, avatar_url)').eq('classroom_id', classroomId),
+    supabase.from('classroom_members').select('*, profile:profiles!left(id, username, display_name, avatar_url)').eq('classroom_id', classroomId),
     supabase.from('classroom_assignments').select('*').eq('classroom_id', classroomId).order('created_at', { ascending: false }),
   ])
 
@@ -41,7 +41,7 @@ export default async function ClassroomPage({ params }: PageProps) {
     await supabase.from('classroom_members').insert({ classroom_id: classroomId, user_id: user.id, role: 'teacher' })
     const { data: refreshed } = await supabase
       .from('classroom_members')
-      .select('*, profile:profiles(id, username, display_name, avatar_url)')
+      .select('*, profile:profiles!left(id, username, display_name, avatar_url)')
       .eq('classroom_id', classroomId)
     myMembership = refreshed?.find((m: { user_id: string }) => m.user_id === user.id) ?? null
     if (!myMembership) {

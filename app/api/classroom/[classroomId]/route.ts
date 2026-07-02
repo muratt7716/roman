@@ -14,7 +14,7 @@ export async function GET(_req: Request, { params }: Params) {
     supabase.from('classrooms').select('*').eq('id', classroomId).single(),
     supabase
       .from('classroom_members')
-      .select('*, profile:profiles(id, username, display_name, avatar_url)')
+      .select('*, profile:profiles!left(id, username, display_name, avatar_url)')
       .eq('classroom_id', classroomId),
   ])
 

@@ -29,7 +29,7 @@ export async function GET(_req: Request, { params }: Params) {
   ] = await Promise.all([
     supabase
       .from('classroom_members')
-      .select('user_id, role, profile:profiles(id, username, display_name, avatar_url)')
+      .select('user_id, role, profile:profiles!left(id, username, display_name, avatar_url)')
       .eq('classroom_id', classroomId)
       .eq('role', 'student'),
     supabase
