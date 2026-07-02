@@ -137,9 +137,9 @@ export default async function ProjectOverviewPage({ params }: Props) {
     const projectSlug = formData.get('projectSlug') as string
     const supabase = await createClient()
     if (action === 'publish') {
-      await supabase.from('projects').update({ visibility: 'published', collaboration_status: 'completed' }).eq('id', projectId)
+      await supabase.from('projects').update({ visibility: 'published' }).eq('id', projectId)
     } else {
-      await supabase.from('projects').update({ visibility: 'open', collaboration_status: 'recruiting' }).eq('id', projectId)
+      await supabase.from('projects').update({ visibility: 'open' }).eq('id', projectId)
     }
     revalidatePath(`/projects/${projectSlug}/overview`)
   }
