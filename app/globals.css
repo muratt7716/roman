@@ -249,6 +249,13 @@
     opacity: 0.4;
   }
 
+  /* ── Scrollbar gizleme (yatay carousel) ─────────────────── */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
   /* ── Animation delays ───────────────────────────────────── */
   .delay-100 { animation-delay: 100ms; }
   .delay-200 { animation-delay: 200ms; }

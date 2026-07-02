@@ -32,10 +32,18 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
   const supabase = createClient()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     setMobileMenuOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   async function signOut() {
     await supabase.auth.signOut()
@@ -46,7 +54,14 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300">
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-md border-b border-white/[0.04] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.01),0_4px_30px_rgba(0,0,0,0.4)]" />
+        <div
+          className={cn(
+            'absolute inset-0 transition-all duration-500',
+            scrolled || mobileMenuOpen
+              ? 'bg-background/80 backdrop-blur-xl border-b border-white/[0.06] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.01),0_4px_30px_rgba(0,0,0,0.4)]'
+              : 'bg-transparent border-b border-transparent'
+          )}
+        />
 
         <div className="relative max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
 
