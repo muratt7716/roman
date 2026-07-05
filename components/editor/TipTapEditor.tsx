@@ -157,6 +157,13 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
     }
   }, [editor, save])
 
+  // Kilit durumu sonradan değişebilir (bölüm kilidi) — runtime'da uygula
+  useEffect(() => {
+    if (editor && !editor.isDestroyed && editor.isEditable !== editable) {
+      editor.setEditable(editable)
+    }
+  }, [editor, editable])
+
   // Focus mode: Escape key to exit
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setFocusMode(false) }
@@ -196,7 +203,7 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
   return (
     <div className={`flex flex-col ${focusMode ? 'fixed inset-0 z-50 bg-[hsl(245_25%_4%)]' : 'h-full'}`}>
       {/* Toolbar - scrollable horizontal row on mobile, full grid wrap on desktop */}
-      <div className={`flex items-center gap-1 px-3 py-1.5 border-b border-border overflow-x-auto flex-nowrap md:flex-wrap shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${focusMode ? 'opacity-0 hover:opacity-100 transition-opacity duration-300' : ''}`}>
+      <div className={`${!editable ? 'hidden ' : ''}flex items-center gap-1 px-3 py-1.5 border-b border-border overflow-x-auto flex-nowrap md:flex-wrap shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${focusMode ? 'opacity-0 hover:opacity-100 transition-opacity duration-300' : ''}`}>
 
         {/* Undo / Redo */}
         <Btn onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Geri Al (Ctrl+Z)">

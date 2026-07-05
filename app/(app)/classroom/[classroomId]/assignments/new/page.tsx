@@ -18,6 +18,7 @@ export default function NewAssignmentPage({ params }: PageProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [minWordCount, setMinWordCount] = useState('')
   const [visibility, setVisibility] = useState<'private' | 'class_visible'>('private')
   const [loading, setLoading] = useState(false)
   const [templateOpen, setTemplateOpen] = useState(false)
@@ -37,6 +38,7 @@ export default function NewAssignmentPage({ params }: PageProps) {
           description: description.trim(),
           due_date: dueDate ? new Date(dueDate).toISOString() : null,
           visibility,
+          min_word_count: minWordCount ? Number(minWordCount) : null,
         }),
       })
 
@@ -132,6 +134,21 @@ export default function NewAssignmentPage({ params }: PageProps) {
               onChange={(e) => setDueDate(e.target.value)}
               disabled={loading}
               className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-primary/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all placeholder:text-slate-600 disabled:opacity-50 [color-scheme:dark]"
+            />
+          </div>
+
+          {/* Min word count */}
+          <div className="space-y-2">
+            <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Minimum Kelime Sayısı (Opsiyonel)</label>
+            <input
+              type="number"
+              min={1}
+              max={100000}
+              value={minWordCount}
+              onChange={(e) => setMinWordCount(e.target.value)}
+              disabled={loading}
+              placeholder="Örn: 100 — altında teslim kabul edilmez"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-primary/50 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all placeholder:text-slate-600 disabled:opacity-50"
             />
           </div>
 

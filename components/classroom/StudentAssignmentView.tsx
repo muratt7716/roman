@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { PenLine, Lock, Sparkles, Star, MessageCircle } from 'lucide-react'
+import { PenLine, Lock, Sparkles, Star, MessageCircle, MessageSquareText } from 'lucide-react'
 import type { ClassroomAssignment, AssignmentSubmission } from '@/types'
 import { cn } from '@/lib/utils'
 
@@ -70,6 +71,13 @@ export function StudentAssignmentView({ assignment, classroomId, initialSubmissi
         </div>
       )}
 
+      {assignment.min_word_count ? (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-xs text-amber-300">
+          <PenLine className="w-3.5 h-3.5 shrink-0" />
+          <span>Bu ödev en az <strong>{assignment.min_word_count} kelime</strong> istiyor — altında teslim kabul edilmez.</span>
+        </div>
+      ) : null}
+
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
         {!submission && (
           <button
@@ -98,11 +106,21 @@ export function StudentAssignmentView({ assignment, classroomId, initialSubmissi
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] border border-white/[0.05] text-xs text-muted-foreground">
             <Lock className="w-4 h-4 text-violet-400/80 animate-pulse" />
             <span>
-              {submission.status === 'submitted' 
-                ? 'Görev teslim edildi — öğretmen büyülü değerlendirmesini hazırlıyor! 🔮' 
+              {submission.status === 'submitted'
+                ? 'Görev teslim edildi — öğretmen büyülü değerlendirmesini hazırlıyor! 🔮'
                 : 'Görev değerlendirildi. Raporu aşağıda bulabilirsin! 👇'}
             </span>
           </div>
+        )}
+
+        {isLocked && submission && (
+          <Link
+            href={`/classroom/${classroomId}/assignments/${assignment.id}/review/${submission.id}`}
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 hover:bg-indigo-500/20 text-xs font-medium transition-colors"
+          >
+            <MessageSquareText className="w-4 h-4" />
+            Yazını ve Öğretmen Geri Bildirimlerini Gör
+          </Link>
         )}
       </div>
 

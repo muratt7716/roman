@@ -48,6 +48,7 @@ export interface Project {
   visibility: ProjectVisibility
   collaboration_status: CollaborationStatus
   cover_image_url: string | null
+  completed_at?: string | null
   created_at: string
   updated_at: string
 }
@@ -300,6 +301,7 @@ export interface ClassroomAssignment {
   description: string | null
   due_date: string | null
   visibility: AssignmentVisibility
+  min_word_count?: number | null
   created_at: string
 }
 

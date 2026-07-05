@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import { InviteButton } from '@/components/writers/InviteButton'
-import { BookOpen, Users, PenLine, ExternalLink, Award, Sparkles, FolderGit } from 'lucide-react'
+import { BookOpen, Users, PenLine, ExternalLink, Award, Sparkles, FolderGit, BookMarked } from 'lucide-react'
 import { FollowButton } from '@/components/reader/FollowButton'
 import { BadgesGrid } from '@/components/profile/BadgesGrid'
 import type { ProjectWithOwner, UserBadge } from '@/types'
@@ -104,6 +104,11 @@ export default async function UserProfilePage({ params }: Props) {
 
   const isOwnProfile = currentUser?.id === profile.id
   const statusCfg = STATUS_CONFIG[(profile as any).writing_status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.open
+
+  // Tamamlanan romanlar ayrı sergilenir, devam edenlerden ayrılır
+  const allOwned = (ownedProjects ?? []) as ProjectWithOwner[]
+  const completedNovels = allOwned.filter((p: any) => p.collaboration_status === 'completed' && p.completed_at)
+  const ongoingProjects = allOwned.filter((p: any) => !(p.collaboration_status === 'completed' && p.completed_at))
 
   return (
     <div className="relative min-h-screen bg-background text-foreground pb-24 selection:bg-primary/30 selection:text-white">
@@ -254,6 +259,31 @@ export default async function UserProfilePage({ params }: Props) {
           </section>
         )}
 
+        {/* ── COMPLETED NOVELS SHOWCASE ── */}
+        {completedNovels.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                <BookMarked className="w-4.5 h-4.5 text-amber-400" />
+              </div>
+              <h2 className="text-2xl font-display font-semibold text-white">Tamamlanan Romanlar</h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                {completedNovels.length} eser
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {completedNovels.map(p => (
+                <div key={p.id} className="relative">
+                  <div className="absolute top-3 left-3 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/90 text-black text-[10px] font-bold uppercase tracking-wider pointer-events-none">
+                    <BookMarked className="w-3 h-3" /> Tamamlandı
+                  </div>
+                  <ProjectCard project={p} />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* ── OWNED PROJECTS GRID (Highly visually pleasing layout) ── */}
         <section className="space-y-6">
           <div className="flex items-center gap-3">
@@ -263,9 +293,9 @@ export default async function UserProfilePage({ params }: Props) {
             <h2 className="text-2xl font-display font-semibold text-white">Yazara Ait Evrenler & Romanlar</h2>
           </div>
 
-          {ownedProjects && ownedProjects.length > 0 ? (
+          {ongoingProjects.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(ownedProjects as ProjectWithOwner[]).map(p => (
+              {ongoingProjects.map(p => (
                 <ProjectCard key={p.id} project={p} />
               ))}
             </div>

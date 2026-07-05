@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Users, CheckCircle, XCircle, Clock, BarChart2, Globe, Lock } from 'lucide-react'
+import { Users, CheckCircle, XCircle, Clock, BarChart2, Globe, Lock, BookMarked } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DeleteProjectButton } from '@/components/project/DeleteProjectButton'
 import { CoverImageUpload } from '@/components/project/CoverImageUpload'
@@ -138,13 +138,27 @@ export default async function ProjectOverviewPage({ params }: Props) {
     const supabase = await createClient()
     if (action === 'publish') {
       await supabase.from('projects').update({ visibility: 'published' }).eq('id', projectId)
+    } else if (action === 'complete') {
+      // Romanı tamamla: yayınlanır, kütüphanede ve yazar profilinde görünür
+      await supabase.from('projects').update({
+        visibility: 'published',
+        collaboration_status: 'completed',
+        completed_at: new Date().toISOString(),
+      }).eq('id', projectId)
+    } else if (action === 'uncomplete') {
+      await supabase.from('projects').update({
+        collaboration_status: 'active',
+        completed_at: null,
+      }).eq('id', projectId)
     } else {
       await supabase.from('projects').update({ visibility: 'open' }).eq('id', projectId)
     }
     revalidatePath(`/projects/${projectSlug}/overview`)
+    revalidatePath('/kitaplik')
   }
 
   const isPublished = project.visibility === 'published'
+  const isCompleted = project.collaboration_status === 'completed' && !!project.completed_at
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-8">
@@ -155,23 +169,48 @@ export default async function ProjectOverviewPage({ params }: Props) {
           <p className="text-muted-foreground text-sm">{project.synopsis}</p>
         </div>
         {isOwner && (
-          <form action={publishProject}>
-            <input type="hidden" name="projectId" value={project.id} />
-            <input type="hidden" name="projectSlug" value={id} />
-            <input type="hidden" name="action" value={isPublished ? 'unpublish' : 'publish'} />
-            <button
-              type="submit"
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isPublished
-                  ? 'bg-surface-2 text-muted-foreground hover:bg-border'
-                  : 'bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30'
-              }`}
-            >
-              {isPublished ? <><Lock className="w-4 h-4" /> Taslağa Al</> : <><Globe className="w-4 h-4" /> Projeyi Yayınla</>}
-            </button>
-          </form>
+          <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+            <form action={publishProject}>
+              <input type="hidden" name="projectId" value={project.id} />
+              <input type="hidden" name="projectSlug" value={id} />
+              <input type="hidden" name="action" value={isPublished ? 'unpublish' : 'publish'} />
+              <button
+                type="submit"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full ${
+                  isPublished
+                    ? 'bg-surface-2 text-muted-foreground hover:bg-border'
+                    : 'bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30'
+                }`}
+              >
+                {isPublished ? <><Lock className="w-4 h-4" /> Taslağa Al</> : <><Globe className="w-4 h-4" /> Projeyi Yayınla</>}
+              </button>
+            </form>
+            <form action={publishProject}>
+              <input type="hidden" name="projectId" value={project.id} />
+              <input type="hidden" name="projectSlug" value={id} />
+              <input type="hidden" name="action" value={isCompleted ? 'uncomplete' : 'complete'} />
+              <button
+                type="submit"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors w-full ${
+                  isCompleted
+                    ? 'bg-surface-2 text-muted-foreground hover:bg-border'
+                    : 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 border border-amber-500/30'
+                }`}
+              >
+                {isCompleted ? <><XCircle className="w-4 h-4" /> Tamamlandıyı Kaldır</> : <><BookMarked className="w-4 h-4" /> Romanı Tamamla</>}
+              </button>
+            </form>
+          </div>
         )}
       </div>
+
+      {isCompleted && (
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm">
+          <BookMarked className="w-4 h-4 shrink-0" />
+          Bu roman tamamlandı — Kütüphane&apos;de ve yazar profillerinde sergileniyor. 🎉
+          <a href="/kitaplik" className="ml-auto underline hover:no-underline text-xs">Kütüphaneyi gör →</a>
+        </div>
+      )}
 
       {isPublished && (
         <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">

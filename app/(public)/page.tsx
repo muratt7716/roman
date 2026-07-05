@@ -25,8 +25,8 @@ export const dynamic = 'force-dynamic'
 const FEATURES = [
   {
     icon: Users,
-    title: 'Gerçek Zamanlı Ortak Yazarlık',
-    desc: 'Ekibinizle veya diğer yazarlarla aynı anda yazın. Cümlelerin ve fikirlerin canlı olarak nasıl şekillendiğini izleyin.',
+    title: 'Ekiple Ortak Yazarlık',
+    desc: 'Ekibinizi kurun, bölümleri paylaşın. Kimin çevrimiçi olduğunu canlı görün; yorum ve önerilerle birlikte ilerleyin.',
     color: 'from-violet-500/10 to-purple-500/5',
     iconColor: 'text-violet-400',
   },
@@ -39,15 +39,15 @@ const FEATURES = [
   },
   {
     icon: BookOpen,
-    title: 'Gelişmiş Lore Evreni',
-    desc: 'Karakter kartları, yerleşim yerleri ve sihir sistemleri için ortak bir wiki kütüphanesi oluşturun.',
+    title: 'Karakter Jeneratörü + AI',
+    desc: 'Tek tıkla Türkçe karakter profilleri üretin, yapay zekâ ile derinleştirin. Tıkandığınızda editördeki AI asistanı yön önerir.',
     color: 'from-sky-500/10 to-blue-500/5',
     iconColor: 'text-sky-400',
   },
   {
     icon: Zap,
-    title: 'Akıllı Sürüm Kontrolü',
-    desc: 'Yazarlar arası çatışmaları otomatik önleyen, her paragrafın geçmişini tutan yazara özel versiyon takip sistemi.',
+    title: 'Bölüm Kilidi & Sürüm Geçmişi',
+    desc: 'Bir bölümü aynı anda tek kişi düzenler — emek kaybı yok. Her kayıt versiyonlanır, dilediğiniz ana geri dönersiniz.',
     color: 'from-amber-500/10 to-yellow-500/5',
     iconColor: 'text-amber-400',
   },

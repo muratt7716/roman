@@ -23,7 +23,8 @@ export function SubmitButton({ submissionId }: Props) {
     if (res.ok) {
       router.back()
     } else {
-      alert('Teslim edilemedi, tekrar dene.')
+      const body = await res.json().catch(() => null)
+      alert(body?.error ?? 'Teslim edilemedi, tekrar dene.')
     }
     setLoading(false)
   }

@@ -113,7 +113,7 @@ export default async function AssignmentPage({ params }: PageProps) {
             Öğrenci Teslimleri
           </h2>
           
-          <SubmissionList initialSubmissions={subs} classroomId={classroomId} />
+          <SubmissionList initialSubmissions={subs} classroomId={classroomId} assignmentId={assignmentId} />
         </div>
 
       </div>

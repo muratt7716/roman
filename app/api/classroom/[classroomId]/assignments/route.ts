@@ -38,20 +38,29 @@ export async function POST(req: Request, { params }: Params) {
 
   if (!classroom) return NextResponse.json({ error: 'Yetki yok.' }, { status: 403 })
 
-  const { title, description, due_date, visibility } = await req.json()
+  const { title, description, due_date, visibility, min_word_count } = await req.json()
   if (!title || title.trim().length < 3 || title.trim().length > 200) {
     return NextResponse.json({ error: 'Başlık 3-200 karakter olmalı.' }, { status: 400 })
   }
 
+  const minWords = Number(min_word_count)
+  if (min_word_count != null && min_word_count !== '' && (!Number.isInteger(minWords) || minWords < 1 || minWords > 100000)) {
+    return NextResponse.json({ error: 'Minimum kelime sayısı 1-100000 arasında olmalı.' }, { status: 400 })
+  }
+
+  const payload: Record<string, unknown> = {
+    classroom_id: classroomId,
+    title: title.trim(),
+    description: description?.trim() || null,
+    due_date: due_date || null,
+    visibility: visibility === 'class_visible' ? 'class_visible' : 'private',
+  }
+  // Kolon şemada yoksa insert patlamasın diye sadece değer verildiyse ekle
+  if (min_word_count != null && min_word_count !== '') payload.min_word_count = minWords
+
   const { data, error } = await supabase
     .from('classroom_assignments')
-    .insert({
-      classroom_id: classroomId,
-      title: title.trim(),
-      description: description?.trim() || null,
-      due_date: due_date || null,
-      visibility: visibility === 'class_visible' ? 'class_visible' : 'private',
-    })
+    .insert(payload)
     .select()
     .single()
 

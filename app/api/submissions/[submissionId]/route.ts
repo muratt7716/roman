@@ -16,6 +16,28 @@ export async function PATCH(req: Request, { params }: Params) {
   const { action } = body
 
   if (action === 'submit') {
+    // Minimum kelime şartı: ödevde tanımlıysa teslimden önce doğrula
+    const { data: subInfo } = await supabase
+      .from('assignment_submissions')
+      .select('project_id, assignment:classroom_assignments(min_word_count)')
+      .eq('id', submissionId)
+      .eq('student_id', user.id)
+      .single()
+
+    const minWords = (subInfo as any)?.assignment?.min_word_count as number | null | undefined
+    if (minWords && subInfo?.project_id) {
+      const { data: chapterRows } = await supabase
+        .from('chapters')
+        .select('word_count')
+        .eq('project_id', subInfo.project_id)
+      const totalWords = (chapterRows ?? []).reduce((s: number, c: { word_count: number }) => s + (c.word_count ?? 0), 0)
+      if (totalWords < minWords) {
+        return NextResponse.json({
+          error: `Bu ödev en az ${minWords} kelime istiyor — şu an ${totalWords} kelimen var. Yazmaya devam et (son yazdıkların otomatik kaydedilene kadar birkaç saniye sürebilir).`,
+        }, { status: 400 })
+      }
+    }
+
     const { data, error } = await supabase
       .from('assignment_submissions')
       .update({ status: 'submitted', submitted_at: new Date().toISOString() })

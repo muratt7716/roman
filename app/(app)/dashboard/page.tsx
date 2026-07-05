@@ -5,6 +5,7 @@ import { Plus, BookOpen, Bell, Users, PenLine, Settings, GraduationCap } from 'l
 import { createClient } from '@/lib/supabase/server'
 import { ProjectCard } from '@/components/project/ProjectCard'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { OnboardingCard } from '@/components/dashboard/OnboardingCard'
 import { WritingGoalCard } from '@/components/dashboard/WritingGoalCard'
 import { WeeklyStatsRow } from '@/components/dashboard/WeeklyStatsRow'
 import { BadgesRow } from '@/components/dashboard/BadgesRow'
@@ -58,14 +59,24 @@ export default async function DashboardPage() {
       .order('earned_at', { ascending: false }),
     supabase
       .from('assignment_submissions')
-      .select('id, status, grade')
+      .select('id, status, grade, project_id')
       .eq('student_id', user.id),
   ])
 
-  const owned = (ownedProjects ?? []) as ProjectWithOwner[]
-  const memberProjects = (membershipData ?? [])
+  // Ödev teslimlerine bağlı projeler dashboard'da gösterilmez —
+  // onlar Akademi tarafında yaşar, "Projelerim" listesini kirletmesin
+  const assignmentProjectIds = new Set(
+    ((academicData ?? []) as { project_id: string | null }[])
+      .map(s => s.project_id)
+      .filter(Boolean) as string[]
+  )
+
+  const owned = ((ownedProjects ?? []) as ProjectWithOwner[])
+    .filter(p => !assignmentProjectIds.has(p.id))
+  const memberProjects = ((membershipData ?? [])
     .map((m: any) => m.project)
-    .filter(Boolean) as ProjectWithOwner[]
+    .filter(Boolean) as ProjectWithOwner[])
+    .filter(p => !assignmentProjectIds.has(p.id))
 
   const projectIds = owned.map(p => p.id)
   const { data: pendingApplications } = projectIds.length > 0
@@ -105,7 +116,7 @@ export default async function DashboardPage() {
 
   const badges = (badgeData ?? []) as UserBadge[]
 
-  const submissions = (academicData ?? []) as { id: string; status: string; grade: number | null }[]
+  const submissions = (academicData ?? []) as { id: string; status: string; grade: number | null; project_id: string | null }[]
   const totalSubmitted = submissions.filter(s => s.status !== 'draft').length
   const graded = submissions.filter(s => s.status === 'graded' && s.grade !== null)
   const avgGrade = graded.length > 0
@@ -128,6 +139,9 @@ export default async function DashboardPage() {
           <Plus className="w-4 h-4 mr-1.5" /> Yeni Proje
         </Link>
       </div>
+
+      {/* Onboarding — hiç projesi ve üyeliği olmayan yeni kullanıcıya */}
+      {owned.length === 0 && memberProjects.length === 0 && <OnboardingCard />}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

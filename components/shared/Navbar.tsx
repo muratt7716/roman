@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LogOut, User, Bell, LayoutDashboard,
-  Compass, Users, Lightbulb, Wand2, Gamepad2, Menu, X, ChevronRight,
+  Compass, Users, Lightbulb, Wand2, Menu, X, ChevronRight, Library,
   MessageSquarePlus, ShieldCheck, GraduationCap, Zap, BookOpen
 } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -88,6 +88,7 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                 <div className="hidden md:flex items-center gap-1.5 mr-2">
                   {[
                     { href: '/explore',   label: 'Keşfet',   icon: <Compass className="w-4 h-4 text-primary" /> },
+                    { href: '/kitaplik',  label: 'Kütüphane', icon: <Library className="w-4 h-4 text-amber-400" /> },
                     { href: '/writers',   label: 'Yazarlar',  icon: <Users className="w-4 h-4 text-pink-400" /> },
                     { href: '/classroom', label: 'Akademi',  icon: <GraduationCap className="w-4 h-4 text-violet-400" /> },
                     { href: '/sprint',    label: 'Sprint',   icon: <Zap className="w-4 h-4 text-amber-400" /> },
@@ -190,12 +191,6 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                     </DropdownMenuItem>
 
                     <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]">
-                      <Link href="/oyun" className="flex w-full items-center gap-2.5 text-[13px] text-muted-foreground hover:text-white font-medium">
-                        <Gamepad2 className="w-4 h-4 text-emerald-400" /> Kelime Oyunu
-                      </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]">
                       <Link href="/discover/magazines" className="flex w-full items-center gap-2.5 text-[13px] text-muted-foreground hover:text-white font-medium">
                         <BookOpen className="w-4 h-4 text-primary" /> Sınıf Dergileri
                       </Link>
@@ -242,6 +237,9 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                   <Link href="/explore" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-[13px] font-medium text-muted-foreground hover:text-white hover:bg-white/[0.02] rounded-xl px-3 h-9 transition-colors')}>
                     Keşfet
                   </Link>
+                  <Link href="/kitaplik" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-[13px] font-medium text-muted-foreground hover:text-white hover:bg-white/[0.02] rounded-xl px-3 h-9 transition-colors')}>
+                    Kütüphane
+                  </Link>
                   <Link href="/writers" className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-[13px] font-medium text-muted-foreground hover:text-white hover:bg-white/[0.02] rounded-xl px-3 h-9 transition-colors')}>
                     Yazarlar
                   </Link>
@@ -282,6 +280,7 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
               <span className="text-[10px] font-bold tracking-wider text-muted-foreground/60 uppercase block px-3 mb-2">Navigasyon</span>
               {[
                 { href: '/explore', label: 'Keşfet', icon: <Compass className="w-4 h-4 text-primary" /> },
+                { href: '/kitaplik', label: 'Kütüphane', icon: <Library className="w-4 h-4 text-amber-400" /> },
                 { href: '/writers', label: 'Yazarlar', icon: <Users className="w-4 h-4 text-pink-400" /> },
                 ...(profile ? [
                   { href: '/classroom', label: 'Akademi', icon: <GraduationCap className="w-4 h-4 text-violet-400" /> },
@@ -302,7 +301,6 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
                 {[
                   { href: '/fikir-odasi', label: 'Fikir Odası', icon: <Lightbulb className="w-4 h-4 text-amber-400" /> },
                   { href: '/jenerator', label: 'Karakter Jeneratörü', icon: <Wand2 className="w-4 h-4 text-violet-400" /> },
-                  { href: '/oyun', label: 'Kelime Oyunu', icon: <Gamepad2 className="w-4 h-4 text-emerald-400" /> },
                 ].map(({ href, label, icon }) => (
                   <Link key={href} href={href} className="flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-white/[0.03] text-sm text-muted-foreground hover:text-white transition-colors">
                     <span className="flex items-center gap-2">{icon}{label}</span>

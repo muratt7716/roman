@@ -9,6 +9,7 @@ import { CommentPanel } from './CommentPanel'
 import { PresenceBar } from './PresenceBar'
 import { PomodoroTimer } from './PomodoroTimer'
 import { createClient } from '@/lib/supabase/client'
+import { useChapterLock } from '@/hooks/useChapterLock'
 import type { Chapter } from '@/types'
 
 interface Props {
@@ -28,6 +29,10 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
   const [pendingSuggestions, setPendingSuggestions] = useState(0)
   const [showComments, setShowComments] = useState(false)
   const supabase = createClient()
+
+  // Eşzamanlı düzenleme koruması: kilit başkasındaysa salt okunur aç
+  const lock = useChapterLock(chapter.id, !locked)
+  const readOnlyByLock = lock.status === 'held_by_other'
 
   useEffect(() => {
     supabase
@@ -107,6 +112,17 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
         </div>
       </div>
 
+      {/* Bölüm kilidi uyarısı */}
+      {readOnlyByLock && (
+        <div className="px-3 sm:px-8 py-2 bg-amber-500/10 border-b border-amber-500/25 flex items-center gap-2 text-xs text-amber-300">
+          <Lock className="w-3.5 h-3.5 shrink-0" />
+          <span>
+            Bu bölümü şu an <strong>{lock.holderName}</strong> düzenliyor — salt okunur açıldı.
+            O çıkınca otomatik olarak yazma modu açılır.
+          </span>
+        </div>
+      )}
+
       {/* Presence + word count */}
       <PresenceBar
         chapterId={chapter.id}
@@ -124,7 +140,7 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
             initialContent={initialContent}
             chapterTitle={chapter.title}
             onWordCountChange={setWordCount}
-            editable={!locked}
+            editable={!locked && !readOnlyByLock}
           />
         </div>
 

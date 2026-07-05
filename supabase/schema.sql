@@ -1296,5 +1296,121 @@ CREATE POLICY "mag_entries_all" ON magazine_entries FOR ALL USING (
   )
 );
 
+-- ============================================================
+-- FAZ 7: BÖLÜM KİLİDİ + ÖDEV ŞARTLARI + PARAGRAF YORUMLARI + TAMAMLANAN ROMANLAR
+-- ============================================================
+
+-- --- 7.1 Bölüm düzenleme kilidi ---------------------------------
+-- Aynı bölümü iki kişinin aynı anda düzenleyip birbirinin emeğini
+-- ezmesini önler. Kilit 2 dakika heartbeat almazsa bayat sayılır.
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS editing_user_id      uuid REFERENCES profiles(id) ON DELETE SET NULL;
+ALTER TABLE chapters ADD COLUMN IF NOT EXISTS editing_heartbeat_at timestamptz;
+
+-- Kilidi al ya da mevcut sahibini bildir. Heartbeat için de aynı
+-- fonksiyon çağrılır (kendi kilidini tazeler).
+CREATE OR REPLACE FUNCTION acquire_chapter_lock(p_chapter_id uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_project_id  uuid;
+  v_holder      uuid;
+  v_heartbeat   timestamptz;
+  v_holder_name text;
+BEGIN
+  SELECT project_id, editing_user_id, editing_heartbeat_at
+    INTO v_project_id, v_holder, v_heartbeat
+    FROM chapters WHERE id = p_chapter_id
+    FOR UPDATE;
+
+  IF v_project_id IS NULL THEN
+    RETURN json_build_object('acquired', false, 'error', 'chapter_not_found');
+  END IF;
+
+  -- Sadece proje sahibi veya üyesi kilit alabilir
+  IF NOT EXISTS (
+    SELECT 1 FROM projects WHERE id = v_project_id AND owner_id = auth.uid()
+    UNION
+    SELECT 1 FROM project_members WHERE project_id = v_project_id AND user_id = auth.uid()
+  ) THEN
+    RETURN json_build_object('acquired', false, 'error', 'not_member');
+  END IF;
+
+  -- Kilit boş, bayat (>2 dk) veya zaten bende → al/tazele
+  IF v_holder IS NULL OR v_holder = auth.uid() OR v_heartbeat < now() - interval '2 minutes' THEN
+    UPDATE chapters
+       SET editing_user_id = auth.uid(), editing_heartbeat_at = now()
+     WHERE id = p_chapter_id;
+    RETURN json_build_object('acquired', true);
+  END IF;
+
+  SELECT COALESCE(display_name, username) INTO v_holder_name FROM profiles WHERE id = v_holder;
+  RETURN json_build_object('acquired', false, 'holder_id', v_holder, 'holder_name', v_holder_name);
+END;
+$$;
+
+-- Kilidi bırak (sadece kendi kilidini)
+CREATE OR REPLACE FUNCTION release_chapter_lock(p_chapter_id uuid)
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  UPDATE chapters
+     SET editing_user_id = NULL, editing_heartbeat_at = NULL
+   WHERE id = p_chapter_id AND editing_user_id = auth.uid();
+$$;
+
+-- --- 7.2 Ödev minimum kelime şartı -------------------------------
+ALTER TABLE classroom_assignments ADD COLUMN IF NOT EXISTS min_word_count int CHECK (min_word_count IS NULL OR min_word_count BETWEEN 1 AND 100000);
+
+-- --- 7.3 Öğretmen paragraf yorumları -----------------------------
+-- Öğretmen, öğrenci teslimindeki belirli bir paragrafa yorum bırakır.
+CREATE TABLE IF NOT EXISTS submission_comments (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  submission_id   uuid NOT NULL REFERENCES assignment_submissions(id) ON DELETE CASCADE,
+  author_id       uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  paragraph_index int  NOT NULL DEFAULT 0,
+  content         text NOT NULL CHECK (char_length(content) BETWEEN 1 AND 1000),
+  created_at      timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_submission_comments_submission ON submission_comments(submission_id);
+
+ALTER TABLE submission_comments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "subcomments_select" ON submission_comments;
+CREATE POLICY "subcomments_select" ON submission_comments FOR SELECT USING (
+  -- Öğrenci kendi teslimindeki yorumları görür, öğretmen kendi sınıfındakileri
+  EXISTS (SELECT 1 FROM assignment_submissions s WHERE s.id = submission_id AND s.student_id = auth.uid())
+  OR EXISTS (
+    SELECT 1 FROM assignment_submissions s
+    JOIN classroom_assignments ca ON ca.id = s.assignment_id
+    JOIN classrooms c ON c.id = ca.classroom_id
+    WHERE s.id = submission_id AND c.owner_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "subcomments_insert_teacher" ON submission_comments;
+CREATE POLICY "subcomments_insert_teacher" ON submission_comments FOR INSERT WITH CHECK (
+  author_id = auth.uid()
+  AND EXISTS (
+    SELECT 1 FROM assignment_submissions s
+    JOIN classroom_assignments ca ON ca.id = s.assignment_id
+    JOIN classrooms c ON c.id = ca.classroom_id
+    WHERE s.id = submission_id AND c.owner_id = auth.uid()
+  )
+);
+
+DROP POLICY IF EXISTS "subcomments_delete_own" ON submission_comments;
+CREATE POLICY "subcomments_delete_own" ON submission_comments FOR DELETE USING (author_id = auth.uid());
+
+-- --- 7.4 Tamamlanan romanlar -------------------------------------
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS completed_at timestamptz;
+
+CREATE INDEX IF NOT EXISTS idx_projects_completed ON projects(completed_at) WHERE completed_at IS NOT NULL;
+
 -- PostgREST schema cache'ini yenile (şema güncellemesinden sonra otomatik tetiklenir)
 NOTIFY pgrst, 'reload schema';

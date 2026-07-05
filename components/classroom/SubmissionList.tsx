@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ExternalLink, ChevronDown, ChevronUp } from 'lucide-react'
+import { ExternalLink, ChevronDown, ChevronUp, MessageSquareText } from 'lucide-react'
 import { GradePanel } from './GradePanel'
 import { cn } from '@/lib/utils'
 import type { AssignmentSubmission } from '@/types'
@@ -10,6 +10,7 @@ import type { AssignmentSubmission } from '@/types'
 interface Props {
   initialSubmissions: AssignmentSubmission[]
   classroomId: string
+  assignmentId?: string
 }
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
@@ -18,7 +19,7 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   graded:    { label: 'Notlandı',      color: 'text-emerald-400' },
 }
 
-export function SubmissionList({ initialSubmissions, classroomId }: Props) {
+export function SubmissionList({ initialSubmissions, classroomId, assignmentId }: Props) {
   const [submissions, setSubmissions] = useState(initialSubmissions)
   const [expanded, setExpanded] = useState<string | null>(null)
 
@@ -61,13 +62,23 @@ export function SubmissionList({ initialSubmissions, classroomId }: Props) {
             {isOpen && (
               <div className="px-4 pb-4 space-y-3 border-t border-white/[0.05]">
                 {sub.project_id && (
-                  <Link
-                    href={`/projects/${sub.project_id}/write`}
-                    target="_blank"
-                    className="flex items-center gap-1.5 text-xs text-primary hover:text-accent transition-colors mt-3"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" /> Yazıyı Görüntüle
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-4 mt-3">
+                    {assignmentId && (sub.status === 'submitted' || sub.status === 'graded') && (
+                      <Link
+                        href={`/classroom/${classroomId}/assignments/${assignmentId}/review/${sub.id}`}
+                        className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+                      >
+                        <MessageSquareText className="w-3.5 h-3.5" /> Metni İncele & Paragraf Yorumla
+                      </Link>
+                    )}
+                    <Link
+                      href={`/projects/${sub.project_id}/write`}
+                      target="_blank"
+                      className="flex items-center gap-1.5 text-xs text-primary hover:text-accent transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Yazıyı Görüntüle
+                    </Link>
+                  </div>
                 )}
                 {(sub.status === 'submitted' || sub.status === 'graded') && (
                   <GradePanel submission={sub} onGraded={updateSubmission} />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Send, Users, Check, X, ChevronLeft, Loader2 } from 'lucide-react'
+import { Send, Users, Check, X, ChevronLeft, Loader2, Rocket } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -27,6 +27,7 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
   const [status, setStatus] = useState(thread.status)
+  const [converting, setConverting] = useState(false)
   const [myRequest, setMyRequest] = useState<JoinRequest | null>(
     initialJoinRequests.find(r => r.user_id === currentUserId) ?? null
   )
@@ -105,6 +106,42 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
     router.refresh()
   }
 
+  // Fikri gerçek bir projeye dönüştür: başlık → proje adı, tohum → özet.
+  // Kabul edilen ekip üyeleri projeye başvurabilir/davet edilebilir.
+  async function convertToProject() {
+    if (!confirm('Bu fikir bir projeye dönüştürülecek. Başlık proje adı, tohum fikir de özet olacak. Devam edilsin mi?')) return
+    setConverting(true)
+
+    const slug = thread.title
+      .toLowerCase()
+      .replace(/[çğıöşü]/g, c => ({ 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u' }[c] ?? c))
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/[\s_]+/g, '-')
+      .replace(/-+/g, '-')
+      .trim() + '-' + Math.random().toString(36).slice(2, 6)
+
+    const { data: project, error } = await supabase
+      .from('projects')
+      .insert({
+        owner_id: currentUserId,
+        title: thread.title,
+        slug,
+        synopsis: thread.seed,
+        visibility: 'open',
+      })
+      .select('id')
+      .single()
+
+    if (error || !project) {
+      alert('Proje oluşturulamadı, tekrar dene.')
+      setConverting(false)
+      return
+    }
+
+    await supabase.from('idea_threads').update({ project_id: project.id, status: 'closed' }).eq('id', thread.id)
+    router.push(`/projects/${project.id}/overview`)
+  }
+
   async function requestJoin() {
     const { data } = await supabase
       .from('idea_join_requests')
@@ -158,6 +195,17 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
           {/* Owner controls */}
           {isOwner && status !== 'closed' && (
             <div className="flex items-center gap-2 shrink-0">
+              {!thread.project_id && (
+                <button
+                  onClick={convertToProject}
+                  disabled={converting}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-primary/20 text-primary border border-primary/30 hover:bg-primary/30 transition-colors disabled:opacity-50"
+                  title="Fikri gerçek bir projeye dönüştür"
+                >
+                  {converting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Rocket className="w-3.5 h-3.5" />}
+                  <span className="hidden sm:inline">{converting ? 'Oluşturuluyor…' : 'Projeye Dönüştür'}</span>
+                </button>
+              )}
               <button
                 onClick={toggleTeamForming}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
