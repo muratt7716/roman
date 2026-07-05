@@ -109,7 +109,12 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">Şifre</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Şifre</Label>
+            <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-primary transition-colors">
+              Şifremi unuttum
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"
