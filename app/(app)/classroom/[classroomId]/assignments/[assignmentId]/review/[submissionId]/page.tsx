@@ -47,27 +47,14 @@ export default async function SubmissionReviewPage({ params }: PageProps) {
   const isStudentOwner = submission.student_id === user.id
   if (!isTeacher && !isStudentOwner) notFound()
 
-  // Teslim edilen metni topla: projenin bölümleri → her bölümün son versiyonu
+  // Teslim edilen metni topla — SECURITY DEFINER RPC: öğretmen öğrencinin
+  // projesine üye olmadığı için normal chapters sorgusu RLS'e takılır
   let blocks: string[] = []
-  if (submission.project_id) {
-    const { data: chapters } = await supabase
-      .from('chapters')
-      .select('id, title, order_index')
-      .eq('project_id', submission.project_id)
-      .order('order_index', { ascending: true })
-
-    for (const ch of chapters ?? []) {
-      const { data: version } = await supabase
-        .from('chapter_versions')
-        .select('content')
-        .eq('chapter_id', ch.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      if (version?.content) {
-        blocks = blocks.concat(splitIntoBlocks(version.content))
-      }
-    }
+  const { data: reviewContent } = await supabase.rpc('get_submission_review_content', {
+    p_submission_id: submissionId,
+  })
+  for (const row of (reviewContent ?? []) as { content: string | null }[]) {
+    if (row.content) blocks = blocks.concat(splitIntoBlocks(row.content))
   }
 
   // Mevcut paragraf yorumları (tablo henüz yoksa sessizce boş)

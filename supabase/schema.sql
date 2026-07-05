@@ -1407,6 +1407,43 @@ CREATE POLICY "subcomments_insert_teacher" ON submission_comments FOR INSERT WIT
 DROP POLICY IF EXISTS "subcomments_delete_own" ON submission_comments;
 CREATE POLICY "subcomments_delete_own" ON submission_comments FOR DELETE USING (author_id = auth.uid());
 
+-- Teslim içeriğini yetki kontrolüyle döndür (RLS bypass):
+-- öğrencinin projesine öğretmen üye değildir, normal sorgu boş döner.
+-- Sadece teslim sahibi öğrenci veya sınıf sahibi öğretmen okuyabilir.
+CREATE OR REPLACE FUNCTION get_submission_review_content(p_submission_id uuid)
+RETURNS TABLE(chapter_id uuid, chapter_title text, order_index int, content text)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_project_id uuid;
+  v_student_id uuid;
+  v_owner_id   uuid;
+BEGIN
+  SELECT s.project_id, s.student_id, c.owner_id
+    INTO v_project_id, v_student_id, v_owner_id
+  FROM assignment_submissions s
+  JOIN classroom_assignments ca ON ca.id = s.assignment_id
+  JOIN classrooms c ON c.id = ca.classroom_id
+  WHERE s.id = p_submission_id;
+
+  IF v_project_id IS NULL THEN RETURN; END IF;
+  IF auth.uid() IS DISTINCT FROM v_student_id AND auth.uid() IS DISTINCT FROM v_owner_id THEN
+    RETURN;
+  END IF;
+
+  RETURN QUERY
+  SELECT ch.id, ch.title, ch.order_index,
+         (SELECT cv.content FROM chapter_versions cv
+           WHERE cv.chapter_id = ch.id
+           ORDER BY cv.created_at DESC LIMIT 1)
+  FROM chapters ch
+  WHERE ch.project_id = v_project_id
+  ORDER BY ch.order_index;
+END;
+$$;
+
 -- --- 7.4 Tamamlanan romanlar -------------------------------------
 ALTER TABLE projects ADD COLUMN IF NOT EXISTS completed_at timestamptz;
 
