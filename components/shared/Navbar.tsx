@@ -54,12 +54,14 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300">
+        {/* Navbar arka planı her zaman opak/blur — şeffafken sayfa içeriği
+            kaydırma sırasında navbar'ın arkasına girip okunmaz oluyordu */}
         <div
           className={cn(
-            'absolute inset-0 transition-all duration-500',
+            'absolute inset-0 transition-all duration-500 bg-background/85 backdrop-blur-xl border-b',
             scrolled || mobileMenuOpen
-              ? 'bg-background/80 backdrop-blur-xl border-b border-white/[0.06] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.01),0_4px_30px_rgba(0,0,0,0.4)]'
-              : 'bg-transparent border-b border-transparent'
+              ? 'border-white/[0.06] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.01),0_4px_30px_rgba(0,0,0,0.4)]'
+              : 'border-white/[0.03]'
           )}
         />
 
