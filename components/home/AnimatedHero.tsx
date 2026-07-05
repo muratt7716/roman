@@ -78,7 +78,7 @@ export function AnimatedHero({ isLoggedIn }: AnimatedHeroProps) {
           variants={titleContainer}
           initial="hidden"
           animate="visible"
-          className="font-display font-bold tracking-tight leading-[0.95] text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-white [perspective:800px]"
+          className="font-display font-bold tracking-tight leading-[1.08] text-6xl sm:text-7xl md:text-8xl lg:text-9xl text-white [perspective:800px]"
           aria-label="Kalem Birliği"
         >
           {words.map((word, wi) => (

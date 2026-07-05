@@ -180,6 +180,9 @@
   }
 
   /* ── Gradient text ──────────────────────────────────────── */
+  /* padding/margin-block: bg-clip-text'in boyadığı kutuyu genişletir —
+     yoksa sıkı line-height'ta Türkçe aksanlar (ğ şapkası, İ noktası,
+     Ö/Ü çift noktası) boyanmadan şeffaf kalır ve kırpılmış görünür */
   .text-gradient {
     background: linear-gradient(135deg,
       var(--color-primary) 0%,
@@ -188,12 +191,16 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-block: 0.18em;
+    margin-block: -0.18em;
   }
   .text-gradient-gold {
     background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #fde68a 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    padding-block: 0.18em;
+    margin-block: -0.18em;
   }
 
   /* ── Shimmer loading ────────────────────────────────────── */
