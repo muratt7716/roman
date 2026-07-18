@@ -140,6 +140,14 @@ export function SignupForm() {
           {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           Hesap Oluştur
         </Button>
+
+        <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
+          Hesap oluşturarak en az 13 yaşında olduğunu,{' '}
+          <Link href="/kullanim-kosullari" className="text-primary hover:underline">Kullanım Koşulları</Link>
+          {' '}ve{' '}
+          <Link href="/gizlilik-politikasi" className="text-primary hover:underline">Gizlilik Politikası</Link>
+          &apos;nı kabul ettiğini onaylarsın.
+        </p>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">

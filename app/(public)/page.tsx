@@ -363,8 +363,8 @@ export default async function HomePage() {
           <div className="mt-10 pt-6 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-muted-foreground/70">
             <span>© 2026 Kalem Birliği. Tüm hakları saklıdır.</span>
             <div className="flex items-center gap-5">
-              <a href="#" className="hover:text-white transition-colors">Kullanım Koşulları</a>
-              <a href="#" className="hover:text-white transition-colors">Gizlilik Politikası</a>
+              <Link href="/kullanim-kosullari" className="hover:text-white transition-colors">Kullanım Koşulları</Link>
+              <Link href="/gizlilik-politikasi" className="hover:text-white transition-colors">Gizlilik Politikası</Link>
             </div>
           </div>
         </div>
