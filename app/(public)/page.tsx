@@ -74,10 +74,19 @@ interface AuthorPreview {
   avatar_url: string | null
 }
 
+interface FreshChapter {
+  id: string
+  title: string
+  updated_at: string
+  project: { slug: string; title: string } | null
+  author: { username: string; display_name: string | null } | null
+}
+
 export default async function HomePage() {
   let isLoggedIn = false
   let stats = { writers: 0, projects: 0, chapters: 0, words: 0 }
   let authors: AuthorPreview[] = []
+  let freshChapters: FreshChapter[] = []
 
   try {
     const supabase = await createClient()
@@ -89,6 +98,7 @@ export default async function HomePage() {
       { count: chaptersCount },
       { data: wordRows },
       { data: authorRows },
+      { data: freshRows },
     ] = await Promise.all([
       supabase.auth.getUser(),
       supabase.from('profiles').select('*', { count: 'exact', head: true }),
@@ -100,6 +110,13 @@ export default async function HomePage() {
         .select('id, username, display_name, avatar_url')
         .order('reputation_score', { ascending: false })
         .limit(8),
+      supabase
+        .from('chapters')
+        .select('id, title, updated_at, project:projects!inner(slug, title, visibility), author:profiles!chapters_created_by_fkey(username, display_name)')
+        .eq('status', 'final')
+        .eq('projects.visibility', 'published')
+        .order('updated_at', { ascending: false })
+        .limit(6),
     ])
 
     isLoggedIn = !!user
@@ -113,6 +130,7 @@ export default async function HomePage() {
       ),
     }
     authors = (authorRows as AuthorPreview[] | null) ?? []
+    freshChapters = ((freshRows ?? []) as unknown as FreshChapter[]).filter(c => c.project)
   } catch {
     // Supabase yapılandırılmamış — statik fallback ile devam et
   }
@@ -173,6 +191,54 @@ export default async function HomePage() {
 
       {/* ── EDİTÖRYAL SEÇKİ — yatay scroll carousel ── */}
       <EditorialPicksSection />
+
+      {/* ── TAZE BÖLÜMLER — en son yayınlanan bölümler akışı ── */}
+      {freshChapters.length > 0 && (
+        <section className="relative py-20 sm:py-24 px-4 border-t border-white/[0.04]">
+          <div className="max-w-4xl mx-auto">
+            <Reveal className="mb-10">
+              <span className="text-emerald-400 text-[11px] font-semibold tracking-[0.25em] uppercase">
+                Sıcağı Sıcağına
+              </span>
+              <h2 className="mt-3 font-display font-bold text-3xl sm:text-4xl text-white">
+                Taze <span className="text-gradient">Bölümler</span>
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground max-w-xl">
+                Devam eden hikâyelerin en yeni bölümleri — kaldığı yerden yazılmaya devam eden evrenler.
+              </p>
+            </Reveal>
+
+            <div className="space-y-2">
+              {freshChapters.map((c, i) => (
+                <Reveal key={c.id} delay={i * 0.06}>
+                  <Link
+                    href={`/projects/${c.project!.slug}/read/${c.id}`}
+                    className="group flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-primary/30 hover:bg-white/[0.04] transition-all duration-300"
+                  >
+                    <span className="shrink-0 w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                      <BookOpen className="w-4 h-4" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm text-white truncate group-hover:text-primary transition-colors">
+                        {c.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {c.project!.title}
+                        {c.author && <> · {c.author.display_name ?? c.author.username}</>}
+                        {' · '}
+                        {new Date(c.updated_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+                      </p>
+                    </div>
+                    <span className="shrink-0 text-xs text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all">
+                      Oku →
+                    </span>
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── FEATURES — staggered reveal grid ── */}
       <section className="relative py-24 sm:py-32 px-4 border-t border-white/[0.04]">

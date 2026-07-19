@@ -98,6 +98,21 @@ export default async function UserProfilePage({ params }: Props) {
   const earnedBadges = (badges ?? []) as UserBadge[]
   const streakBest = writingGoal?.streak_best ?? 0
 
+  // Son yayınlanan bölümler — yazarın panosu (yalnızca yayınlanmış projelerdeki final bölümler)
+  const { data: recentChapterRows } = await supabase
+    .from('chapters')
+    .select('id, title, updated_at, project:projects!inner(slug, title, visibility)')
+    .eq('created_by', profile.id)
+    .eq('status', 'final')
+    .eq('projects.visibility', 'published')
+    .order('updated_at', { ascending: false })
+    .limit(6)
+
+  const recentChapters = ((recentChapterRows ?? []) as unknown as {
+    id: string; title: string; updated_at: string
+    project: { slug: string; title: string } | null
+  }[]).filter(c => c.project)
+
   const uniqueRoles = [...new Set(
     (memberships ?? []).map((m: any) => m.role?.name).filter(Boolean)
   )] as string[]
@@ -256,6 +271,40 @@ export default async function UserProfilePage({ params }: Props) {
               <h2 className="text-2xl font-display font-semibold text-white">Kazanılan Rozetler</h2>
             </div>
             <BadgesGrid badges={earnedBadges} />
+          </section>
+        )}
+
+        {/* ── SON YAYINLANAN BÖLÜMLER — yazarın panosu ── */}
+        {recentChapters.length > 0 && (
+          <section className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+                <PenLine className="w-4 h-4 text-emerald-400" />
+              </div>
+              <h2 className="text-2xl font-display font-semibold text-white">Son Yayınlanan Bölümler</h2>
+            </div>
+            <div className="space-y-2">
+              {recentChapters.map(c => (
+                <Link
+                  key={c.id}
+                  href={`/projects/${c.project!.slug}/read/${c.id}`}
+                  className="group flex items-center gap-4 px-5 py-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.05] hover:border-primary/30 hover:bg-white/[0.04] transition-all duration-300"
+                >
+                  <span className="shrink-0 w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                    <BookOpen className="w-3.5 h-3.5" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm text-white truncate group-hover:text-primary transition-colors">{c.title}</p>
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">
+                      {c.project!.title} · {new Date(c.updated_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all">
+                    Oku →
+                  </span>
+                </Link>
+              ))}
+            </div>
           </section>
         )}
 

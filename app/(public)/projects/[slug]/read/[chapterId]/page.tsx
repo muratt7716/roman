@@ -46,7 +46,7 @@ export default async function ChapterReadPage({ params }: Props) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('id, title, slug, visibility')
+    .select('id, title, slug, visibility, collaboration_status, completed_at')
     .eq('slug', slug)
     .single()
 
@@ -92,7 +92,29 @@ export default async function ChapterReadPage({ params }: Props) {
         <span className="text-foreground">{chapter.title}</span>
       </div>
 
-      <h1 className="text-3xl font-display font-bold mb-10">{chapter.title}</h1>
+      <h1 className="text-3xl font-display font-bold mb-4">{chapter.title}</h1>
+
+      {/* Seri ilerleme göstergesi — okur hikâyenin neresinde olduğunu görsün */}
+      {currentIdx >= 0 && chapterList.length > 0 && (
+        <div className="mb-10 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground font-medium">
+              Bölüm {currentIdx + 1} / {chapterList.length}
+            </span>
+            {project.collaboration_status === 'completed' && project.completed_at ? (
+              <span className="text-amber-400 font-medium">● Tamamlandı</span>
+            ) : (
+              <span className="text-emerald-400 font-medium">● Devam ediyor</span>
+            )}
+          </div>
+          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-violet-400"
+              style={{ width: `${Math.round(((currentIdx + 1) / chapterList.length) * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       {latestVersion?.content ? (
