@@ -53,7 +53,18 @@
       "PowerShell(npx next build; \"BUILD EXIT: $LASTEXITCODE\")",
       "PowerShell(git add -A)",
       "PowerShell(git rm -r --cached .claude/worktrees 2>$null)",
-      "PowerShell(git add .gitignore)"
+      "PowerShell(git add .gitignore)",
+      "PowerShell(npx tsc --noEmit; \"TSC: $LASTEXITCODE\")",
+      "PowerShell(git add supabase/schema.sql \"app/\\(app\\)/classroom/[classroomId]/assignments/[assignmentId]/review/[submissionId]/page.tsx\")",
+      "PowerShell(git add components/shared/Navbar.tsx)",
+      "PowerShell(git add \"app/\\(auth\\)/forgot-password\" \"app/\\(auth\\)/reset-password\" components/auth/ForgotPasswordForm.tsx components/auth/ResetPasswordForm.tsx components/auth/LoginForm.tsx)",
+      "PowerShell(git add \"app/\\(public\\)/kullanim-kosullari\" \"app/\\(public\\)/gizlilik-politikasi\" \"app/\\(public\\)/page.tsx\" components/auth/SignupForm.tsx)",
+      "PowerShell(Resolve-DnsName dtcwlvoggjxvuwvkjpip.supabase.co -ErrorAction Continue)",
+      "PowerShell(Resolve-DnsName dtcwlvoggjxvuwvkjpip.supabase.co -Server 8.8.8.8 -ErrorAction Continue)",
+      "PowerShell(\"---\")",
+      "PowerShell(git add \"app/\\(public\\)/page.tsx\" \"app/\\(public\\)/u/[username]/page.tsx\" \"app/\\(public\\)/projects/[slug]/read/[chapterId]/page.tsx\")",
+      "PowerShell(git commit -m \"feat: serialized reading touches \\(fresh chapters feed, author board, chapter progress\\)\")",
+      "PowerShell(git commit -m \"chore: update Claude Code permission allowlist\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\Administrator\\Desktop\\roman"
