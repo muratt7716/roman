@@ -16,6 +16,7 @@ export function SignupForm() {
   const router = useRouter()
   const supabase = createClient()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [consent, setConsent] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -136,18 +137,26 @@ export function SignupForm() {
           <p role="alert" className="text-destructive text-sm text-center">{serverError}</p>
         )}
 
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <label className="flex items-start gap-2.5 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={e => setConsent(e.target.checked)}
+            className="mt-0.5 w-4 h-4 shrink-0 rounded border-border bg-surface-2 accent-primary cursor-pointer"
+          />
+          <span className="text-[11px] text-muted-foreground leading-relaxed">
+            En az 13 yaşında olduğumu,{' '}
+            <Link href="/kullanim-kosullari" className="text-primary hover:underline" target="_blank">Kullanım Koşulları</Link>
+            {' '}ve{' '}
+            <Link href="/gizlilik-politikasi" className="text-primary hover:underline" target="_blank">Gizlilik Politikası</Link>
+            &apos;nı okuduğumu ve kabul ettiğimi onaylıyorum.
+          </span>
+        </label>
+
+        <Button type="submit" className="w-full" disabled={isSubmitting || !consent}>
           {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           Hesap Oluştur
         </Button>
-
-        <p className="text-[11px] text-muted-foreground text-center leading-relaxed">
-          Hesap oluşturarak en az 13 yaşında olduğunu,{' '}
-          <Link href="/kullanim-kosullari" className="text-primary hover:underline">Kullanım Koşulları</Link>
-          {' '}ve{' '}
-          <Link href="/gizlilik-politikasi" className="text-primary hover:underline">Gizlilik Politikası</Link>
-          &apos;nı kabul ettiğini onaylarsın.
-        </p>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">

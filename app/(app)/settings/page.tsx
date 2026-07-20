@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SettingsForm } from '@/components/settings/SettingsForm'
+import { DeleteAccountButton } from '@/components/settings/DeleteAccountButton'
 
 export const metadata: Metadata = { title: 'Ayarlar — Kalem Birliği' }
 export const dynamic = 'force-dynamic'
@@ -21,6 +22,14 @@ export default async function SettingsPage() {
         <p className="text-muted-foreground mt-1">Profil bilgilerini ve yazarlık durumunu yönet.</p>
       </div>
       <SettingsForm profile={profile} />
+
+      <div className="glass-card rounded-2xl p-6 space-y-3 border border-destructive/20">
+        <h2 className="font-display font-semibold text-lg text-destructive">Tehlikeli Bölge</h2>
+        <p className="text-sm text-muted-foreground">
+          Hesabını ve tüm verilerini kalıcı olarak silebilirsin. Bu işlem geri alınamaz.
+        </p>
+        <DeleteAccountButton username={profile.username} />
+      </div>
     </div>
   )
 }
