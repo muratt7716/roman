@@ -64,7 +64,9 @@
       "PowerShell(\"---\")",
       "PowerShell(git add \"app/\\(public\\)/page.tsx\" \"app/\\(public\\)/u/[username]/page.tsx\" \"app/\\(public\\)/projects/[slug]/read/[chapterId]/page.tsx\")",
       "PowerShell(git commit -m \"feat: serialized reading touches \\(fresh chapters feed, author board, chapter progress\\)\")",
-      "PowerShell(git commit -m \"chore: update Claude Code permission allowlist\")"
+      "PowerShell(git commit -m \"chore: update Claude Code permission allowlist\")",
+      "PowerShell(git add components/auth/SignupForm.tsx lib/supabase/admin.ts app/api/account/delete components/settings/DeleteAccountButton.tsx \"app/\\(app\\)/settings/page.tsx\")",
+      "PowerShell(git commit -m \"feat: active signup consent checkbox + self-service account deletion \\(KVKK\\)\")"
     ],
     "additionalDirectories": [
       "C:\\Users\\Administrator\\Desktop\\roman"
