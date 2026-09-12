@@ -46,6 +46,14 @@ Bu upsert şu dosyaların HEPSİNDE var olmalı:
 - `components/project/ProjectForm.tsx` — proje oluşturmadan önce
 - `app/(app)/layout.tsx` — her oturumda fallback olarak
 - `app/(public)/layout.tsx` — her oturumda fallback olarak (try/catch içinde)
+- `app/api/account/consent/route.ts` — rıza yazmadan önce (satır yoksa UPDATE 0 satır etkiler)
+
+> **UYARI (13 Eyl 2026'da bulundu):** Bu upsert'lerin hiçbiri `profiles_insert_own`
+> RLS politikası olmadan çalışmaz — hepsi sessizce 403 döner, çünkü
+> `ON CONFLICT DO NOTHING` da PostgREST için INSERT'tir ve kod hatayı yutar.
+> Satırlar aslında `handle_new_user` trigger'ı (SECURITY DEFINER, RLS baypas)
+> tarafından oluşturulduğu için sorun yıllarca görünmedi. Politika artık
+> `supabase/schema.sql`'de — **Supabase'e uygulanması gerekiyor.**
 
 Upsert pattern:
 ```typescript
@@ -59,6 +67,30 @@ await supabase.from('profiles').upsert({
   avatar_url: user.user_metadata?.avatar_url ?? null,
 }, { onConflict: 'id', ignoreDuplicates: true })
 ```
+
+### KVKK Rıza Kapısı — İstemcide Değil Sunucuda
+Google ile kayıt, kayıt formundaki onay kutusunu **tamamen atlar**: OAuth akışı
+`/login` ile paylaşılır, yani ilk kez gelen kullanıcı giriş sayfasındaki Google
+butonuyla da hesap açar. Bu yüzden butonu istemcide kilitlemek kozmetiktir —
+rıza `app/(app)/layout.tsx` içinde zorunlu kılınır:
+
+```typescript
+if (requiresConsent(profile)) redirect('/onay')
+```
+
+| Dosya | Rolü |
+|-------|------|
+| `lib/legal.ts` | `TERMS_VERSION` + `requiresConsent()` politikası (tek karar noktası) |
+| `app/api/account/consent/route.ts` | Rıza yazmanın **tek** yolu — zaman damgası sunucudan |
+| `app/(auth)/onay/page.tsx` | Onay kapısı — `(auth)` grubunda! `(app)` altında olsaydı döngü |
+| `components/auth/ConsentGate.tsx` | Onay UI + "kabul etmiyorum → çıkış yap" |
+
+- Kolonlar: `profiles.consent_at` (NULL = rıza yok) + `profiles.consent_version`
+- Metinler değişince `TERMS_VERSION`'ı güncelle
+- Politika şu an gevşek: `!consent_at`. Katı sürüm (her metin güncellemesinde
+  yeniden rıza) `lib/legal.ts` içinde yorumda duruyor
+- **Dağıtım sırası:** kolonlar DB'de yokken bu kod deploy edilirse
+  `requiresConsent()` herkes için true döner ve TÜM kullanıcılar kapıda kilitlenir
 
 ---
 
@@ -154,9 +186,14 @@ lib/validations/
   project.ts                          # Zod şemaları — synopsis max 1000 karakter
   auth.ts                             # Auth zod şemaları
 lib/gemini.ts                         # generateWithFallback() — çok model retry (RPD öncelikli)
+lib/legal.ts                          # TERMS_VERSION + requiresConsent() — KVKK rıza politikası
+lib/supabase/admin.ts                 # service-role client (RLS baypas) — yalnızca auth.admin.* için
 lib/characterData.ts                  # Türkçe karakter üretimi için veri listeleri
 hooks/useStreak.ts                    # localStorage streak takibi (zero cost)
 app/(auth)/auth/callback/route.ts     # OAuth callback — profil upsert burada
+app/(auth)/onay/page.tsx              # KVKK onay kapısı — (auth) grubunda, döngüyü önlemek için
+app/api/account/consent/route.ts      # Rıza kaydı — sunucu zaman damgası, tek yazma noktası
+app/api/account/delete/route.ts       # Hesap silme — SUPABASE_SERVICE_ROLE_KEY gerektirir
 app/(app)/
   layout.tsx                          # Auth guard + profil upsert fallback
   dashboard/page.tsx                  # Dashboard
@@ -628,6 +665,19 @@ Kod hazır ama DB'de tablolar yok — `supabase/schema.sql` Supabase Dashboard >
 - **Yeni enum değerleri:** `notification_type` → `new_chapter`, `new_follower`
 - **Yeni kolon:** `chapters.view_count int NOT NULL DEFAULT 0`
 - **Faz 3 tabloları:** `classrooms`, `classroom_members`, `classroom_assignments`, `assignment_submissions` + `join_classroom_by_code` SECURITY DEFINER function + tüm RLS politikaları
+
+### Açık Kalan — Elle Yapılması Gerekenler (13 Eyl 2026)
+- **`profiles_insert_own` RLS politikası** — schema.sql'de var, DB'ye uygulanmadı.
+  Uygulanmadan profili eksik eski hesaplar onay kapısında kilitli kalır:
+  ```sql
+  DROP POLICY IF EXISTS "profiles_insert_own" ON profiles;
+  CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
+  ```
+- **`SUPABASE_SERVICE_ROLE_KEY`** — `.env.local` ve Vercel'de tanımlı değil.
+  Bu olmadan `/api/account/delete` (hesap silme) çalışmaz, kendi hata mesajını döner.
+  Supabase Dashboard > Settings > API > service_role. Gerekli değişkenlerin
+  tam listesi `.env.local.example`'da.
+- `profiles.consent_at` / `consent_version` kolonları **uygulandı** ✅ (12 Eyl 2026)
 
 ### Diğer Bekleyenler
 - **`totalViews` haftalık istatistik** — şu an 0 gösterir; ileriki fazda chapter_reads tablosu ile gerçek veri gelecek
