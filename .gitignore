@@ -34,6 +34,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...ama örnek dosya sadece placeholder içerir ve hangi değişkenlerin
+# gerekli olduğunu belgeler — commit'lenmeli.
+!.env.local.example
 
 # vercel
 .vercel

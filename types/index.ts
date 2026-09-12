@@ -21,6 +21,10 @@ export interface Profile {
   portfolio_url: string | null
   reputation_score: number
   writing_status?: 'active' | 'open' | 'busy'
+  /** KVKK açık rıza zaman damgası — NULL ise rıza kaydı yok (bkz. lib/legal.ts) */
+  consent_at?: string | null
+  /** Rızanın verildiği metin sürümü (TERMS_VERSION) */
+  consent_version?: string | null
   created_at: string
 }
 

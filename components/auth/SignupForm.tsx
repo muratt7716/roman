@@ -45,11 +45,19 @@ export function SignupForm() {
         display_name: data.username,
         avatar_url: null,
       }, { onConflict: 'id', ignoreDuplicates: true })
+
+      // Rızayı sunucu zaman damgasıyla kaydet. Başarısız olursa sessizce
+      // geçiyoruz — (app) layout'undaki onay kapısı kullanıcıyı /onay'a
+      // düşürüp kaydı orada alır, yani rıza hiçbir durumda kaybolmaz.
+      await fetch('/api/account/consent', { method: 'POST' }).catch(() => null)
     }
     router.push('/dashboard')
     router.refresh()
   }
 
+  // Google ile gelen kullanıcı bu formu doldurmaz; rıza kaydı OAuth dönüşünde
+  // /onay kapısında alınır. Buradaki kilit yalnızca UX — kullanıcı koşulları
+  // görmeden akışa girmesin.
   async function signUpWithGoogle() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -64,7 +72,29 @@ export function SignupForm() {
         <p className="text-muted-foreground text-sm">Birlikte yazmaya başla</p>
       </div>
 
-      <Button variant="outline" className="w-full border-border" onClick={signUpWithGoogle} type="button">
+      <label className="flex items-start gap-2.5 cursor-pointer select-none rounded-xl bg-surface-2/60 border border-border p-3">
+        <input
+          type="checkbox"
+          checked={consent}
+          onChange={e => setConsent(e.target.checked)}
+          className="mt-0.5 w-4 h-4 shrink-0 rounded border-border bg-surface-2 accent-primary cursor-pointer"
+        />
+        <span className="text-[11px] text-muted-foreground leading-relaxed">
+          En az 13 yaşında olduğumu,{' '}
+          <Link href="/kullanim-kosullari" className="text-primary hover:underline" target="_blank">Kullanım Koşulları</Link>
+          {' '}ve{' '}
+          <Link href="/gizlilik-politikasi" className="text-primary hover:underline" target="_blank">Gizlilik Politikası</Link>
+          &apos;nı okuduğumu ve kabul ettiğimi onaylıyorum.
+        </span>
+      </label>
+
+      <Button
+        variant="outline"
+        className="w-full border-border"
+        onClick={signUpWithGoogle}
+        type="button"
+        disabled={!consent}
+      >
         <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" aria-hidden="true">
           <path fill="currentColor" d="M12.545 10.239v3.821h5.445c-.712 2.315-2.647 3.972-5.445 3.972a6.033 6.033 0 1 1 0-12.064c1.498 0 2.866.549 3.921 1.453l2.814-2.814A9.969 9.969 0 0 0 12.545 2C7.021 2 2.543 6.477 2.543 12s4.478 10 10.002 10c8.396 0 10.249-7.85 9.426-11.748z"/>
         </svg>
@@ -136,22 +166,6 @@ export function SignupForm() {
         {serverError && (
           <p role="alert" className="text-destructive text-sm text-center">{serverError}</p>
         )}
-
-        <label className="flex items-start gap-2.5 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={consent}
-            onChange={e => setConsent(e.target.checked)}
-            className="mt-0.5 w-4 h-4 shrink-0 rounded border-border bg-surface-2 accent-primary cursor-pointer"
-          />
-          <span className="text-[11px] text-muted-foreground leading-relaxed">
-            En az 13 yaşında olduğumu,{' '}
-            <Link href="/kullanim-kosullari" className="text-primary hover:underline" target="_blank">Kullanım Koşulları</Link>
-            {' '}ve{' '}
-            <Link href="/gizlilik-politikasi" className="text-primary hover:underline" target="_blank">Gizlilik Politikası</Link>
-            &apos;nı okuduğumu ve kabul ettiğimi onaylıyorum.
-          </span>
-        </label>
 
         <Button type="submit" className="w-full" disabled={isSubmitting || !consent}>
           {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}

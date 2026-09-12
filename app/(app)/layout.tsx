@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { Navbar } from '@/components/shared/Navbar'
+import { requiresConsent } from '@/lib/legal'
 import type { Profile } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -44,9 +45,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       portfolio_url: null,
       writing_status: 'open',
       reputation_score: 0,
+      consent_at: null,
+      consent_version: null,
       created_at: user.created_at,
     }
   }
+
+  // KVKK onay kapısı — hangi yoldan hesap açıldığından bağımsız çalışır.
+  // Google ile gelen kullanıcı kayıt formundaki onay kutusunu hiç görmez
+  // (üstelik /login'deki Google butonu da yeni hesap açar), bu yüzden onay
+  // istemcide değil burada zorunlu kılınır. /onay sayfası (auth) grubunda
+  // durur — bu layout'un altında olsaydı döngüye girerdi.
+  if (requiresConsent(profile)) redirect('/onay')
 
   return (
     <div className="min-h-dvh">

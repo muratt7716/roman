@@ -51,8 +51,15 @@ CREATE TABLE IF NOT EXISTS profiles (
   portfolio_url   text,
   writing_status  text NOT NULL DEFAULT 'open' CHECK (writing_status IN ('active', 'open', 'busy')),
   reputation_score int NOT NULL DEFAULT 0,
+  consent_at      timestamptz,
+  consent_version text,
   created_at      timestamptz NOT NULL DEFAULT now()
 );
+
+-- KVKK açık rıza kaydı — profiles zaten kurulu olduğu için CREATE TABLE atlanır,
+-- kolonlar yalnızca bu ALTER'lar ile gelir. consent_at NULL = rıza kaydı yok.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS consent_at      timestamptz;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS consent_version text;
 
 CREATE TABLE IF NOT EXISTS projects (
   id                   uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -397,6 +404,7 @@ $$ LANGUAGE sql SECURITY DEFINER;
 
 -- Tüm politikaları sil ve yeniden oluştur (politikalar veri içermez)
 DROP POLICY IF EXISTS "profiles_select_all"          ON profiles;
+DROP POLICY IF EXISTS "profiles_insert_own"           ON profiles;
 DROP POLICY IF EXISTS "profiles_update_own"           ON profiles;
 DROP POLICY IF EXISTS "projects_select_public"        ON projects;
 DROP POLICY IF EXISTS "projects_insert_auth"          ON projects;
@@ -456,6 +464,11 @@ DROP POLICY IF EXISTS "follows_delete_own"       ON follows;
 
 -- Profiles
 CREATE POLICY "profiles_select_all" ON profiles FOR SELECT USING (true);
+-- INSERT politikası olmadan koddaki TÜM profiles.upsert(...) çağrıları 403 döner
+-- (ON CONFLICT DO NOTHING da PostgREST için INSERT'tir). Satırları handle_new_user
+-- trigger'ı SECURITY DEFINER ile oluşturduğu için bu sessizce fark edilmiyordu;
+-- profili eksik eski hesaplar ise onay kapısında kilitli kalıyordu.
+CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (id = auth.uid());
 
 -- Projects
