@@ -241,10 +241,10 @@ export default async function DashboardPage() {
             action={{ label: 'Proje Oluştur', href: '/projects/new' }}
           />
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {owned.map(p => (
               <div key={p.id} className="space-y-2">
-                <ProjectCard project={p} />
+                <ProjectCard project={p} variant="compact" />
                 <div className="flex gap-2 px-1">
                   <Link
                     href={`/projects/${p.id}/write`}
@@ -274,10 +274,10 @@ export default async function DashboardPage() {
             </div>
             <h2 className="text-xl font-display font-semibold">Katıldığım Projeler</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {memberProjects.map(p => (
               <div key={p.id} className="space-y-2">
-                <ProjectCard project={p} />
+                <ProjectCard project={p} variant="compact" />
                 <Link
                   href={`/projects/${p.id}/write`}
                   className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-xs font-medium transition-colors w-full"
