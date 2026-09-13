@@ -20,6 +20,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ])
 
   let profile: Profile
+  // DB'de gerçek bir profil satırı var mı? Aşağıdaki fallback nesnesi bellekte
+  // yaşar; ona rıza yazılamaz, dolayısıyla kapı da uygulanamaz.
+  let profileRowExists = !!profileData
+
   if (profileData) {
     profile = profileData as Profile
   } else {
@@ -35,6 +39,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       display_name: user.user_metadata?.full_name ?? user.email?.split('@')[0] ?? null,
       avatar_url: user.user_metadata?.avatar_url ?? null,
     }, { onConflict: 'id', ignoreDuplicates: true }).select().single()
+
+    profileRowExists = !!upserted
 
     profile = (upserted as Profile | null) ?? {
       id: user.id,
@@ -56,7 +62,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // (üstelik /login'deki Google butonu da yeni hesap açar), bu yüzden onay
   // istemcide değil burada zorunlu kılınır. /onay sayfası (auth) grubunda
   // durur — bu layout'un altında olsaydı döngüye girerdi.
-  if (requiresConsent(profile)) redirect('/onay')
+  //
+  // Fail-open: profil satırı yoksa kapı uygulanmaz. Aksi halde satırı
+  // oluşturulamayan hesap (profiles_insert_own politikası eksikken) rızasını
+  // da kaydettiremez ve uygulamadan tamamen kilitlenirdi. Politika uygulanınca
+  // bu hesaplar ilk yüklemede satırlarını alır ve kapı kendiliğinden devreye girer.
+  if (profileRowExists && requiresConsent(profile)) redirect('/onay')
 
   return (
     <div className="min-h-dvh">
