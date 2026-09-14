@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Plus, BookOpen, Bell, Users, PenLine, Settings, GraduationCap } from 'lucide-react'
+import { Plus, BookOpen, Bell, Users, GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { ProjectCard } from '@/components/project/ProjectCard'
+import { ProjectRow } from '@/components/project/ProjectRow'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { OnboardingCard } from '@/components/dashboard/OnboardingCard'
 import { WritingGoalCard } from '@/components/dashboard/WritingGoalCard'
@@ -241,25 +241,9 @@ export default async function DashboardPage() {
             action={{ label: 'Proje Oluştur', href: '/projects/new' }}
           />
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="space-y-2">
             {owned.map(p => (
-              <div key={p.id} className="space-y-2">
-                <ProjectCard project={p} variant="compact" />
-                <div className="flex gap-2 px-1">
-                  <Link
-                    href={`/projects/${p.id}/write`}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-xs font-medium transition-colors"
-                  >
-                    <PenLine className="w-3.5 h-3.5" /> Yaz
-                  </Link>
-                  <Link
-                    href={`/projects/${p.id}/overview`}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-surface-2 border border-border text-muted-foreground hover:text-foreground text-xs font-medium transition-colors"
-                  >
-                    <Settings className="w-3.5 h-3.5" /> Yönet
-                  </Link>
-                </div>
-              </div>
+              <ProjectRow key={p.id} project={p} canManage />
             ))}
           </div>
         )}
@@ -274,17 +258,9 @@ export default async function DashboardPage() {
             </div>
             <h2 className="text-xl font-display font-semibold">Katıldığım Projeler</h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="space-y-2">
             {memberProjects.map(p => (
-              <div key={p.id} className="space-y-2">
-                <ProjectCard project={p} variant="compact" />
-                <Link
-                  href={`/projects/${p.id}/write`}
-                  className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 text-xs font-medium transition-colors w-full"
-                >
-                  <PenLine className="w-3.5 h-3.5" /> Yazı Odasına Git
-                </Link>
-              </div>
+              <ProjectRow key={p.id} project={p} />
             ))}
           </div>
         </section>
