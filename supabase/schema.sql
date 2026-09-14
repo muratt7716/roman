@@ -450,6 +450,7 @@ DROP POLICY IF EXISTS "timeline_update_member"        ON timeline_events;
 DROP POLICY IF EXISTS "timeline_delete_owner"         ON timeline_events;
 DROP POLICY IF EXISTS "notifications_select_own"      ON notifications;
 DROP POLICY IF EXISTS "notifications_update_own"      ON notifications;
+DROP POLICY IF EXISTS "notifications_delete_own"      ON notifications;
 DROP POLICY IF EXISTS "notifications_insert_service"  ON notifications;
 DROP POLICY IF EXISTS "reactions_select_all"     ON chapter_reactions;
 DROP POLICY IF EXISTS "reactions_insert_auth"    ON chapter_reactions;
@@ -565,6 +566,9 @@ CREATE POLICY "timeline_delete_owner"  ON timeline_events FOR DELETE USING (is_p
 -- Notifications
 CREATE POLICY "notifications_select_own"     ON notifications FOR SELECT USING (user_id = auth.uid());
 CREATE POLICY "notifications_update_own"     ON notifications FOR UPDATE USING (user_id = auth.uid());
+-- Bildirim temizleme (/api/notifications DELETE). Politika yokken silme hata
+-- vermez, sessizce 0 satır etkiler — API bunu sayıp açık hata döndürür.
+CREATE POLICY "notifications_delete_own"     ON notifications FOR DELETE USING (user_id = auth.uid());
 CREATE POLICY "notifications_insert_service" ON notifications FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
 -- ============================================================
