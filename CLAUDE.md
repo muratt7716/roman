@@ -30,7 +30,7 @@ Yazarlar için işbirlikli hikaye yazma platformu. Turkish-language collaborativ
 - **Site URL:** `https://writersquad.vercel.app`
 - **Auth Callback:** `https://writersquad.vercel.app/auth/callback`
 - **Supabase callback (OAuth):** `https://dtcwlvoggjxvuwvkjpip.supabase.co/auth/v1/callback`
-- Email onayı **kapalı** tutulmalı (lokal geliştirme için) ya da Supabase Dashboard > Auth > Email > "Confirm email" toggle'ı
+- Email onayı canlıda **AÇIK** (17 Eyl 2026'da doğrulandı) — kayıt API'si oturum döndürmez. Toggle: Supabase Dashboard > Auth > Email > "Confirm email"
 
 ### Veritabanı
 - Tek şema dosyası: `supabase/schema.sql` — idempotent (başına DROP IF EXISTS eklenmiş), Supabase SQL Editor'a kopyala-yapıştır ile çalışır
@@ -52,8 +52,8 @@ Bu upsert şu dosyaların HEPSİNDE var olmalı:
 > RLS politikası olmadan çalışmaz — hepsi sessizce 403 döner, çünkü
 > `ON CONFLICT DO NOTHING` da PostgREST için INSERT'tir ve kod hatayı yutar.
 > Satırlar aslında `handle_new_user` trigger'ı (SECURITY DEFINER, RLS baypas)
-> tarafından oluşturulduğu için sorun yıllarca görünmedi. Politika artık
-> `supabase/schema.sql`'de — **Supabase'e uygulanması gerekiyor.**
+> tarafından oluşturulduğu için sorun yıllarca görünmedi. Politika
+> `supabase/schema.sql`'de ve canlı DB'ye **uygulandı** (17 Eyl 2026).
 
 Upsert pattern:
 ```typescript
@@ -666,18 +666,22 @@ Kod hazır ama DB'de tablolar yok — `supabase/schema.sql` Supabase Dashboard >
 - **Yeni kolon:** `chapters.view_count int NOT NULL DEFAULT 0`
 - **Faz 3 tabloları:** `classrooms`, `classroom_members`, `classroom_assignments`, `assignment_submissions` + `join_classroom_by_code` SECURITY DEFINER function + tüm RLS politikaları
 
-### Açık Kalan — Elle Yapılması Gerekenler (13 Eyl 2026)
-- **`profiles_insert_own` RLS politikası** — schema.sql'de var, DB'ye uygulanmadı.
-  Uygulanmadan profili eksik eski hesaplar onay kapısında kilitli kalır:
-  ```sql
-  DROP POLICY IF EXISTS "profiles_insert_own" ON profiles;
-  CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
-  ```
-- **`SUPABASE_SERVICE_ROLE_KEY`** — `.env.local` ve Vercel'de tanımlı değil.
-  Bu olmadan `/api/account/delete` (hesap silme) çalışmaz, kendi hata mesajını döner.
-  Supabase Dashboard > Settings > API > service_role. Gerekli değişkenlerin
-  tam listesi `.env.local.example`'da.
-- `profiles.consent_at` / `consent_version` kolonları **uygulandı** ✅ (12 Eyl 2026)
+### Açık Kalan — Elle Yapılması Gerekenler
+- **`SUPABASE_SERVICE_ROLE_KEY` Vercel'de yok** — `.env.local`'da var ✅ (17 Eyl 2026),
+  Vercel > Environment Variables'a eklenip **redeploy** yapılmalı; env build anında gömülür.
+  Eklenene kadar canlıda hesap silme kendi hata mesajını döner.
+
+### Uygulandı ✅ (17 Eyl 2026 — canlı DB'de test edildi)
+- `profiles.consent_at` / `consent_version` kolonları
+- `profiles_insert_own` RLS — profil upsert'leri artık gerçekten çalışıyor
+- `notifications_delete_own` RLS — "Tümünü temizle" çalışıyor
+- Hesap silme uçtan uca: route → `auth.admin.deleteUser` → FK cascade profili siliyor → silinen hesapla giriş reddediliyor
+
+### Supabase Auth — E-posta Onayı AÇIK (canlı)
+Kayıt API'si oturum **döndürmüyor** (`access_token` yok, `email_confirmed_at` null).
+`SignupForm` bu yüzden `authData.session` kontrolü yapıyor; onay sonrası rıza kaydı
+`/onay` kapısına düşer. Test için hesap açarken admin API ile
+`PUT /auth/v1/admin/users/{id}` `{ email_confirm: true }` gerekir.
 
 ### Diğer Bekleyenler
 - **`totalViews` haftalık istatistik** — şu an 0 gösterir; ileriki fazda chapter_reads tablosu ile gerçek veri gelecek
