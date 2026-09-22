@@ -1,8 +1,21 @@
 -- ============================================================
 -- Writer Squad — Tam Veritabanı Şeması
--- Supabase SQL Editor'a yapıştır ve çalıştır.
 -- VERİ KAYBETMEZ: Tablolar silinmez, sadece eksikler oluşturulur.
 -- Politikalar, fonksiyonlar ve trigger'lar her seferinde yenilenir.
+--
+-- ⚠️  BU DOSYAYI KÖRÜ KÖRÜNE ÇALIŞTIRMA — 23 Eyl 2026
+--
+-- Dosya canlı veritabanından AYRIŞTI. Politikalar `DROP POLICY` + `CREATE`
+-- ile yeniden kurulduğu için, dosyada eski kalan her politika çalıştırıldığı
+-- anda canlıdakinin YERİNE geçer. Ölçülen ayrışma:
+--
+--   notifications — dosyadaki INSERT politikası canlıdakinden GEVŞEK.
+--                   Dosya: auth.uid() IS NOT NULL  → herkes herkese yazabilir.
+--                   Canlı: yalnızca kendine yazılabiliyor (403 ile doğrulandı).
+--                   Yani bu dosyayı çalıştırmak bir güvenlik gerilemesidir.
+--
+-- Bu dosya kanıtlanmış bir doğruluk kaynağı DEĞİL, canlının bir temsili.
+-- Değişiklik uygularken tamamını değil, yalnızca eklediğin bölümü çalıştır.
 -- ============================================================
 
 -- ============================================================
@@ -583,7 +596,16 @@ CREATE POLICY "notifications_update_own"     ON notifications FOR UPDATE USING (
 -- Bildirim temizleme (/api/notifications DELETE). Politika yokken silme hata
 -- vermez, sessizce 0 satır etkiler — API bunu sayıp açık hata döndürür.
 CREATE POLICY "notifications_delete_own"     ON notifications FOR DELETE USING (user_id = auth.uid());
-CREATE POLICY "notifications_insert_service" ON notifications FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+-- Canlıdaki davranışla hizalı: kullanıcı yalnızca KENDİNE bildirim yazabilir.
+-- Eski hali (auth.uid() IS NOT NULL) herkesin herkese bildirim yazmasına izin
+-- veriyordu — spam ve kimlik avı için açık kapı.
+--
+-- DİKKAT: Politikanın adındaki "service" tesadüf değil — başkasına bildirim
+-- yazmak service-role ile, sunucu tarafında yapılmalıdır. Uygulamada 9 çağrı
+-- yeri bunu hâlâ tarayıcıdan kullanıcının kendi oturumuyla deniyor ve sessizce
+-- 403 alıyor (hata kontrol edilmiyor); bu yüzden 2 Tem 2026'dan beri hiçbir
+-- bildirim teslim edilmiyor. Kalıcı çözüm o çağrıları sunucuya taşımaktır.
+CREATE POLICY "notifications_insert_service" ON notifications FOR INSERT WITH CHECK (user_id = auth.uid());
 
 -- ============================================================
 -- 5. INDEX'LER (yoksa oluştur)

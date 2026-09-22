@@ -33,7 +33,7 @@ Yazarlar için işbirlikli hikaye yazma platformu. Turkish-language collaborativ
 - Email onayı canlıda **AÇIK** (17 Eyl 2026'da doğrulandı) — kayıt API'si oturum döndürmez. Toggle: Supabase Dashboard > Auth > Email > "Confirm email"
 
 ### Veritabanı
-- Tek şema dosyası: `supabase/schema.sql` — idempotent (başına DROP IF EXISTS eklenmiş), Supabase SQL Editor'a kopyala-yapıştır ile çalışır
+- Tek şema dosyası: `supabase/schema.sql` — **canlı DB ile ayrıştı, tamamını çalıştırma** (23 Eyl 2026). Politikalar DROP+CREATE ile yenilendiği için dosyada eski kalan bir politika canlıdakinin yerine geçer ve güvenliği gevşetebilir. Yalnızca eklediğin bölümü çalıştır; dosyanın başındaki uyarıyı oku.
 - `handle_new_user` trigger'ı yeni kullanıcılar için otomatik profil oluşturur
 - **Kritik:** Trigger kurulmadan önce oluşturulan eski hesaplarda `profiles` satırı **yok** — bu yüzden her auth giriş noktasında `upsert` zorunlu
 
@@ -137,7 +137,7 @@ CREATE POLICY "members_insert_owner" ON project_members FOR INSERT WITH CHECK (
   )
 );
 ```
-> Bu politikaları uygulamak için: Supabase Dashboard > SQL Editor > schema.sql'i çalıştır
+> Bu politikaları uygulamak için: Supabase Dashboard > SQL Editor > **yalnızca ilgili CREATE POLICY bloğunu** yapıştır. schema.sql'in tamamını çalıştırma (bkz. dosya başındaki uyarı).
 
 ### Server Action'larda revalidatePath Zorunlu
 - Server action içinde DB güncellendikten sonra `revalidatePath(...)` çağrılmazsa sayfa değişmez
@@ -358,6 +358,21 @@ CREATE INDEX IF NOT EXISTS idx_reading_lists_project ON reading_lists(project_id
 
 ## Bildirim Sistemi
 
+> **🔴 TESLİMAT BOZUK (23 Eyl 2026'da bulundu):** Canlıdaki `notifications` INSERT
+> politikası yalnızca `user_id = auth.uid()` izni veriyor — kullanıcı **sadece kendine**
+> bildirim yazabiliyor. Oysa kodda 9 yer başkasına yazmaya çalışıyor: `CommentPanel`,
+> `InviteButton`, `ApplicationCard`, `SuggestionEditorClient`, `SuggestionReviewActions`,
+> overview server action'ları (2), `/api/reactions`, `/api/magazine/[id]/publish`.
+> Hepsi tarayıcıdan kullanıcının kendi oturumuyla yazıyor ve sessizce 403 alıyor —
+> hiçbiri dönen hatayı kontrol etmiyor.
+>
+> Kanıt: DB'deki **en yeni bildirim 2 Tem 2026** tarihli. O tarihten bu yana sıfır teslimat.
+> Proje üyesinin proje sahibine bildirim yazması canlıda denendi: `42501 RLS violation`.
+>
+> Doğru çözüm bu çağrıları service-role ile sunucuya taşımak — politikanın adındaki
+> "service" zaten bunu ima ediyor. Politikayı gevşetmek yanlış cevap olur: o, herkesin
+> herkese bildirim yazabilmesi demektir (spam + kimlik avı).
+
 Desteklenen tipler ve linkleri:
 
 | Tip | Başlık | Link |
@@ -397,7 +412,7 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
 ## Kullanıcı Notları
 - Test hesabı: `mmuratb77@gmail.com` — profil upsert fix sonrası normal çalışıyor
 - Google OAuth şu an "test" modunda — sadece Google Cloud Console'daki test kullanıcıları giriş yapabilir
-- Schema'yı Supabase'e uygulamak için: Dashboard > SQL Editor > `supabase/schema.sql` içeriğini yapıştır > Run
+- Şema değişikliği uygularken: Dashboard > SQL Editor > **sadece eklediğin bloğu** yapıştır > Run. Dosyanın tamamını çalıştırmak canlı politikaları geriye alır.
 
 ---
 
