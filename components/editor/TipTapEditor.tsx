@@ -3,7 +3,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import Highlight from '@tiptap/extension-highlight'
 import Typography from '@tiptap/extension-typography'
@@ -11,7 +10,6 @@ import CharacterCount from '@tiptap/extension-character-count'
 import Placeholder from '@tiptap/extension-placeholder'
 import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
-import Link from '@tiptap/extension-link'
 import Subscript from '@tiptap/extension-subscript'
 import Superscript from '@tiptap/extension-superscript'
 import { createClient } from '@/lib/supabase/client'
@@ -117,8 +115,12 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
     immediatelyRender: false,
     editable,
     extensions: [
-      StarterKit,
-      Underline,
+      // TipTap 3.31'den itibaren StarterKit, Link ve Underline'ı kendi içinde
+      // getiriyor. Ayrıca eklemek "Duplicate extension names" uyarısı üretir ve
+      // iki tanım çakışır; bu yüzden ikisi de StarterKit üzerinden yapılandırılır.
+      StarterKit.configure({
+        link: { openOnClick: false },
+      }),
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Highlight.configure({ multicolor: true }),
       Typography,
@@ -126,7 +128,6 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       Placeholder.configure({ placeholder: 'Yazmaya başla...' }),
       TextStyle,
       Color,
-      Link.configure({ openOnClick: false }),
       Subscript,
       Superscript,
     ],

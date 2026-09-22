@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { TERMS_VERSION } from '@/lib/legal'
 
 // POST /api/account/consent — KVKK açık rıza kaydı (m.5/1 açık rıza + ispat yükü)
@@ -31,7 +32,19 @@ export async function POST() {
     avatar_url: user.user_metadata?.avatar_url ?? null,
   }, { onConflict: 'id', ignoreDuplicates: true })
 
-  const { data, error } = await supabase
+  // Rıza kaydı service-role ile yazılır, kullanıcının kendi istemcisiyle değil.
+  // Sebebi ispat değeri: `consent_at` kullanıcının yazabildiği bir kolon olursa
+  // kayıt, hakkında kanıt olduğu kişi tarafından uydurulabilir hale gelir.
+  // Bu yüzden schema.sql'de authenticated rolünden bu kolonların UPDATE yetkisi
+  // alınmıştır — yazma yetkisi yalnızca burada, sunucuda.
+  let admin
+  try {
+    admin = createAdminClient()
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 })
+  }
+
+  const { data, error } = await admin
     .from('profiles')
     .update({ consent_at: new Date().toISOString(), consent_version: TERMS_VERSION })
     .eq('id', user.id)

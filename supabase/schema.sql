@@ -472,6 +472,20 @@ CREATE POLICY "profiles_select_all" ON profiles FOR SELECT USING (true);
 CREATE POLICY "profiles_insert_own" ON profiles FOR INSERT WITH CHECK (id = auth.uid());
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE USING (id = auth.uid());
 
+-- RLS hangi SATIRI güncelleyebileceğini söyler, hangi KOLONU değil. Politika
+-- tek başına bırakılırsa kullanıcı kendi satırındaki her kolonu yazabilir:
+-- 23 Eyl 2026'da `reputation_score = 999999` ve `consent_at` uydurmanın mümkün
+-- olduğu doğrulandı. Kolon kısıtı RLS ile değil, kolon bazlı GRANT ile kurulur.
+--
+-- Yazılabilir olması gerekenler yalnızca SettingsForm'un dokunduğu alanlar.
+-- Dışarıda kalanlar ve nedenleri:
+--   username         — kayıt anında INSERT ile belirlenir, sonradan değişmez
+--   reputation_score — Yazarlar sıralamasını besler, kullanıcı yazamamalı
+--   consent_at/_version — KVKK ispat kaydı; /api/account/consent service-role ile yazar
+REVOKE UPDATE ON profiles FROM authenticated;
+GRANT UPDATE (display_name, bio, avatar_url, portfolio_url, writing_status)
+  ON profiles TO authenticated;
+
 -- Projects
 CREATE POLICY "projects_select_public" ON projects FOR SELECT USING (visibility IN ('open', 'closed', 'published') OR owner_id = auth.uid() OR is_project_member(id));
 CREATE POLICY "projects_insert_auth"   ON projects FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND owner_id = auth.uid());

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { RotateCcw, X, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 interface Version {
   id: string
@@ -129,7 +130,7 @@ export function VersionHistoryClient({ versions, projectId }: Props) {
                 className="prose prose-invert max-w-none font-serif text-base leading-relaxed text-foreground/90
                   [&_p]:mb-4 [&_h2]:text-lg [&_h2]:font-bold [&_h3]:font-semibold
                   [&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground"
-                dangerouslySetInnerHTML={{ __html: selected.content || '<p class="text-muted-foreground italic">Bu versiyonda içerik yok.</p>' }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(selected.content) || '<p class="text-muted-foreground italic">Bu versiyonda içerik yok.</p>' }}
               />
             </div>
 

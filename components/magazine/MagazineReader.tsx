@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Star, Printer } from 'lucide-react'
 import { MAGAZINE_SECTION_LABELS, type MagazineSection } from '@/types'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 interface Props {
   title: string
@@ -78,7 +79,7 @@ export function MagazineReader({ title, issueNumber, classroomName, schoolName, 
                   </p>
                   <div
                     className="prose prose-invert max-w-none text-sm leading-relaxed print:text-black print:prose-neutral"
-                    dangerouslySetInnerHTML={{ __html: entry.submission?.latest_content ?? '<p><em>İçerik bulunamadı.</em></p>' }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(entry.submission?.latest_content) || '<p><em>İçerik bulunamadı.</em></p>' }}
                   />
                 </article>
               ))}
@@ -92,7 +93,7 @@ export function MagazineReader({ title, issueNumber, classroomName, schoolName, 
                   <p className="text-xs text-slate-400 print:text-gray-600">{entry.display_name ?? 'Anonim'}</p>
                   <div
                     className="prose prose-invert max-w-none text-sm leading-relaxed print:text-black print:prose-neutral"
-                    dangerouslySetInnerHTML={{ __html: entry.submission?.latest_content ?? '<p><em>İçerik bulunamadı.</em></p>' }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(entry.submission?.latest_content) || '<p><em>İçerik bulunamadı.</em></p>' }}
                   />
                 </article>
               ))}

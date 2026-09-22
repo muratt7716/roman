@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, ArrowRight, BookOpen } from 'lucide-react'
 import { ViewTracker } from '@/components/reader/ViewTracker'
 import { ReactionBar } from '@/components/reader/ReactionBar'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 export const dynamic = 'force-dynamic'
 
@@ -120,7 +121,7 @@ export default async function ChapterReadPage({ params }: Props) {
       {latestVersion?.content ? (
         <div
           className="prose font-serif text-lg leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: latestVersion.content }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(latestVersion.content) }}
         />
       ) : (
         <p className="text-muted-foreground italic">Bu bölümün içeriği henüz mevcut değil.</p>

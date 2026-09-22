@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ExportButtons } from '@/components/editor/ExportButtons'
 import { ArrowLeft, BookOpen } from 'lucide-react'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 export const dynamic = 'force-dynamic'
 
@@ -119,7 +120,7 @@ export default async function ExportPage({ params }: Props) {
                     [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2
                     [&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-4 [&_blockquote]:text-muted-foreground [&_blockquote]:italic
                     [&_strong]:font-semibold [&_em]:italic"
-                  dangerouslySetInnerHTML={{ __html: ch.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(ch.content) }}
                 />
               ) : (
                 <p className="text-muted-foreground italic no-print">Bu bölümde henüz içerik yok.</p>

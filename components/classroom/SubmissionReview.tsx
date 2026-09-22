@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { MessageSquarePlus, Trash2, X, Send } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 export interface ReviewComment {
   id: string
@@ -69,7 +70,7 @@ export function SubmissionReview({ submissionId, blocks, initialComments, canCom
             <div className="flex items-start gap-2 px-3 py-1.5">
               <div
                 className="flex-1 min-w-0 prose prose-invert max-w-none font-serif text-base leading-[1.9] [&>*]:my-0"
-                dangerouslySetInnerHTML={{ __html: html }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
               />
               {canComment && (
                 <button

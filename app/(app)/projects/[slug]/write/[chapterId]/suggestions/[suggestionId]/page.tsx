@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, Check, X, User, Clock, Lightbulb } from 'lucide-react'
 import { SuggestionReviewActions } from '@/components/editor/SuggestionReviewActions'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 export const dynamic = 'force-dynamic'
 
@@ -125,7 +126,7 @@ export default async function SuggestionReviewPage({ params }: Props) {
                     [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2
                     [&_blockquote]:border-l-2 [&_blockquote]:border-sky-400/40 [&_blockquote]:pl-4 [&_blockquote]:italic
                     [&_strong]:font-semibold [&_em]:italic"
-                  dangerouslySetInnerHTML={{ __html: latestVersion.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(latestVersion.content) }}
                 />
               ) : (
                 <p className="text-muted-foreground italic">İçerik yok.</p>
@@ -149,7 +150,7 @@ export default async function SuggestionReviewPage({ params }: Props) {
                   [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-2
                   [&_blockquote]:border-l-2 [&_blockquote]:border-amber-400/40 [&_blockquote]:pl-4 [&_blockquote]:italic
                   [&_strong]:font-semibold [&_em]:italic"
-                dangerouslySetInnerHTML={{ __html: suggestion.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(suggestion.content) }}
               />
             </div>
           </div>
