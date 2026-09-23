@@ -17,13 +17,12 @@ interface Props {
   projectId: string
   currentUser: { id: string; username: string; displayName: string | null; avatarUrl: string | null }
   initialContent: string
-  memberIds?: string[]
   isOwner?: boolean
   locked?: boolean
   submissionId?: string
 }
 
-export function ChapterEditorClient({ chapter, projectId, currentUser, initialContent, memberIds = [], isOwner = false, locked = false, submissionId }: Props) {
+export function ChapterEditorClient({ chapter, projectId, currentUser, initialContent, isOwner = false, locked = false, submissionId }: Props) {
   const [wordCount, setWordCount] = useState(chapter.word_count)
   const initialWordCount = chapter.word_count ?? 0
   const [pendingSuggestions, setPendingSuggestions] = useState(0)
@@ -148,9 +147,7 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
         <div className="hidden lg:flex">
           <CommentPanel
             chapterId={chapter.id}
-            projectId={projectId}
             currentUserId={currentUser.id}
-            projectMemberIds={memberIds}
             isOwner={isOwner}
           />
         </div>
@@ -169,10 +166,8 @@ export function ChapterEditorClient({ chapter, projectId, currentUser, initialCo
               <div className="flex-1 overflow-hidden flex flex-col">
                 <CommentPanel
                   chapterId={chapter.id}
-                  projectId={projectId}
                   currentUserId={currentUser.id}
-                  projectMemberIds={memberIds}
-                  isOwner={isOwner}
+                        isOwner={isOwner}
                   hideBorder
                 />
               </div>

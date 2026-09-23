@@ -28,38 +28,27 @@ export function ApplicationForm({ projectId, role, userId }: ApplicationFormProp
 
   async function onSubmit(data: CreateApplicationInput) {
     setServerError(null)
-    const { error } = await supabase.from('applications').insert({
+    const { data: application, error } = await supabase.from('applications').insert({
       project_id: projectId,
       applicant_id: userId,
       role_id: role.id,
       intro: data.intro,
       writing_sample: data.writing_sample,
       portfolio_links: [],
-    })
+    }).select('id').single()
 
     if (error) {
       setServerError('Başvuru gönderilirken bir hata oluştu.')
       return
     }
 
-    // Proje sahibine bildirim gönder
-    const [{ data: project }, { data: applicant }] = await Promise.all([
-      supabase.from('projects').select('owner_id, title').eq('id', projectId).single(),
-      supabase.from('profiles').select('username, display_name').eq('id', userId).single(),
-    ])
-
-    if (project && project.owner_id !== userId) {
-      await supabase.from('notifications').insert({
-        user_id: project.owner_id,
-        type: 'application',
-        payload: {
-          project_id: projectId,
-          project_title: project.title,
-          applicant_id: userId,
-          applicant_username: applicant?.username,
-          role_name: role.name,
-        },
-      })
+    // Proje sahibine bildirim — alıcıyı ve metni sunucu başvuru satırından türetir
+    if (application?.id) {
+      await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'application', application_id: application.id }),
+      }).catch(() => null)
     }
 
     setSubmitted(true)

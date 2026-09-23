@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { insertNotificationsSafe } from '@/lib/notifications'
 
 export async function POST(_: Request, { params }: { params: Promise<{ magazineId: string }> }) {
   const { magazineId } = await params
@@ -43,7 +44,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ magazineI
         classroom_id: magazine.classroom_id,
       },
     }))
-    await supabase.from('notifications').insert(notifications)
+    await insertNotificationsSafe(notifications)
   }
 
   return NextResponse.json({ ok: true })

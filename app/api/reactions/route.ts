@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { insertNotificationsSafe } from '@/lib/notifications'
 
 const REACTION_EMOJI: Record<string, string> = { fire: '🔥', drop: '💧', bolt: '⚡' }
 
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
 
     const project = (Array.isArray(chapter.project) ? chapter.project[0] : chapter.project) as { id: string; slug: string } | null
 
-    await supabase.from('notifications').insert({
+    await insertNotificationsSafe([{
       user_id: chapter.created_by,
       type: 'reaction',
       payload: {
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
         reaction,
         emoji: REACTION_EMOJI[reaction],
       },
-    })
+    }])
   }
 
   return NextResponse.json({ active: true })

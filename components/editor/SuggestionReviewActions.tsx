@@ -43,17 +43,7 @@ export function SuggestionReviewActions({
     // Öneri durumunu güncelle
     await supabase.from('chapter_suggestions').update({ status: 'accepted' }).eq('id', suggestionId)
 
-    // Öneri sahibine bildirim
-    await supabase.from('notifications').insert({
-      user_id: suggestorId,
-      type: 'acceptance',
-      payload: {
-        chapter_id: chapterId,
-        project_id: projectId,
-        context: 'suggestion_accepted',
-        chapter_title: '',
-      },
-    })
+    await notifySuggester('accepted')
 
     toast.success(`${suggestorName}'in önerisi kabul edildi ve yeni versiyon oluşturuldu.`)
     setLoading(null)
@@ -61,9 +51,21 @@ export function SuggestionReviewActions({
     router.refresh()
   }
 
+  // Öneriyi gönderene sonucu bildir. Alıcıyı ve yetkiyi sunucu doğrular:
+  // yalnızca proje sahibi değerlendirebilir, alıcı da önerinin sahibidir.
+  async function notifySuggester(decision: 'accepted' | 'rejected') {
+    await fetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'suggestion_reviewed', suggestion_id: suggestionId, decision }),
+    }).catch(() => null)
+  }
+
   async function reject() {
     setLoading('reject')
     await supabase.from('chapter_suggestions').update({ status: 'rejected' }).eq('id', suggestionId)
+    // Eskiden red sessizdi — öneriyi gönderen cevabı hiç öğrenmiyordu
+    await notifySuggester('rejected')
     toast.success('Öneri reddedildi.')
     setLoading(null)
     router.push(`/projects/${projectId}/write/${chapterId}`)

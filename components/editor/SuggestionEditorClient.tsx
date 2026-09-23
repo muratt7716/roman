@@ -67,42 +67,13 @@ export function SuggestionEditorClient({ chapterId, projectId, chapterTitle, ini
       return
     }
 
-    // Proje sahibine bildirim gönder
-    const { data: chapter } = await supabase
-      .from('chapters')
-      .select('project_id, created_by')
-      .eq('id', chapterId)
-      .single()
-
-    if (chapter) {
-      const { data: senderProfile } = await supabase
-        .from('profiles')
-        .select('username, display_name')
-        .eq('id', authorId)
-        .single()
-
-      // chapter yazan kişi ve proje sahibine bildir (farklıysa)
-      const notifyIds = [...new Set([chapter.created_by])]
-      const filtered = notifyIds.filter(uid => uid !== authorId)
-
-      if (filtered.length > 0) {
-        await supabase.from('notifications').insert(
-          filtered.map(uid => ({
-            user_id: uid,
-            type: 'suggestion',
-            payload: {
-              suggestion_id: suggestion.id,
-              chapter_id: chapterId,
-              chapter_title: chapterTitle,
-              project_id: chapter.project_id,
-              suggester_username: senderProfile?.username,
-              suggester_display_name: senderProfile?.display_name,
-              note: note.trim() || null,
-            },
-          }))
-        )
-      }
-    }
+    // Bölümü yazana ve proje sahibine bildirim — alıcıları sunucu, öneri
+    // satırından türetir (eskiden yalnızca chapter.created_by'a gidiyordu)
+    await fetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'suggestion', suggestion_id: suggestion.id }),
+    }).catch(() => null)
 
     toast.success('Önerin gönderildi!')
     router.push(`/projects/${projectId}/write/${chapterId}`)

@@ -21,13 +21,11 @@ export default async function ChapterEditorPage({ params, searchParams }: Props)
     { data: chapter },
     { data: profile },
     { data: latestVersion },
-    { data: members },
     { data: project },
   ] = await Promise.all([
     supabase.from('chapters').select('*').eq('id', chapterId).single() as any,
     supabase.from('profiles').select('id, username, display_name, avatar_url').eq('id', user.id).single() as any,
     supabase.from('chapter_versions').select('content').eq('chapter_id', chapterId).order('created_at', { ascending: false }).limit(1).single() as any,
-    supabase.from('project_members').select('user_id').eq('project_id', projectId) as any,
     supabase.from('projects').select('owner_id').eq('id', projectId).single() as any,
   ])
 
@@ -52,7 +50,6 @@ export default async function ChapterEditorPage({ params, searchParams }: Props)
     avatarUrl: profile?.avatar_url ?? null,
   }
 
-  const memberIds = (members ?? []).map((m: any) => m.user_id as string)
   const isOwner = project?.owner_id === user.id
 
   return (
@@ -61,7 +58,6 @@ export default async function ChapterEditorPage({ params, searchParams }: Props)
       projectId={projectId}
       currentUser={currentUser}
       initialContent={latestVersion?.content ?? ''}
-      memberIds={memberIds}
       isOwner={isOwner}
       locked={locked}
       submissionId={submission_id}

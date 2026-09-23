@@ -1,8 +1,40 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { insertNotifications } from '@/lib/notifications'
+import { buildEventNotifications } from './events'
 
 const RLS_HINT =
   'Bildirimler silinemedi. Supabase\'de notifications_delete_own politikası uygulanmamış olabilir.'
+
+/**
+ * POST /api/notifications — tarayıcıdan tetiklenen bildirimler.
+ *
+ * İstemci yalnızca olay kimliğini yollar; alıcıyı ve metni sunucu DB'den
+ * türetir (bkz. events.ts). Yazma service-role ile yapılır, çünkü RLS
+ * kullanıcıyı yalnızca kendine yazmaya bırakır — ve öyle kalmalı.
+ */
+export async function POST(request: Request) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Giriş yapman gerekiyor.' }, { status: 401 })
+
+  let body: Record<string, unknown>
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Geçersiz istek.' }, { status: 400 })
+  }
+
+  const { rows, denied } = await buildEventNotifications(supabase, user.id, body)
+  if (denied) return NextResponse.json({ error: denied }, { status: 403 })
+
+  try {
+    const sent = await insertNotifications(rows)
+    return NextResponse.json({ sent })
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 })
+  }
+}
 
 /**
  * DELETE /api/notifications        → tümünü sil (bekleyen davetler hariç)

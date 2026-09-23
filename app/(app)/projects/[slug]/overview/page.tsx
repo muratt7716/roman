@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { insertNotificationsSafe } from '@/lib/notifications'
 import { Users, CheckCircle, XCircle, Clock, BarChart2, Globe, Lock, BookMarked } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { DeleteProjectButton } from '@/components/project/DeleteProjectButton'
@@ -98,7 +99,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
           user_id: app.applicant_id,
           role_id: app.role_id,
         }, { onConflict: 'project_id,user_id', ignoreDuplicates: true })
-        await supabase.from('notifications').insert({
+        await insertNotificationsSafe([{
           user_id: app.applicant_id,
           type: 'acceptance',
           payload: {
@@ -106,7 +107,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
             project_title: (app.project as any)?.title,
             role_name: (app.role as any)?.name,
           },
-        })
+        }])
       }
     } else {
       const { data: app } = await supabase
@@ -116,14 +117,14 @@ export default async function ProjectOverviewPage({ params }: Props) {
         .single()
       if (app) {
         await supabase.from('applications').update({ status: 'rejected' }).eq('id', appId)
-        await supabase.from('notifications').insert({
+        await insertNotificationsSafe([{
           user_id: app.applicant_id,
           type: 'rejection',
           payload: {
             project_id: app.project_id,
             project_title: (app.project as any)?.title,
           },
-        })
+        }])
       }
     }
 

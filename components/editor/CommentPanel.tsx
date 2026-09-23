@@ -13,14 +13,12 @@ interface CommentWithAuthor extends Comment {
 
 interface Props {
   chapterId: string
-  projectId: string
   currentUserId: string
-  projectMemberIds?: string[]
   isOwner?: boolean
   hideBorder?: boolean
 }
 
-export function CommentPanel({ chapterId, projectId, currentUserId, projectMemberIds = [], isOwner = false, hideBorder = false }: Props) {
+export function CommentPanel({ chapterId, currentUserId, isOwner = false, hideBorder = false }: Props) {
   const supabase = createClient()
   const [comments, setComments] = useState<CommentWithAuthor[]>([])
   const [input, setInput] = useState('')
@@ -58,32 +56,15 @@ export function CommentPanel({ chapterId, projectId, currentUserId, projectMembe
     return () => { supabase.removeChannel(channel) }
   }, [chapterId, supabase])
 
-  async function notifyMembers(content: string, parentAuthorId?: string) {
-    const others = new Set([
-      ...projectMemberIds.filter(id => id !== currentUserId),
-      ...(parentAuthorId && parentAuthorId !== currentUserId ? [parentAuthorId] : []),
-    ])
-    if (others.size === 0) return
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('username, display_name')
-      .eq('id', currentUserId)
-      .single()
-
-    await supabase.from('notifications').insert(
-      [...others].map(uid => ({
-        user_id: uid,
-        type: 'comment',
-        payload: {
-          project_id: projectId,
-          chapter_id: chapterId,
-          commenter_username: profile?.username,
-          commenter_display_name: profile?.display_name,
-          preview: content.slice(0, 100),
-        },
-      }))
-    )
+  // Bildirimi tarayıcıdan yazmaya çalışmak RLS'e takılır (kullanıcı yalnızca
+  // kendine yazabilir). Alıcıları ve metni sunucu belirler; buradan yalnızca
+  // "hangi bölüme yorum yapıldı" bilgisi gider.
+  async function notifyMembers(content: string) {
+    await fetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'comment', chapter_id: chapterId, preview: content.slice(0, 100) }),
+    }).catch(() => null)
   }
 
   async function send() {
@@ -99,7 +80,7 @@ export function CommentPanel({ chapterId, projectId, currentUserId, projectMembe
     setSending(false)
   }
 
-  async function sendReply(parentId: string, parentAuthorId: string) {
+  async function sendReply(parentId: string) {
     if (!replyInput.trim() || sending) return
     setSending(true)
     await supabase.from('comments').insert({
@@ -108,7 +89,7 @@ export function CommentPanel({ chapterId, projectId, currentUserId, projectMembe
       content: replyInput.trim(),
       parent_id: parentId,
     })
-    await notifyMembers(replyInput.trim(), parentAuthorId)
+    await notifyMembers(replyInput.trim())
     setReplyInput('')
     setReplyingTo(null)
     setSending(false)
@@ -243,13 +224,13 @@ export function CommentPanel({ chapterId, projectId, currentUserId, projectMembe
                   <input
                     value={replyInput}
                     onChange={e => setReplyInput(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendReply(c.id, c.author_id)}
+                    onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendReply(c.id)}
                     placeholder="Yanıt yaz..."
                     autoFocus
                     className="flex-1 text-xs bg-surface-2 border border-border rounded-lg px-3 py-2 outline-none focus:border-primary/50 placeholder:text-muted-foreground"
                   />
                   <button
-                    onClick={() => sendReply(c.id, c.author_id)}
+                    onClick={() => sendReply(c.id)}
                     disabled={!replyInput.trim() || sending}
                     className="p-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 transition-colors disabled:opacity-40"
                   >

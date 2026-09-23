@@ -75,22 +75,14 @@ export function InviteButton({ targetUserId, targetUsername, className }: Props)
       return
     }
 
-    const [{ data: inviterProfile }] = await Promise.all([
-      supabase.from('profiles').select('username, display_name').eq('id', user.id).single(),
-    ])
-
-    await supabase.from('notifications').insert({
-      user_id: targetUserId,
-      type: 'invite',
-      payload: {
-        invite_id: invite.id,
-        project_id: selectedProjectId,
-        project_title: selectedProject?.title,
-        role_name: selectedProject?.roles.find(r => r.id === selectedRoleId)?.name,
-        inviter_username: inviterProfile?.username,
-        inviter_display_name: inviterProfile?.display_name,
-      },
-    })
+    // Bildirimi sunucu yazar: davet satırı zaten kimin kimi davet ettiğini
+    // kanıtlıyor, metni de alıcıyı da oradan türetmek istemcinin sahte davet
+    // bildirimi üretmesini imkânsız kılar.
+    await fetch('/api/notifications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ event: 'invite', invite_id: invite.id }),
+    }).catch(() => null)
 
     toast.success(`@${targetUsername} kullanıcısına davet gönderildi!`)
     setOpen(false)
