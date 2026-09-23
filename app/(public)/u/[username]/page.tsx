@@ -25,7 +25,7 @@ const STATUS_CONFIG = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params
-  return { title: `${username} Profili — Kalem Birliği` }
+  return { title: `${username} Profili` }
 }
 
 export default async function UserProfilePage({ params }: Props) {

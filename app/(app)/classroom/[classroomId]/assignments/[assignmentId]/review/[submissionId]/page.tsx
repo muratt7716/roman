@@ -5,7 +5,7 @@ import { FileText, GraduationCap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { SubmissionReview, type ReviewComment } from '@/components/classroom/SubmissionReview'
 
-export const metadata: Metadata = { title: 'Teslim İncelemesi — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Teslim İncelemesi' }
 export const dynamic = 'force-dynamic'
 
 interface PageProps {

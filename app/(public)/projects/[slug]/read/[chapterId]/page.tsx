@@ -20,11 +20,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     supabase.from('chapters').select('title').eq('id', chapterId).single(),
     supabase.from('projects').select('title, cover_image_url').eq('slug', slug).single(),
   ])
-  if (!chapter || !project) return { title: 'Bölüm — Kalem Birliği' }
+  if (!chapter || !project) return { title: 'Bölüm' }
 
-  const description = `"${project.title}" · ${chapter.title} — Kalem Birliği'nde oku.`
+  const description = `"${project.title}" · ${chapter.title}'nde oku.`
   return {
-    title: `${chapter.title} · ${project.title} — Kalem Birliği`,
+    title: `${chapter.title} · ${project.title}`,
     description,
     openGraph: {
       title: `${chapter.title} · ${project.title}`,

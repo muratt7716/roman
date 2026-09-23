@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NewIdeaForm } from '@/components/idea/NewIdeaForm'
 
-export const metadata: Metadata = { title: 'Fikir Odası — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Fikir Odası' }
 export const dynamic = 'force-dynamic'
 
 export default async function IdeaRoomListPage() {

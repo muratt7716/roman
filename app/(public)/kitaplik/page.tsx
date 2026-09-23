@@ -7,7 +7,7 @@ import { Library, BookMarked } from 'lucide-react'
 import type { ProjectWithOwner } from '@/types'
 
 export const metadata: Metadata = {
-  title: 'Kütüphane — Kalem Birliği',
+  title: 'Kütüphane',
   description: 'Kalem Birliği\'nde tamamlanmış romanlar. Burada bitirilen her hikâye ilk kez okurlarla buluşur.',
 }
 export const dynamic = 'force-dynamic'

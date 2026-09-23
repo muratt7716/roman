@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { data } = await supabase.from('projects').select('title, synopsis').eq('slug', slug).single()
   return {
-    title: data ? `${data.title} — Kalem Birliği` : 'Proje — Kalem Birliği',
+    title: data ? `${data.title}` : 'Proje',
     description: data?.synopsis ?? undefined,
   }
 }

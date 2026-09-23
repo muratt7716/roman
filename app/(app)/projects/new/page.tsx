@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { ProjectForm } from '@/components/project/ProjectForm'
 
-export const metadata: Metadata = { title: 'Yeni Proje — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Yeni Proje' }
 export const dynamic = 'force-dynamic'
 
 export default function NewProjectPage() {

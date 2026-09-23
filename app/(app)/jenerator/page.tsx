@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { CharacterGenerator } from '@/components/CharacterGenerator'
 
-export const metadata: Metadata = { title: 'Karakter Jeneratörü — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Karakter Jeneratörü' }
 
 export default function GeneratorPage() {
   return (

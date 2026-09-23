@@ -8,7 +8,7 @@ import { DeleteClassroomButton } from '@/components/classroom/DeleteClassroomBut
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-export const metadata: Metadata = { title: 'Sınıflarım — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Sınıflarım' }
 export const dynamic = 'force-dynamic'
 
 export default async function ClassroomListPage() {

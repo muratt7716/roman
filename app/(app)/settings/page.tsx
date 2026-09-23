@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SettingsForm } from '@/components/settings/SettingsForm'
 import { DeleteAccountButton } from '@/components/settings/DeleteAccountButton'
 
-export const metadata: Metadata = { title: 'Ayarlar — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Ayarlar' }
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {

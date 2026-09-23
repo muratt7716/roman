@@ -15,7 +15,7 @@ interface PageProps {
   params: Promise<{ classroomId: string }>
 }
 
-export const metadata: Metadata = { title: 'Sınıf Detayı — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Sınıf Detayı' }
 export const dynamic = 'force-dynamic'
 
 export default async function ClassroomPage({ params }: PageProps) {

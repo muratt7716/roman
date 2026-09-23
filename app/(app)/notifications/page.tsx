@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/shared/EmptyState'
 import { InviteActions } from '@/components/notifications/InviteActions'
 import { ClearAllButton } from '@/components/notifications/ClearAllButton'
 
-export const metadata: Metadata = { title: 'Bildirimler — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Bildirimler' }
 export const dynamic = 'force-dynamic'
 
 const TYPE_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {

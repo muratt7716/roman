@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select('title, synopsis, cover_image_url, owner:profiles!projects_owner_id_fkey(display_name, username)')
     .eq('slug', slug)
     .single()
-  if (!data) return { title: 'Oku — Kalem Birliği' }
+  if (!data) return { title: 'Oku' }
 
   const owner = data.owner as any
   const authorName = owner?.display_name ?? owner?.username ?? 'Kalem Birliği'
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : `${authorName} tarafından yazılan "${data.title}" projesini oku.`
 
   return {
-    title: `${data.title} — Kalem Birliği`,
+    title: `${data.title}`,
     description,
     openGraph: {
       title: data.title,

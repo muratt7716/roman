@@ -8,7 +8,7 @@ import { Users, BookOpen, PenLine, Star, Sparkles, Award } from 'lucide-react'
 import type { Profile } from '@/types'
 import { cn } from '@/lib/utils'
 
-export const metadata: Metadata = { title: 'Yazarlar Topluluğu — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Yazarlar Topluluğu' }
 export const dynamic = 'force-dynamic'
 
 const STATUS_CONFIG = {

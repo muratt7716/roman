@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ShieldCheck } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Gizlilik Politikası — Kalem Birliği',
+  title: 'Gizlilik Politikası',
   description: 'Kalem Birliği\'nin kişisel verileri işleme, saklama ve koruma esasları (KVKK aydınlatma metni).',
 }
 export const dynamic = 'force-dynamic'

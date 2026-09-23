@@ -8,7 +8,7 @@ import { BookOpen, Compass } from 'lucide-react'
 import type { ProjectWithOwner } from '@/types'
 import { cn } from '@/lib/utils'
 
-export const metadata: Metadata = { title: 'Evrenleri Keşfet — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Evrenleri Keşfet' }
 export const dynamic = 'force-dynamic'
 
 const GENRES = ['Tümü', 'Fantastik', 'Bilim Kurgu', 'Romantik', 'Gerilim', 'Macera', 'Tarihi', 'Distopya']

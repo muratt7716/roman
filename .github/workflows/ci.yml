@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tip kontrolü
+        run: npx tsc --noEmit
+
+      - name: Testler
+        run: npm test
+
+      # Build, Supabase değişkenleri olmadan da geçmeli: lib/supabase/*
+      # istemcileri eksik değişkende sessizce boş dönecek şekilde yazılmış.
+      # Sahte ama geçerli biçimli değerler veriyoruz ki derleme aşaması
+      # gerçek bir projeye bağlanmaya çalışmasın.
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+
+      # Lint'te 160+ eski uyarı var (çoğu `any`). Bunları CI'ı kırmadan
+      # görünür tutmak için hata olarak sayılmıyor; borç kapandıkça
+      # continue-on-error kaldırılmalı.
+      - name: Lint (bilgilendirme)
+        run: npm run lint
+        continue-on-error: true

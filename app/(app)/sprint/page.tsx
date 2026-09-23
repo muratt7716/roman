@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SprintCard } from '@/components/sprint/SprintCard'
 import type { WritingSprint } from '@/types'
 
-export const metadata: Metadata = { title: 'Yazı Sprintleri — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Yazı Sprintleri' }
 export const dynamic = 'force-dynamic'
 
 const DURATIONS = [15, 25, 45] as const

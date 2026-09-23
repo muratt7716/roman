@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SprintRoom } from '@/components/sprint/SprintRoom'
 import type { SprintParticipant } from '@/types'
 
-export const metadata: Metadata = { title: 'Sprint Odası — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Sprint Odası' }
 export const dynamic = 'force-dynamic'
 
 interface Props { params: Promise<{ sprintId: string }> }

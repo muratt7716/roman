@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ScrollText } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Kullanım Koşulları — Kalem Birliği',
+  title: 'Kullanım Koşulları',
   description: 'Kalem Birliği platformunun kullanım koşulları, yaş şartları ve içerik kuralları.',
 }
 export const dynamic = 'force-dynamic'

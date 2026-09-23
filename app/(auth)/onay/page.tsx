@@ -5,7 +5,7 @@ import { ConsentGate } from '@/components/auth/ConsentGate'
 import { requiresConsent } from '@/lib/legal'
 
 export const dynamic = 'force-dynamic'
-export const metadata: Metadata = { title: 'Onay — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Onay' }
 
 /**
  * (auth) grubunda duruyor — (app) layout'undaki onay kapısı bu sayfayı

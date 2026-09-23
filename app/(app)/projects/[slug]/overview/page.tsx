@@ -10,7 +10,7 @@ import { DeleteProjectButton } from '@/components/project/DeleteProjectButton'
 import { CoverImageUpload } from '@/components/project/CoverImageUpload'
 import { MemberHoverCard } from '@/components/project/MemberHoverCard'
 
-export const metadata: Metadata = { title: 'Proje Genel Bakış — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Proje Genel Bakış' }
 export const dynamic = 'force-dynamic'
 
 interface Props {

@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AnalyticsPanel } from '@/components/classroom/AnalyticsPanel'
 
-export const metadata: Metadata = { title: 'Sınıf İstatistikleri — Kalem Birliği' }
+export const metadata: Metadata = { title: 'Sınıf İstatistikleri' }
 export const dynamic = 'force-dynamic'
 
 interface PageProps {
