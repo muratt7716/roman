@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MailCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,6 +17,7 @@ export function SignupForm() {
   const supabase = createClient()
   const [serverError, setServerError] = useState<string | null>(null)
   const [consent, setConsent] = useState(false)
+  const [awaitingEmail, setAwaitingEmail] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
@@ -33,11 +34,28 @@ export function SignupForm() {
       },
     })
     if (error) {
-      setServerError(error.message === 'User already registered'
-        ? 'Bu email zaten kayıtlı.'
-        : 'Bir hata oluştu. Lütfen tekrar dene.')
+      // 429 = Supabase'in e-posta gönderim limiti (dahili SMTP'de saatte ~2
+      // kayıt). Kullanıcının hatası değil, ama "bir hata oluştu" demek onu
+      // boşuna tekrar denemeye iter. 23 Eyl 2026'da ölçüldü: üst üste üçüncü
+      // kayıt 429 dönüyor.
+      const rateLimited = error.status === 429 || /rate limit/i.test(error.message)
+      setServerError(
+        error.message === 'User already registered' ? 'Bu email zaten kayıtlı.'
+        : rateLimited ? 'Şu anda çok fazla kayıt isteği var. Lütfen birazdan tekrar dene.'
+        : 'Bir hata oluştu. Lütfen tekrar dene.'
+      )
       return
     }
+
+    // E-posta onayı açıkken signUp oturum DÖNDÜRMEZ. Eskiden burada koşulsuz
+    // /dashboard'a gidiliyordu; oturum olmadığı için layout kullanıcıyı
+    // /login'e atıyor ve kaydolan kişi hiçbir açıklama görmeden giriş
+    // ekranında buluyordu kendini. Onay beklendiğini açıkça söylüyoruz.
+    if (authData.user && !authData.session) {
+      setAwaitingEmail(data.email)
+      return
+    }
+
     if (authData.user && authData.session) {
       await supabase.from('profiles').upsert({
         id: authData.user.id,
@@ -63,6 +81,31 @@ export function SignupForm() {
       provider: 'google',
       options: { redirectTo: `${location.origin}/auth/callback` },
     })
+  }
+
+  // Kayıt tamamlandı ama hesap e-posta onayı bekliyor. Kullanıcıyı panele
+  // göndermek anlamsız — oturumu yok, layout onu /login'e atar.
+  if (awaitingEmail) {
+    return (
+      <div className="glass rounded-xl p-8 space-y-6 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 flex items-center justify-center mx-auto">
+          <MailCheck className="w-6 h-6 text-emerald-400" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="font-display text-2xl font-bold">E-postanı doğrula</h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            <span className="text-foreground font-medium">{awaitingEmail}</span> adresine bir
+            doğrulama bağlantısı gönderdik. Bağlantıya tıkladıktan sonra giriş yapabilirsin.
+          </p>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Birkaç dakika içinde gelmediyse spam klasörüne bak.
+        </p>
+        <Link href="/login" className="inline-block text-sm text-primary hover:underline">
+          Giriş sayfasına dön
+        </Link>
+      </div>
+    )
   }
 
   return (

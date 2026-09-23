@@ -692,6 +692,24 @@ Kod hazır ama DB'de tablolar yok — `supabase/schema.sql` Supabase Dashboard >
 - `notifications_delete_own` RLS — "Tümünü temizle" çalışıyor
 - Hesap silme uçtan uca: route → `auth.admin.deleteUser` → FK cascade profili siliyor → silinen hesapla giriş reddediliyor
 
+### 🔴 LANSMAN ENGELİ: E-posta gönderim limiti (23 Eyl 2026'da ölçüldü)
+Supabase'in **dahili SMTP'si** kullanılıyor (gönderen: "Supabase Auth"). Limiti ölçtüm —
+üst üste kayıtta **üçüncüsü 429 dönüyor**:
+```
+kbsmtp...a: HTTP 200 ✓   kbsmtp...b: HTTP 200 ✓   kbsmtp...c: HTTP 429 "email rate limit exceeded"
+```
+İlk ikisine mail ulaştı (Mailinator'da "E-POSTANIZI DOĞRULAYIN" görüldü), üçüncüsü hesap
+bile açamadı. **Bir öğretmen 25 kişilik sınıfı kaydedemez** — Akademi modülünün tamamı
+bu limite takılı.
+
+Çözüm: Supabase Dashboard > Project Settings > Authentication > SMTP Settings'e gerçek bir
+servis bağla (Resend ücretsiz katman 3.000 mail/ay, Postmark, SendGrid). Kod tarafında
+yapılacak bir şey yok; limit tamamen Supabase yapılandırmasında.
+
+Kod tarafında yapılanlar (bu limiti çözmez, sadece dürüstleştirir):
+- `SignupForm` 429'u ayırt edip "çok fazla kayıt isteği var" diyor (eskiden "bir hata oluştu")
+- Kayıt sonrası "E-postanı doğrula" ekranı gösteriliyor (aşağıya bak)
+
 ### Supabase Auth — E-posta Onayı AÇIK (canlı)
 Kayıt API'si oturum **döndürmüyor** (`access_token` yok, `email_confirmed_at` null).
 `SignupForm` bu yüzden `authData.session` kontrolü yapıyor; onay sonrası rıza kaydı
