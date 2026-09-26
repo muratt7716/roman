@@ -65,7 +65,10 @@ export async function POST(_req: Request, { params }: Params) {
       owner_id: user.id,
       title: assignment.title,
       slug,
-      visibility: 'closed',
+      // 'draft' = yalnızca sahibi (öğrenci). 'closed' herkese açık sayılır —
+      // eskiden öyleydi ve çocukların ödev projeleri giriş yapmamış ziyaretçiye
+      // görünüyordu. Öğretmen metni get_submission_review_content RPC'siyle okur.
+      visibility: 'draft',
       collaboration_status: 'active',
     })
     .select()

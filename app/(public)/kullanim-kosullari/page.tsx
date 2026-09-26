@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ScrollText } from 'lucide-react'
+import { DATA_CONTROLLER, TERMS_UPDATED_LABEL } from '@/lib/legal'
 
 export const metadata: Metadata = {
   title: 'Kullanım Koşulları',
@@ -15,7 +16,7 @@ const SECTIONS = [
   },
   {
     title: '2. Yaş Şartı',
-    body: `Platformu bireysel olarak kullanmak için en az 13 yaşında olmanız gerekir. 13 yaşından küçük kullanıcılar Platformu yalnızca Akademi (okul) modülü kapsamında, öğretmen gözetiminde ve velisinin bilgisi dâhilinde kullanabilir. 18 yaşından küçük tüm kullanıcıların kayıt için veli veya vasi onayına sahip olduğu kabul edilir. Yaş şartına aykırı açıldığı tespit edilen hesaplar kapatılabilir.`,
+    body: `Platformu bireysel olarak kullanmak için en az 13 yaşında olmanız gerekir. 13 yaşından küçük kullanıcılar Platformu yalnızca Akademi (okul) modülü kapsamında, öğretmen gözetiminde ve velisinin bilgisi dâhilinde kullanabilir. 18 yaşından küçük kullanıcılar adına Koşulların kabulü ve açık rıza veli veya vasi tarafından verilir; kayıt sırasında bu beyan ayrıca alınır. Yaş şartına aykırı açıldığı tespit edilen hesaplar kapatılabilir.`,
   },
   {
     title: '3. Hesap ve Güvenlik',
@@ -35,11 +36,11 @@ const SECTIONS = [
   },
   {
     title: '7. Akademi (Okul) Modülü',
-    body: `Sınıf oluşturan öğretmen, sınıfındaki içerik ve iletişimin uygunluğundan sorumludur. Öğrenci teslimleri varsayılan olarak yalnızca öğrenciye ve öğretmene görünür; öğretmen "sınıfa açık" yaptığı ödevlerde teslimlerin sınıf arkadaşlarınca okunabileceğini öğrencilere bildirmelidir. Veli rolü, yalnızca kendi öğrencisinin ödev ve notlarını görüntüleyebilir.`,
+    body: `Sınıf oluşturan öğretmen, sınıfındaki içerik ve iletişimin uygunluğundan sorumludur. Öğrenci teslimleri ve notlar yalnızca öğrenciye ve öğretmene görünür. Öğretmen "sınıfa açık" yaptığı ödevlerde, son teslim tarihinden sonra teslim edilen metinlerin (not ve yorum olmadan) sınıf arkadaşlarınca okunabileceğini öğrencilere önceden bildirmelidir. Sınıf dergisinde yayımlanan yazılarda öğrencinin adı, öğretmen ayrıca seçmedikçe "Anonim" görünür.`,
   },
   {
     title: '8. Hesabın Kapatılması',
-    body: `Bu koşulları ihlal eden hesapları uyararak veya uyarmaksızın askıya alma ya da kapatma hakkımız saklıdır. Hesabınızı istediğiniz zaman kapatabilir, içeriklerinizi silebilirsiniz.`,
+    body: `Bu koşulları ihlal eden hesapları uyararak veya uyarmaksızın askıya alma ya da kapatma hakkımız saklıdır. Hesabınızı Ayarlar sayfasından istediğiniz zaman kalıcı olarak silebilirsiniz.`,
   },
   {
     title: '9. Sorumluluk Reddi',
@@ -47,11 +48,11 @@ const SECTIONS = [
   },
   {
     title: '10. Değişiklikler',
-    body: `Bu koşulları zaman zaman güncelleyebiliriz. Önemli değişikliklerde Platform üzerinden duyuru yaparız. Değişiklik sonrası Platformu kullanmaya devam etmeniz, güncel koşulları kabul ettiğiniz anlamına gelir.`,
+    body: `Bu koşulları zaman zaman güncelleyebiliriz. Önemli bir değişiklikte, bir sonraki girişinizde güncel metin size gösterilir ve Platformu kullanmaya devam etmek için onayınız yeniden istenir.`,
   },
   {
     title: '11. İletişim',
-    body: `Bu koşullarla ilgili sorularınız için Platform içindeki "Geri Bildirim Gönder" özelliğini kullanabilirsiniz.`,
+    body: `Bu koşullarla ilgili sorularınız ve kişisel verilerinize ilişkin talepleriniz için ${DATA_CONTROLLER.channel} kullanabilirsiniz.`,
   },
 ]
 
@@ -67,7 +68,7 @@ export default function TermsPage() {
             <h1 className="text-3xl font-display font-bold text-white">Kullanım Koşulları</h1>
           </div>
           <p className="text-sm text-muted-foreground">
-            Son güncelleme: 5 Temmuz 2026 · Kalem Birliği&apos;ni kullanarak bu koşulları kabul etmiş olursunuz.
+            Son güncelleme: {TERMS_UPDATED_LABEL} · Kayıt sırasında ayrıca onayınız alınır.
           </p>
         </div>
 
@@ -82,7 +83,7 @@ export default function TermsPage() {
 
         <p className="text-xs text-muted-foreground text-center">
           Ayrıca bkz.{' '}
-          <Link href="/gizlilik-politikasi" className="text-primary hover:underline">Gizlilik Politikası</Link>
+          <Link href="/gizlilik-politikasi" className="text-primary hover:underline">Gizlilik Politikası</Link>{' · '}<Link href="/acik-riza" className="text-primary hover:underline">Açık Rıza Metni</Link>
         </p>
       </div>
     </div>

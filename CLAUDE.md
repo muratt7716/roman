@@ -362,7 +362,12 @@ CREATE INDEX IF NOT EXISTS idx_reading_lists_project ON reading_lists(project_id
 
 ## Bildirim Sistemi
 
-> **🔴 TESLİMAT BOZUK (23 Eyl 2026'da bulundu):** Canlıdaki `notifications` INSERT
+> **✅ DÜZELDİ (`fc17d31`) — 26 Eyl 2026'da canlıda 3 kullanıcıyla doğrulandı.** 8 tipin hepsi
+> doğru alıcıya gidiyor; sahte davet ve üye olmayanın yorum bildirimi 403. Yazma yalnızca
+> `lib/notifications.ts` (service-role) üzerinden. `new_follower` ve `new_chapter` DB
+> trigger'larıyla gider — koda EKLEME, çift bildirim olur. Aşağısı tarihçe.
+>
+> **(Tarihçe) TESLİMAT BOZUKTU (23 Eyl 2026'da bulundu):** Canlıdaki `notifications` INSERT
 > politikası yalnızca `user_id = auth.uid()` izni veriyor — kullanıcı **sadece kendine**
 > bildirim yazabiliyor. Oysa kodda 9 yer başkasına yazmaya çalışıyor: `CommentPanel`,
 > `InviteButton`, `ApplicationCard`, `SuggestionEditorClient`, `SuggestionReviewActions`,
@@ -702,6 +707,25 @@ Kod hazır ama DB'de tablolar yok — `supabase/schema.sql` Supabase Dashboard >
 kullanıcı `deleteUser` ile "Database error deleting user" alıyor. Düzeltme (SET NULL, kısıt
 adları korunur): `supabase/migrations/2026-09-25-account-delete-set-null.sql`.
 **Canlıya uygulandı ✅ (26 Eyl 2026)** — 4 kısıt da `confdeltype = 'n'`.
+Hesap silme ayrıca depodaki `avatars/{userId}.*` ve sahip olunan projelerin `covers/{projectId}.*`
+dosyalarını siler (FK cascade depoya ulaşmaz).
+
+### 🔴 Akademi erişim açıkları (26 Eyl 2026, canlıda test edildi)
+Düzeltme: `supabase/migrations/2026-09-26-academy-access.sql` — **uygulandı mı kontrol et.**
+- Herkes şifresiz, doğrudan `classroom_members` insert ile istediği sınıfa öğrenci olabiliyordu
+- Ödev projeleri `closed` (= herkese açık) açılıyordu → artık `draft`; eskileri migration düzeltir
+- Öğrenci kendi teslimini `graded` yapabiliyordu; veli RLS dalı kolonu kendisiyle karşılaştırıyordu
+- Sınıf arkadaşı RLS'ten teslimin `grade`/`teacher_comment` alanlarını okuyabiliyordu
+- Akran okuma ve sınıf dergisi metinleri hiç görünmüyordu (öğrenci projeleri RLS'e takılır)
+Kural: öğrenci ödev metnine öğretmen/akran/dergi yalnızca SECURITY DEFINER RPC ile erişir —
+`get_submission_review_content`, `get_peer_submissions` (+`can_peer_read`), `get_magazine_content`.
+Veli ekleme arayüzü **yok** (members route kaldırılmış) — metinlerde veli rolü vaat edilmez.
+
+### KVKK (26 Eyl 2026)
+- Açık rıza (yurt dışı aktarım) aydınlatmadan AYRI: `/acik-riza` + `ConsentChecks` 2. kutu
+- `requiresConsent` artık katı: sürüm değişince herkes `/onay`'a düşer (mevcutlar dahil)
+- Veri sorumlusu + başvuru kanalı: `lib/legal.ts` → `DATA_CONTROLLER`
+- CI'da `npm run lint` repo genelinde 148 hatayla kırmızı (önceden de) — ayrı iş
 
 ### 🔴 LANSMAN ENGELİ: E-posta gönderim limiti (23 Eyl 2026'da ölçüldü)
 Supabase'in **dahili SMTP'si** kullanılıyor (gönderen: "Supabase Auth"). Limiti ölçtüm —

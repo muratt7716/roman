@@ -11,12 +11,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createClient } from '@/lib/supabase/client'
 import { signUpSchema, type SignUpInput } from '@/lib/validations/auth'
+import { ConsentChecks, consentComplete, type ConsentState } from '@/components/auth/ConsentChecks'
 
 export function SignupForm() {
   const router = useRouter()
   const supabase = createClient()
   const [serverError, setServerError] = useState<string | null>(null)
-  const [consent, setConsent] = useState(false)
+  const [consentState, setConsentState] = useState<ConsentState>({ terms: false, transfer: false })
+  const consent = consentComplete(consentState)
   const [awaitingEmail, setAwaitingEmail] = useState<string | null>(null)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignUpInput>({
@@ -115,21 +117,9 @@ export function SignupForm() {
         <p className="text-muted-foreground text-sm">Birlikte yazmaya başla</p>
       </div>
 
-      <label className="flex items-start gap-2.5 cursor-pointer select-none rounded-xl bg-surface-2/60 border border-border p-3">
-        <input
-          type="checkbox"
-          checked={consent}
-          onChange={e => setConsent(e.target.checked)}
-          className="mt-0.5 w-4 h-4 shrink-0 rounded border-border bg-surface-2 accent-primary cursor-pointer"
-        />
-        <span className="text-[11px] text-muted-foreground leading-relaxed">
-          En az 13 yaşında olduğumu,{' '}
-          <Link href="/kullanim-kosullari" className="text-primary hover:underline" target="_blank">Kullanım Koşulları</Link>
-          {' '}ve{' '}
-          <Link href="/gizlilik-politikasi" className="text-primary hover:underline" target="_blank">Gizlilik Politikası</Link>
-          &apos;nı okuduğumu ve kabul ettiğimi onaylıyorum.
-        </span>
-      </label>
+      <div className="rounded-xl bg-surface-2/60 border border-border p-3">
+        <ConsentChecks value={consentState} onChange={setConsentState} compact />
+      </div>
 
       <Button
         variant="outline"

@@ -9,7 +9,8 @@ const TYPES = [
   { value: 'bug',        label: '🐛 Hata Bildirimi',  desc: 'Bir şey beklendiği gibi çalışmıyor' },
   { value: 'suggestion', label: '💡 Öneri',            desc: 'Mevcut bir şeyi iyileştir' },
   { value: 'feature',    label: '✨ Özellik İsteği',   desc: 'Yeni bir şey eklemek istiyorum' },
-  { value: 'other',      label: '💬 Diğer',            desc: 'Aklındaki her şey' },
+  // Aydınlatma metni KVKK başvuru kanalı olarak bu kategoriyi gösteriyor (lib/legal.ts)
+  { value: 'other',      label: '💬 Diğer / KVKK',     desc: 'Kişisel veri talepleri dahil her şey' },
 ]
 
 interface Props {
@@ -37,8 +38,8 @@ export function FeedbackModal({ open, onClose }: Props) {
       setDone(true)
       setMessage('')
       setTimeout(() => { setDone(false); onClose() }, 2500)
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      setError((e as Error).message)
     } finally {
       setLoading(false)
     }

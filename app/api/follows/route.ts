@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 // POST /api/follows
 // Body: { following_id: string }
 // Toggles: follows if not following, unfollows if already following
+// "Yeni takipçi" bildirimi burada YAZILMAZ — DB trigger'ı on_new_follow yazar.
+// Buraya da eklemek her takipte çift bildirim demektir.
 export async function POST(req: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

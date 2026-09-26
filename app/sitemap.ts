@@ -23,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/discover/magazines`, changeFrequency: 'weekly', priority: 0.5 },
     { url: `${SITE_URL}/kullanim-kosullari`, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/gizlilik-politikasi`, changeFrequency: 'yearly', priority: 0.2 },
+    { url: `${SITE_URL}/acik-riza`, changeFrequency: 'yearly', priority: 0.1 },
   ]
 
   try {

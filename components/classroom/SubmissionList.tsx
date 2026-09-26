@@ -63,21 +63,18 @@ export function SubmissionList({ initialSubmissions, classroomId, assignmentId }
               <div className="px-4 pb-4 space-y-3 border-t border-white/[0.05]">
                 {sub.project_id && (
                   <div className="flex flex-wrap items-center gap-4 mt-3">
-                    {assignmentId && (sub.status === 'submitted' || sub.status === 'graded') && (
+                    {/* Öğretmen öğrencinin projesine üye değil — /projects/.../write
+                        ona kapalı. İnceleme sayfası metni RPC ile okur, taslakta da çalışır. */}
+                    {assignmentId && (
                       <Link
                         href={`/classroom/${classroomId}/assignments/${assignmentId}/review/${sub.id}`}
                         className="flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
                       >
-                        <MessageSquareText className="w-3.5 h-3.5" /> Metni İncele & Paragraf Yorumla
+                        {sub.status === 'draft'
+                          ? <><ExternalLink className="w-3.5 h-3.5" /> Taslağı Görüntüle</>
+                          : <><MessageSquareText className="w-3.5 h-3.5" /> Metni İncele & Paragraf Yorumla</>}
                       </Link>
                     )}
-                    <Link
-                      href={`/projects/${sub.project_id}/write`}
-                      target="_blank"
-                      className="flex items-center gap-1.5 text-xs text-primary hover:text-accent transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Yazıyı Görüntüle
-                    </Link>
                   </div>
                 )}
                 {(sub.status === 'submitted' || sub.status === 'graded') && (

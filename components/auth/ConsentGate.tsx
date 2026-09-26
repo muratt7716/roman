@@ -2,21 +2,22 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { Loader2, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
+import { ConsentChecks, consentComplete, type ConsentState } from '@/components/auth/ConsentChecks'
 
 /**
- * Onay kapısı — profilinde rıza kaydı olmayan kullanıcı buraya düşer.
- * Google ile açılan hesaplar kayıt formundaki onay kutusunu hiç görmez;
- * rıza tek noktada, sunucu zaman damgasıyla burada alınır.
+ * Onay kapısı — profilinde güncel rıza kaydı olmayan kullanıcı buraya düşer.
+ * Google ile açılan hesaplar kayıt formundaki onay kutularını hiç görmez;
+ * metinler güncellendiğinde mevcut kullanıcılar da buraya bir kez daha gelir.
+ * Rıza tek noktada, sunucu zaman damgasıyla burada alınır.
  */
-export function ConsentGate() {
+export function ConsentGate({ renewal = false }: { renewal?: boolean }) {
   const router = useRouter()
   const supabase = createClient()
-  const [consent, setConsent] = useState(false)
+  const [consent, setConsent] = useState<ConsentState>({ terms: false, transfer: false })
   const [saving, setSaving] = useState(false)
 
   async function accept() {
@@ -44,31 +45,19 @@ export function ConsentGate() {
         <div className="w-12 h-12 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto">
           <ShieldCheck className="w-6 h-6 text-primary" />
         </div>
-        <h1 className="font-display text-2xl font-bold">Son bir adım</h1>
+        <h1 className="font-display text-2xl font-bold">{renewal ? 'Metinlerimiz güncellendi' : 'Son bir adım'}</h1>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          Devam etmek için Kullanım Koşulları ve Gizlilik Politikası&apos;nı onaylaman gerekiyor.
-          Onayın, tarihi ve metin sürümüyle birlikte hesabına kaydedilir.
+          {renewal
+            ? 'Kullanım Koşulları ve gizlilik metinlerimizi güncelledik. Devam etmek için yeniden onay vermen gerekiyor.'
+            : 'Devam etmek için aşağıdaki metinleri onaylaman gerekiyor.'}
+          {' '}Onayın, tarihi ve metin sürümüyle birlikte hesabına kaydedilir.
         </p>
       </div>
 
-      <label className="flex items-start gap-2.5 cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={consent}
-          onChange={e => setConsent(e.target.checked)}
-          className="mt-0.5 w-4 h-4 shrink-0 rounded border-border bg-surface-2 accent-primary cursor-pointer"
-        />
-        <span className="text-xs text-muted-foreground leading-relaxed">
-          En az 13 yaşında olduğumu,{' '}
-          <Link href="/kullanim-kosullari" className="text-primary hover:underline" target="_blank">Kullanım Koşulları</Link>
-          {' '}ve{' '}
-          <Link href="/gizlilik-politikasi" className="text-primary hover:underline" target="_blank">Gizlilik Politikası</Link>
-          &apos;nı okuduğumu ve kabul ettiğimi onaylıyorum.
-        </span>
-      </label>
+      <ConsentChecks value={consent} onChange={setConsent} />
 
       <div className="space-y-3">
-        <Button type="button" className="w-full" disabled={!consent || saving} onClick={accept}>
+        <Button type="button" className="w-full" disabled={!consentComplete(consent) || saving} onClick={accept}>
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           Onayla ve Devam Et
         </Button>
@@ -81,6 +70,9 @@ export function ConsentGate() {
         >
           Kabul etmiyorum — çıkış yap
         </button>
+        <p className="text-[11px] text-center text-muted-foreground/70 leading-relaxed">
+          Kabul etmezsen hesabını Ayarlar&apos;dan dilediğin zaman kalıcı olarak silebilirsin.
+        </p>
       </div>
     </div>
   )

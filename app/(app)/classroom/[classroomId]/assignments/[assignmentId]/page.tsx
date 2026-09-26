@@ -131,49 +131,28 @@ export default async function AssignmentPage({ params }: PageProps) {
 
     const hasSubmitted = submission?.status === 'submitted' || submission?.status === 'graded'
 
-    let peerSubmissions: { student_name: string; project_slug: string; chapter_id: string; word_count: number }[] = []
+    let peerSubmissions: { submission_id: string; student_name: string }[] = []
 
+    // Sınıf arkadaşının ödev projesi özeldir (visibility 'draft') ve öğrenci
+    // ona üye değildir — projects/chapters sorguları RLS'e takılır. Eskiden bu
+    // yüzden liste hep boş çıkıyordu. Metin inceleme sayfasında
+    // get_submission_review_content RPC'siyle okunur; burada yalnızca teslimler
+    // (submissions_select_own_or_teacher'ın class_visible dalı) listelenir.
     if (assignment.visibility === 'class_visible' && isPast) {
       const { data: peers } = await supabase
         .from('assignment_submissions')
-        .select('project_id, student:profiles(display_name, username)')
+        .select('id, student:profiles(display_name, username)')
         .eq('assignment_id', assignmentId)
         .in('status', ['submitted', 'graded'])
         .neq('student_id', user.id)
 
-      if (peers && peers.length > 0) {
-        const projectIds = peers.map((p: any) => p.project_id).filter(Boolean)
-        const [{ data: projects }, { data: chapters }] = await Promise.all([
-          supabase.from('projects').select('id, slug').in('id', projectIds),
-          supabase.from('chapters').select('id, project_id').in('project_id', projectIds).order('order_index', { ascending: true }),
-        ])
-
-        const chapterIds = (chapters ?? []).map((c: any) => c.id)
-        const { data: versions } = await supabase
-          .from('chapter_versions')
-          .select('chapter_id, word_count')
-          .in('chapter_id', chapterIds.length > 0 ? chapterIds : ['00000000-0000-0000-0000-000000000000'])
-          .order('created_at', { ascending: false })
-
-        const latestWordCount: Record<string, number> = {}
-        for (const v of versions ?? []) {
-          if (!((v as any).chapter_id in latestWordCount)) {
-            latestWordCount[(v as any).chapter_id] = (v as any).word_count ?? 0
-          }
+      peerSubmissions = (peers ?? []).map(p => {
+        const student = (Array.isArray(p.student) ? p.student[0] : p.student) as { display_name: string | null; username: string } | null
+        return {
+          submission_id: p.id as string,
+          student_name: student?.display_name ?? student?.username ?? 'Öğrenci',
         }
-
-        peerSubmissions = peers.map((p: any) => {
-          const project = (projects ?? []).find((pr: any) => pr.id === p.project_id)
-          const chapter = (chapters ?? []).find((c: any) => c.project_id === p.project_id)
-          const wc = chapter ? (latestWordCount[chapter.id] ?? 0) : 0
-          return {
-            student_name: (p.student as any)?.display_name ?? (p.student as any)?.username ?? 'Öğrenci',
-            project_slug: project?.slug ?? '',
-            chapter_id: chapter?.id ?? '',
-            word_count: wc,
-          }
-        }).filter(s => s.project_slug && s.chapter_id)
-      }
+      })
     }
 
     // Countdown / Friendly Alert calculation
@@ -268,8 +247,8 @@ export default async function AssignmentPage({ params }: PageProps) {
               Sınıf Yazıları
             </h2>
             <PeerReadingList
-              assignmentTitle={assignment.title}
               submissions={peerSubmissions}
+              reviewBase={`/classroom/${classroomId}/assignments/${assignmentId}/review`}
             />
           </div>
         )}

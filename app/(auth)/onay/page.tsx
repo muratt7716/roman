@@ -20,13 +20,14 @@ export default async function ConsentPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('consent_at')
+    .select('consent_at, consent_version')
     .eq('id', user.id)
     .single()
 
-  // Rıza zaten varsa kapıda bekletme. Profil satırı yoksa (eski hesap) kapı
+  // Rıza zaten güncelse kapıda bekletme. Profil satırı yoksa (eski hesap) kapı
   // gösterilir; rıza yazma sırasında (app) layout profili çoktan upsert etmiştir.
   if (profile && !requiresConsent(profile)) redirect('/dashboard')
 
-  return <ConsentGate />
+  // Daha önce rıza vermiş ama metin sürümü eskimiş → "metinler güncellendi"
+  return <ConsentGate renewal={!!profile?.consent_at} />
 }

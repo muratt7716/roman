@@ -30,22 +30,29 @@ export default async function SubmissionReviewPage({ params }: PageProps) {
     { data: classroom },
     { data: assignment },
     { data: submission },
+    { data: peers },
   ] = await Promise.all([
     supabase.from('classrooms').select('id, name, owner_id').eq('id', classroomId).single(),
     supabase.from('classroom_assignments').select('id, title, min_word_count').eq('id', assignmentId).eq('classroom_id', classroomId).single(),
+    // Yalnızca öğretmen ve öğrencinin kendisi görür (RLS) — not/yorum bu satırda
     supabase
       .from('assignment_submissions')
       .select('*, student:profiles(id, username, display_name)')
       .eq('id', submissionId)
       .eq('assignment_id', assignmentId)
-      .single(),
+      .maybeSingle(),
+    // Akran okuma: kural (sınıfa açık + süre bitti + teslim edildi + sınıf
+    // üyesi) veritabanında, can_peer_read içinde. Satır değil, yalnızca ad döner.
+    supabase.rpc('get_peer_submissions', { p_assignment_id: assignmentId }),
   ])
 
-  if (!classroom || !assignment || !submission) notFound()
+  if (!classroom || !assignment) notFound()
 
+  const peer = ((peers ?? []) as { submission_id: string; student_name: string }[])
+    .find(p => p.submission_id === submissionId)
   const isTeacher = classroom.owner_id === user.id
-  const isStudentOwner = submission.student_id === user.id
-  if (!isTeacher && !isStudentOwner) notFound()
+  const isStudentOwner = submission?.student_id === user.id
+  if (!submission && !peer) notFound()
 
   // Teslim edilen metni topla — SECURITY DEFINER RPC: öğretmen öğrencinin
   // projesine üye olmadığı için normal chapters sorgusu RLS'e takılır
@@ -58,8 +65,10 @@ export default async function SubmissionReviewPage({ params }: PageProps) {
   }
 
   // Mevcut paragraf yorumları (tablo henüz yoksa sessizce boş)
+  // Akran okuyucu metni görür; not ve öğretmen yorumları öğrenciyle öğretmen arasında kalır.
+  const showFeedback = isTeacher || isStudentOwner
   let comments: ReviewComment[] = []
-  try {
+  if (showFeedback) try {
     const { data } = await supabase
       .from('submission_comments')
       .select('*')
@@ -70,7 +79,8 @@ export default async function SubmissionReviewPage({ params }: PageProps) {
     comments = []
   }
 
-  const studentName = (submission.student as { display_name: string | null; username: string } | null)
+  const student = submission?.student as { display_name: string | null; username: string } | null | undefined
+  const studentLabel = student?.display_name ?? student?.username ?? peer?.student_name ?? 'Öğrenci'
   const { data: teacherProfile } = await supabase
     .from('profiles')
     .select('display_name, username')
@@ -93,8 +103,8 @@ export default async function SubmissionReviewPage({ params }: PageProps) {
         </h1>
         <p className="text-sm text-slate-400 flex items-center gap-2">
           <GraduationCap className="w-4 h-4 text-indigo-400" />
-          {studentName?.display_name ?? studentName?.username ?? 'Öğrenci'} teslimi
-          {submission.grade !== null && (
+          {studentLabel} teslimi
+          {showFeedback && submission && submission.grade !== null && (
             <span className="text-emerald-400 font-bold">· {submission.grade}/100</span>
           )}
         </p>
