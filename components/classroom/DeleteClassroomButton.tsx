@@ -64,7 +64,7 @@ export function DeleteClassroomButton({ classroomId, classroomName }: Props) {
             <div className="space-y-2">
               <label className="text-sm text-slate-400">
                 Onaylamak için sınıf adını tam olarak yaz:{' '}
-                <span className="text-white font-medium">"{classroomName}"</span>
+                <span className="text-white font-medium">&quot;{classroomName}&quot;</span>
               </label>
               <input
                 type="text"

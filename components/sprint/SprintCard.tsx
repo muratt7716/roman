@@ -20,12 +20,12 @@ export function SprintCard({ sprint, isJoined = false }: Props) {
   const minutesUntil = Math.max(0, Math.floor((start.getTime() - now.getTime()) / 60000))
 
   const timeLabel = isActive
-    ? `Bitti: ${new Date(sprint.ends_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`
+    ? `Bitiş: ${new Date(sprint.ends_at).toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' })}`
     : isFinished
       ? 'Sona Erdi'
       : minutesUntil <= 5
         ? `${minutesUntil} dk sonra başlıyor`
-        : `${start.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}`
+        : `${start.toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' })}`
 
   return (
     <Link

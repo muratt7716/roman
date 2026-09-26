@@ -63,7 +63,7 @@ export function DeleteProjectButton({ projectId, projectTitle }: Props) {
             <div className="space-y-2">
               <label className="text-sm text-muted-foreground">
                 Onaylamak için proje adını tam olarak yaz:{' '}
-                <span className="text-foreground font-medium">"{projectTitle}"</span>
+                <span className="text-foreground font-medium">&quot;{projectTitle}&quot;</span>
               </label>
               <input
                 type="text"

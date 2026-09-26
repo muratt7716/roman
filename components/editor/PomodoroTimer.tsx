@@ -8,50 +8,52 @@ type Phase = 'idle' | 'focus' | 'break'
 const FOCUS_SECS = 25 * 60
 const BREAK_SECS = 5 * 60
 
+function notify(body: string) {
+  if (typeof window === 'undefined' || !('Notification' in window)) return
+  if (Notification.permission === 'granted') {
+    new Notification('Kalem Birliği', { body })
+  }
+}
+
+/**
+ * Süre, saniye saymak yerine bitiş anından hesaplanır. İki sebep:
+ *  - Arka plandaki sekmede tarayıcı setInterval'i dakikada bire kadar
+ *    yavaşlatır; saniye sayan sayaç yazar başka sekmedeyken geri kalırdı.
+ *  - Eski sürüm faz bitince interval'i durduruyor ama `running` true kaldığı
+ *    için effect yeniden başlamıyordu: mola sayacı 5:00'te donuyordu.
+ */
 export function PomodoroTimer() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [seconds, setSeconds] = useState(FOCUS_SECS)
   const [running, setRunning] = useState(false)
   const [sessions, setSessions] = useState(0)
   const phaseRef = useRef<Phase>('idle')
-  const sessionsRef = useRef(0)
+  const deadlineRef = useRef(0)
 
   useEffect(() => {
     if (!running) return
     const id = setInterval(() => {
-      setSeconds(prev => {
-        if (prev > 1) return prev - 1
-        clearInterval(id)
-        setTimeout(() => handlePhaseComplete(), 0)
-        return 0
-      })
-    }, 1000)
+      const left = Math.ceil((deadlineRef.current - Date.now()) / 1000)
+      if (left > 0) { setSeconds(left); return }
+
+      // Faz bitti — bir sonrakine geç, sayaç kesintisiz devam eder
+      if (phaseRef.current === 'focus') {
+        setSessions(s => s + 1)
+        phaseRef.current = 'break'
+        setPhase('break')
+        deadlineRef.current = Date.now() + BREAK_SECS * 1000
+        setSeconds(BREAK_SECS)
+        notify('Mola zamanı! 5 dakika dinlen. ☕')
+      } else {
+        phaseRef.current = 'focus'
+        setPhase('focus')
+        deadlineRef.current = Date.now() + FOCUS_SECS * 1000
+        setSeconds(FOCUS_SECS)
+        notify('Odaklanma süresi başladı! ✍️')
+      }
+    }, 500)
     return () => clearInterval(id)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running])
-
-  function handlePhaseComplete() {
-    if (phaseRef.current === 'focus') {
-      sessionsRef.current += 1
-      setSessions(sessionsRef.current)
-      phaseRef.current = 'break'
-      setPhase('break')
-      setSeconds(BREAK_SECS)
-      notify('Mola zamanı! 5 dakika dinlen. ☕')
-    } else {
-      phaseRef.current = 'focus'
-      setPhase('focus')
-      setSeconds(FOCUS_SECS)
-      notify('Odaklanma süresi başladı! ✍️')
-    }
-  }
-
-  function notify(body: string) {
-    if (typeof window === 'undefined' || !('Notification' in window)) return
-    if (Notification.permission === 'granted') {
-      new Notification('Kalem Birliği', { body })
-    }
-  }
 
   function start() {
     if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'default') {
@@ -61,6 +63,8 @@ export function PomodoroTimer() {
       phaseRef.current = 'focus'
       setPhase('focus')
     }
+    // Duraklatılmışsa kalan süreden devam et
+    deadlineRef.current = Date.now() + seconds * 1000
     setRunning(true)
   }
 

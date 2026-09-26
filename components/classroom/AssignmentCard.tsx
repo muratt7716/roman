@@ -53,7 +53,7 @@ export function AssignmentCard({ assignment, classroomId, submission, isTeacher 
             )}>
               <Clock className="w-3.5 h-3.5 shrink-0" />
               <span>
-                {new Date(assignment.due_date).toLocaleDateString('tr-TR', { 
+                {new Date(assignment.due_date).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', 
                   day: 'numeric', 
                   month: 'short', 
                   hour: '2-digit', 

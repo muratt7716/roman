@@ -55,6 +55,35 @@ const TEXT_COLORS = [
   { label: 'Mor', value: '#a78bfa' },
 ]
 
+// Araç çubuğu parçaları modül seviyesinde: bileşen içinde tanımlanınca her
+// render'da (her tuş vuruşunda) yeni bir bileşen tipi olur ve React tüm
+// düğmeleri söküp yeniden kurar.
+function Btn({ onClick, active, disabled, title, children }: {
+  onClick: () => void; active?: boolean; disabled?: boolean; title?: string; children: React.ReactNode
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      aria-label={title}
+      aria-pressed={active}
+      disabled={disabled}
+      // Fare: mousedown'da çalış ve varsayılanı engelle, yoksa editör odağı ve seçimi kaybeder.
+      // Klavye (Enter/Boşluk) mousedown üretmez, yalnızca click — detail === 0 onu ayırt eder.
+      onMouseDown={e => { e.preventDefault(); onClick() }}
+      onClick={e => { if (e.detail === 0) onClick() }}
+      className={`p-1.5 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed
+        ${active ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-surface-2'}`}
+    >
+      {children}
+    </button>
+  )
+}
+
+function Sep() {
+  return <div className="w-px h-4 bg-border mx-0.5 shrink-0" />
+}
+
 export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitle, onWordCountChange, editable = true }: Props) {
   const supabase = createClient()
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -183,23 +212,6 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
 
   const wc = editor.storage.characterCount?.words() ?? 0
   const cc = editor.storage.characterCount?.characters() ?? 0
-
-  const Btn = ({ onClick, active, disabled, title, children }: {
-    onClick: () => void; active?: boolean; disabled?: boolean; title?: string; children: React.ReactNode
-  }) => (
-    <button
-      type="button"
-      title={title}
-      disabled={disabled}
-      onMouseDown={e => { e.preventDefault(); onClick() }}
-      className={`p-1.5 rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed
-        ${active ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-surface-2'}`}
-    >
-      {children}
-    </button>
-  )
-
-  const Sep = () => <div className="w-px h-4 bg-border mx-0.5 shrink-0" />
 
   return (
     <div className={`flex flex-col ${focusMode ? 'fixed inset-0 z-50 bg-[hsl(245_25%_4%)]' : 'h-full'}`}>

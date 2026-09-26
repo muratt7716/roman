@@ -76,7 +76,7 @@ export function SuggestionReviewActions({
     <div className="shrink-0 border-t border-border bg-surface px-6 py-4">
       <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
-          <span className="text-foreground font-medium">{suggestorName}</span>'in önerisini ne yapacaksın?
+          <span className="text-foreground font-medium">{suggestorName}</span>&apos;in önerisini ne yapacaksın?
         </p>
         <div className="flex gap-3">
           <Button

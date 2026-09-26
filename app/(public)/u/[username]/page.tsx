@@ -296,7 +296,7 @@ export default async function UserProfilePage({ params }: Props) {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-white truncate group-hover:text-primary transition-colors">{c.title}</p>
                     <p className="text-xs text-muted-foreground truncate mt-0.5">
-                      {c.project!.title} · {new Date(c.updated_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      {c.project!.title} · {new Date(c.updated_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', year: 'numeric' })}
                     </p>
                   </div>
                   <span className="shrink-0 text-xs text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all">

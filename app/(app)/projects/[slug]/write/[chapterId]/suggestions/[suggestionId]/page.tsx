@@ -78,7 +78,7 @@ export default async function SuggestionReviewPage({ params }: Props) {
           </div>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
-            {new Date(suggestion.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+            {new Date(suggestion.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
           </div>
           {wordDiff !== 0 && (
             <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${wordDiff > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`}>

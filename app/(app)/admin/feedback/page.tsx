@@ -122,7 +122,7 @@ export default function AdminFeedbackPage() {
                   {TYPE_LABELS[fb.type] ?? fb.type}
                 </span>
                 <span className="text-[11px] text-muted-foreground">
-                  {fb.profiles?.display_name ?? fb.profiles?.username ?? 'Anonim'} · {new Date(fb.created_at).toLocaleDateString('tr-TR')}
+                  {fb.profiles?.display_name ?? fb.profiles?.username ?? 'Anonim'} · {new Date(fb.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}
                 </span>
               </div>
               <p className="text-sm text-white/80 mt-1.5 whitespace-pre-wrap">{fb.message}</p>

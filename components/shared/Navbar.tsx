@@ -34,9 +34,13 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  useEffect(() => {
+  // Sayfa değişince mobil menüyü kapat — render sırasında, effect'siz
+  // (effect içindeki setState fazladan bir render turu doğurur)
+  const [menuPath, setMenuPath] = useState(pathname)
+  if (menuPath !== pathname) {
+    setMenuPath(pathname)
     setMobileMenuOpen(false)
-  }, [pathname])
+  }
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)

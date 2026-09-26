@@ -164,7 +164,7 @@ export function CommentPanel({ chapterId, currentUserId, isOwner = false, hideBo
                 <p className="text-xs text-foreground/80 leading-relaxed">{c.content}</p>
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] text-muted-foreground">
-                    {new Date(c.created_at).toLocaleString('tr', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    {new Date(c.created_at).toLocaleString('tr', { timeZone: 'Europe/Istanbul', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>
                   <div className="flex items-center gap-2">
                     {hasReplies && (
@@ -211,7 +211,7 @@ export function CommentPanel({ chapterId, currentUserId, isOwner = false, hideBo
                       </div>
                       <p className="text-xs text-foreground/80 leading-relaxed">{r.content}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {new Date(r.created_at).toLocaleString('tr', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(r.created_at).toLocaleString('tr', { timeZone: 'Europe/Istanbul', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   ))}

@@ -89,7 +89,7 @@ export default async function SuggestionsListPage({ params }: Props) {
                     <div>
                       <p className="text-sm font-medium">{author?.display_name ?? author?.username}</p>
                       <p className="text-xs text-muted-foreground">
-                        {new Date(s.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(s.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
                         {' · '}{wc.toLocaleString('tr')} kelime
                       </p>
                     </div>
@@ -102,7 +102,7 @@ export default async function SuggestionsListPage({ params }: Props) {
 
                 {s.note && (
                   <p className="mt-3 text-sm text-muted-foreground leading-relaxed line-clamp-2 pl-12">
-                    "{s.note}"
+                    &quot;{s.note}&quot;
                   </p>
                 )}
 

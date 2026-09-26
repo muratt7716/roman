@@ -29,7 +29,6 @@ export default function robots(): MetadataRoute.Robots {
         '/sprint',
         '/fikir-odasi',
         '/jenerator',
-        '/oyun',
         '/projects/*/write',
         '/projects/*/overview',
         '/projects/*/brainstorm',

@@ -226,7 +226,7 @@ export default async function HomePage() {
                         {c.project!.title}
                         {c.author && <> · {c.author.display_name ?? c.author.username}</>}
                         {' · '}
-                        {new Date(c.updated_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+                        {new Date(c.updated_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long' })}
                       </p>
                     </div>
                     <span className="shrink-0 text-xs text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all">

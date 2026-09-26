@@ -55,3 +55,19 @@ describe('sanitizeHtml — meşru TipTap içeriği', () => {
     expect(sanitizeHtml('<p>şğüöçİIı — “tırnak”</p>')).toContain('şğüöçİIı')
   })
 })
+
+describe('sanitizeHtml — style ve bağlantı', () => {
+  it('TipTap hizalama ve rengini korur, sayfa düzenini bozan CSS düşer', () => {
+    const out = sanitizeHtml('<p style="text-align: center; position: fixed; inset: 0; z-index: 9999">x</p>')
+    expect(out).toContain('text-align:center')
+    expect(out).not.toMatch(/position|z-index|inset/)
+  })
+
+  it('yeni sekmede açılan bağlantıya noopener eklenir', () => {
+    expect(sanitizeHtml('<a href="https://ornek.com" target="_blank">x</a>')).toContain('rel="noopener noreferrer"')
+  })
+
+  it('protokolsüz dış adres düşer', () => {
+    expect(sanitizeHtml('<a href="//evil.example">x</a>')).not.toContain('evil.example')
+  })
+})

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 
 interface StreakData {
   streak: number
@@ -9,61 +9,63 @@ interface StreakData {
 }
 
 const KEY = 'kb_writing_streak'
+const EVENT = 'kb-streak-change'
+const EMPTY: StreakData = { streak: 0, best: 0, lastDate: null }
 
+/**
+ * Türkiye'deki takvim günü (YYYY-MM-DD). Eskiden toISOString (UTC) kullanılıyordu:
+ * gece 00:00–03:00 arası yazılan yazı önceki güne sayılıyor, seri bozuluyordu.
+ */
 function today() {
-  return new Date().toISOString().slice(0, 10)
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date())
 }
 
-function load(): StreakData {
-  if (typeof window === 'undefined') return { streak: 0, best: 0, lastDate: null }
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (!raw) return { streak: 0, best: 0, lastDate: null }
-    return JSON.parse(raw) as StreakData
-  } catch {
-    return { streak: 0, best: 0, lastDate: null }
-  }
+function parse(raw: string | null): StreakData {
+  if (!raw) return EMPTY
+  try { return JSON.parse(raw) as StreakData } catch { return EMPTY }
+}
+
+// localStorage gizli sekmede veya kota dolunca hata fırlatabilir — seri
+// kaybolsun, editör çökmesin.
+function read(): string | null {
+  try { return localStorage.getItem(KEY) } catch { return null }
 }
 
 function save(data: StreakData) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(KEY, JSON.stringify(data))
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data))
+    window.dispatchEvent(new Event(EVENT))
+  } catch { /* yok say */ }
+}
+
+function subscribe(onChange: () => void) {
+  window.addEventListener(EVENT, onChange)
+  window.addEventListener('storage', onChange) // başka sekmede yazılırsa
+  return () => {
+    window.removeEventListener(EVENT, onChange)
+    window.removeEventListener('storage', onChange)
+  }
 }
 
 export function useStreak(hasWrittenToday: boolean) {
-  const [data, setData] = useState<StreakData>({ streak: 0, best: 0, lastDate: null })
+  // Sunucuda null → boş seri; tarayıcıda localStorage. Ham string döndüğü için
+  // anlık görüntü içerik değişmedikçe aynı kalır (useSyncExternalStore bunu ister).
+  const raw = useSyncExternalStore(subscribe, read, () => null)
 
-  // Load on mount
-  useEffect(() => {
-    setData(load())
-  }, [])
-
-  // Update streak when user writes
+  // Kullanıcı bugün yazınca seriyi güncelle
   useEffect(() => {
     if (!hasWrittenToday) return
-    const current = load()
+    const current = parse(read())
     const todayStr = today()
+    if (current.lastDate === todayStr) return // bugün zaten sayıldı
 
-    if (current.lastDate === todayStr) return // already counted today
-
-    let newStreak: number
-    if (current.lastDate === null) {
-      newStreak = 1
-    } else {
-      // Check if yesterday
-      const last = new Date(current.lastDate)
-      const diff = (new Date(todayStr).getTime() - last.getTime()) / 86400000
-      newStreak = diff <= 1 ? current.streak + 1 : 1
+    let newStreak = 1
+    if (current.lastDate) {
+      const diffDays = (Date.parse(todayStr) - Date.parse(current.lastDate)) / 86400000
+      newStreak = diffDays <= 1 ? current.streak + 1 : 1
     }
-
-    const updated: StreakData = {
-      streak: newStreak,
-      best: Math.max(newStreak, current.best),
-      lastDate: todayStr,
-    }
-    save(updated)
-    setData(updated)
+    save({ streak: newStreak, best: Math.max(newStreak, current.best), lastDate: todayStr })
   }, [hasWrittenToday])
 
-  return data
+  return parse(raw)
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useRef, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { UserPlus, ChevronDown, Loader2, Send } from 'lucide-react'
 import { toast } from 'sonner'
@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils'
 
 interface Role { id: string; name: string }
 interface Project { id: string; title: string; roles: Role[] }
+
+const noopSubscribe = () => () => {}
 
 interface Props {
   targetUserId: string
@@ -25,10 +27,8 @@ export function InviteButton({ targetUserId, targetUsername, className }: Props)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  // Portal için client-side mount kontrolü
-  useEffect(() => { setMounted(true) }, [])
+  // Portal için client-side mount kontrolü: sunucuda false, tarayıcıda true
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false)
 
   const selectedProject = projects.find(p => p.id === selectedProjectId)
 

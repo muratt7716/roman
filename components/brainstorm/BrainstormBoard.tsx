@@ -7,6 +7,15 @@ import type { BrainstormNote } from '@/types'
 
 const NOTE_COLORS = ['#7C3AED', '#DB2777', '#D97706', '#059669', '#2563EB', '#7C3AED']
 
+/** Yeni notun tahtadaki yeri ve rengi — yalnızca "Not ekle" tıklamasında çağrılır */
+function randomPlacement() {
+  return {
+    position_x: 80 + Math.random() * 200,
+    position_y: 80 + Math.random() * 200,
+    color: NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)],
+  }
+}
+
 const TYPE_LABELS: Record<string, string> = {
   sticky: 'Not',
   plot: 'Olay Örgüsü',
@@ -37,9 +46,7 @@ export function BrainstormBoard({ projectId, currentUserId, initialNotes }: Prop
         type: 'sticky',
         title: 'Yeni Not',
         content: {},
-        position_x: 80 + Math.random() * 200,
-        position_y: 80 + Math.random() * 200,
-        color: NOTE_COLORS[Math.floor(Math.random() * NOTE_COLORS.length)],
+        ...randomPlacement(),
       })
       .select()
       .single()
@@ -117,7 +124,7 @@ export function BrainstormBoard({ projectId, currentUserId, initialNotes }: Prop
       >
         {notes.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm">
-            Tuval boş — "Not Ekle" ile başla
+            Tuval boş — &quot;Not Ekle&quot; ile başla
           </div>
         )}
 

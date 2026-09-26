@@ -66,7 +66,6 @@ export function MusicWidget() {
       audioRef.current = null
     }
 
-    setLoading(true)
     const audio = new Audio(STATIONS[activeIdx].url)
     audio.volume = muted ? 0 : 0.5
     audio.oncanplay = () => setLoading(false)
@@ -85,7 +84,10 @@ export function MusicWidget() {
   }, [muted])
 
   function select(idx: number) {
-    setActiveIdx(prev => (prev === idx ? null : idx))
+    const next = activeIdx === idx ? null : idx
+    setActiveIdx(next)
+    // Yükleniyor göstergesi tıklama anında açılır; effect yalnızca sesi yönetir
+    setLoading(next !== null)
   }
 
   const playing = activeIdx !== null

@@ -27,7 +27,7 @@ export function MagazineReader({ title, issueNumber, classroomName, schoolName, 
           <p className="text-xs text-primary font-semibold uppercase tracking-widest mb-1 print:text-black">{schoolName} · {classroomName}</p>
           <h1 className="text-3xl font-display font-black text-white print:text-black">{title}</h1>
           <p className="text-sm text-slate-400 mt-1 print:text-gray-600">
-            Sayı #{issueNumber} · {new Date(publishedAt).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            Sayı #{issueNumber} · {new Date(publishedAt).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
       </div>

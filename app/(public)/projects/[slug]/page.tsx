@@ -152,7 +152,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               <span className="text-muted-foreground flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4" /> Kelime Sayısı
               </span>
-              <span className="font-medium">{project.current_word_count?.toLocaleString() ?? 0}</span>
+              <span className="font-medium">{project.current_word_count?.toLocaleString('tr-TR') ?? 0}</span>
             </div>
             {project.target_word_count && (
               <div className="space-y-1">
@@ -173,7 +173,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                 <Calendar className="w-4 h-4" /> Oluşturulma
               </span>
               <span className="font-medium">
-                {new Date(project.created_at).toLocaleDateString('tr-TR')}
+                {new Date(project.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}
               </span>
             </div>
           </div>

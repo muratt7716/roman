@@ -159,7 +159,7 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
   }
 
   function formatTime(ts: string) {
-    return new Date(ts).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+    return new Date(ts).toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' })
   }
 
   const pendingRequests = joinRequests.filter(r => r.status === 'pending')

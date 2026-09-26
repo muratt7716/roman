@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { PenLine, Lock, Sparkles, Star, MessageCircle, MessageSquareText } from 'lucide-react'
 import type { ClassroomAssignment, AssignmentSubmission } from '@/types'
 import { cn } from '@/lib/utils'
@@ -27,7 +28,10 @@ export function StudentAssignmentView({ assignment, classroomId, initialSubmissi
     if (res.ok) {
       const { submission_id, project_id, chapter_id } = await res.json()
       router.push(`/projects/${project_id}/write/${chapter_id}?submission_id=${submission_id}`)
+      return
     }
+    const body = await res.json().catch(() => null)
+    toast.error(body?.error ?? 'Ödev açılamadı. Lütfen tekrar dene.')
     setLoading(false)
   }
 
@@ -160,7 +164,7 @@ export function StudentAssignmentView({ assignment, classroomId, initialSubmissi
                 <MessageCircle className="w-5 h-5 text-indigo-400 mt-0.5 shrink-0" />
                 <div className="space-y-1">
                   <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider">Öğretmenin Notu</p>
-                  <p className="text-xs leading-relaxed text-slate-200 italic">"{submission.teacher_comment}"</p>
+                  <p className="text-xs leading-relaxed text-slate-200 italic">&quot;{submission.teacher_comment}&quot;</p>
                 </div>
               </div>
             )}

@@ -19,7 +19,7 @@ export function BadgesGrid({ badges }: Props) {
         return (
           <div
             key={code}
-            title={earned ? `${meta.label} — ${new Date(earned.earned_at).toLocaleDateString('tr-TR')}` : meta.desc}
+            title={earned ? `${meta.label} — ${new Date(earned.earned_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}` : meta.desc}
             className={cn(
               'flex flex-col items-center gap-1.5 p-4 rounded-xl border text-center transition-all',
               earned
@@ -31,7 +31,7 @@ export function BadgesGrid({ badges }: Props) {
             <span className="text-xs font-medium leading-tight">{meta.label}</span>
             {earned && (
               <span className="text-[10px] text-muted-foreground">
-                {new Date(earned.earned_at).toLocaleDateString('tr-TR')}
+                {new Date(earned.earned_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}
               </span>
             )}
           </div>

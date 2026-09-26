@@ -21,11 +21,12 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
 
   const endTime   = new Date(sprint.ends_at).getTime()
   const startTime = new Date(sprint.starts_at).getTime()
-  const nowMs     = Date.now()
+  // Sayfa açıldığı an — render'da Date.now() çağırmak her render'da farklı sonuç verir
+  const [nowMs] = useState(() => Date.now())
   const isActiveNow   = nowMs >= startTime && nowMs < endTime
   const isFinishedNow = nowMs >= endTime
 
-  const [timeLeft, setTimeLeft]         = useState(Math.max(0, Math.ceil((endTime - Date.now()) / 1000)))
+  const [timeLeft, setTimeLeft]         = useState(() => Math.max(0, Math.ceil((endTime - nowMs) / 1000)))
   const [participants, setParticipants] = useState<SprintParticipant[]>(initialParticipants)
   const [joined, setJoined]             = useState(isJoinedProp)
   const [joining, setJoining]           = useState(false)
@@ -124,12 +125,13 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
         isActiveNow ? 'border-violet-500/30 shadow-[0_0_30px_rgba(124,58,237,0.1)]' : 'border-white/[0.05]'
       )}>
         <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{sprint.title}</p>
-        <div className="font-display text-7xl font-black text-white tracking-tight tabular-nums">
+        {/* Sayaç sunucu ve tarayıcıda birkaç saniye farklı hesaplanır — beklenen, zararsız */}
+        <div className="font-display text-7xl font-black text-white tracking-tight tabular-nums" suppressHydrationWarning>
           {isActiveNow
             ? `${mins}:${secs}`
             : isFinishedNow
             ? '00:00'
-            : new Date(sprint.starts_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+            : new Date(sprint.starts_at).toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' })}
         </div>
         {/* Sadece "kaç kişi yazıyor" — kimse kimseyle yarışmıyor */}
         <p className="text-xs text-slate-400 flex items-center justify-center gap-2">
@@ -143,7 +145,7 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
       {/* Henüz başlamadı */}
       {!isActiveNow && !isFinishedNow && (
         <div className="glass-card rounded-xl p-4 border border-white/[0.05] text-center text-sm text-slate-400">
-          Sprint {new Date(sprint.starts_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })} tarihinde başlıyor.
+          Sprint {new Date(sprint.starts_at).toLocaleTimeString('tr-TR', { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' })} tarihinde başlıyor.
           {!joined && (
             <button
               onClick={handleJoin}
@@ -204,7 +206,7 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
       {finished && joined && !done && (
         <div className="glass-card rounded-2xl p-6 border border-violet-500/20 space-y-4">
           <p className="text-violet-300 font-bold text-sm">✨ Sprint bitti! Bu oturumda kaç kelime yazdın?</p>
-          <p className="text-xs text-slate-500">Sadece senin için kaydedilir — streak'ine sayılır.</p>
+          <p className="text-xs text-slate-500">Sadece senin için kaydedilir — streak&apos;ine sayılır.</p>
           <input
             type="number"
             min={0}

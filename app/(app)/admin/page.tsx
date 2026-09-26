@@ -74,7 +74,7 @@ export default async function AdminOverviewPage() {
                 <p className="text-sm text-white/80 line-clamp-2">{fb.message}</p>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   {(fb.profiles as any)?.display_name ?? (fb.profiles as any)?.username ?? 'Anonim'} ·{' '}
-                  {new Date(fb.created_at).toLocaleDateString('tr-TR')}
+                  {new Date(fb.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}
                 </p>
               </div>
               {fb.status === 'new' && (

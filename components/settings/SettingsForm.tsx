@@ -169,7 +169,7 @@ export function SettingsForm({ profile }: Props) {
       <div className="glass-card rounded-2xl p-6 space-y-4">
         <div>
           <h2 className="font-display font-semibold text-lg">Yazarlık Durumu</h2>
-          <p className="text-sm text-muted-foreground mt-0.5">Diğer yazarlar seni Yazarlar Rehberi'nde bu durumla görür.</p>
+          <p className="text-sm text-muted-foreground mt-0.5">Diğer yazarlar seni Yazarlar Rehberi&apos;nde bu durumla görür.</p>
         </div>
 
         <div className="space-y-2">

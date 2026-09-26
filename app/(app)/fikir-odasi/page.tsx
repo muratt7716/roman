@@ -93,7 +93,7 @@ export default async function IdeaRoomListPage() {
                   {msgCount[thread.id] ?? 0} mesaj
                 </span>
                 <span className="ml-auto">
-                  {new Date(thread.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+                  {new Date(thread.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long' })}
                 </span>
               </div>
             </div>

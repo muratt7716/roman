@@ -175,7 +175,7 @@ export default async function NotificationsPage() {
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{detail.subtitle}</p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(n.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(n.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     {n.read && <CheckCircle className="w-4 h-4 text-muted-foreground/40 shrink-0 mt-0.5" />}

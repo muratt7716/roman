@@ -143,6 +143,22 @@ CREATE POLICY "members_insert_owner" ON project_members FOR INSERT WITH CHECK (
 ```
 > Bu politikaları uygulamak için: Supabase Dashboard > SQL Editor > **yalnızca ilgili CREATE POLICY bloğunu** yapıştır. schema.sql'in tamamını çalıştırma (bkz. dosya başındaki uyarı).
 
+### Tarih/Saat: Her Zaman `timeZone: 'Europe/Istanbul'` (27 Eyl 2026)
+- Vercel sunucusu UTC'de çalışır. `toLocaleDateString('tr-TR')` saat dilimsiz → sunucuda
+  üretilen her saat 3 saat geri görünüyordu (23:59 son teslim → 20:59) ve istemci bileşenlerinde
+  hydration hatası (React #418) veriyordu. Tüm `toLocale(Date|Time)String` ve tarih
+  `toLocaleString` çağrılarına `timeZone: 'Europe/Istanbul'` eklendi — yenilerine de ekle.
+- "Bugün" hesabı: `toISOString().slice(0,10)` UTC'dir, gece 00–03 arası önceki gün sayılır.
+  `new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(d)` kullan.
+
+### HTML Temizleme: `sanitize-html`, DOMPurify DEĞİL (27 Eyl 2026)
+- `isomorphic-dompurify` sunucuda jsdom çalıştırır; jsdom Vercel'de kırılır. 23–27 Eyl arası
+  okuma, dışa aktarma ve öneri sayfaları canlıda 500 verdi, yerelde çalıştığı için görünmedi.
+- `lib/sanitize.ts` style'da yalnızca hizalama/renk/yazı tipine izin verir — editöre yeni bir
+  stil özelliği eklersen beyaz listeye de ekle, yoksa okuma sayfasında kaybolur.
+- Yerelde çalışan ama canlıda kırılan sayfaları yakalamak için canlı tarama betiği kullanıldı
+  (her sayfa × mobil/masaüstü × anonim/üye/sahip/öğrenci).
+
 ### Server Action'larda revalidatePath Zorunlu
 - Server action içinde DB güncellendikten sonra `revalidatePath(...)` çağrılmazsa sayfa değişmez
 - Kullanıcı butona bastı ama görsel hiçbir şey olmadı diye şikayet eder — önce bunu kontrol et
@@ -725,7 +741,8 @@ Veli ekleme arayüzü **yok** (members route kaldırılmış) — metinlerde vel
 - Açık rıza (yurt dışı aktarım) aydınlatmadan AYRI: `/acik-riza` + `ConsentChecks` 2. kutu
 - `requiresConsent` artık katı: sürüm değişince herkes `/onay`'a düşer (mevcutlar dahil)
 - Veri sorumlusu + başvuru kanalı: `lib/legal.ts` → `DATA_CONTROLLER`
-- CI'da `npm run lint` repo genelinde 148 hatayla kırmızı (önceden de) — ayrı iş
+- CI lint: 148 hata → 0 (27 Eyl 2026). `no-explicit-any` uyarıya çekildi (Supabase tipleri
+  üretilince geri açılmalı); sunucu `page/layout` dosyalarında `react-hooks/purity` kapalı.
 
 ### 🔴 LANSMAN ENGELİ: E-posta gönderim limiti (23 Eyl 2026'da ölçüldü)
 Supabase'in **dahili SMTP'si** kullanılıyor (gönderen: "Supabase Auth"). Limiti ölçtüm —

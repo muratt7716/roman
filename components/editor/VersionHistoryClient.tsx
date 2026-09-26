@@ -79,7 +79,7 @@ export function VersionHistoryClient({ versions, projectId }: Props) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <time className="text-xs text-muted-foreground">
-                  {new Date(v.created_at).toLocaleString('tr', {
+                  {new Date(v.created_at).toLocaleString('tr', { timeZone: 'Europe/Istanbul',
                     day: '2-digit', month: 'short', year: 'numeric',
                     hour: '2-digit', minute: '2-digit',
                   })}
@@ -115,7 +115,7 @@ export function VersionHistoryClient({ versions, projectId }: Props) {
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {selected.author?.display_name ?? selected.author?.username}
                   {' · '}
-                  {new Date(selected.created_at).toLocaleString('tr', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(selected.created_at).toLocaleString('tr', { timeZone: 'Europe/Istanbul', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   {' · '}{selected.word_count.toLocaleString('tr')} kelime
                 </p>
               </div>

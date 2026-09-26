@@ -63,7 +63,7 @@ export default async function AdminProjectsPage() {
                   {Array.isArray(p.project_members) ? p.project_members.length : 0}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground text-xs">
-                  {new Date(p.created_at).toLocaleDateString('tr-TR')}
+                  {new Date(p.created_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}
                 </td>
               </tr>
             ))}

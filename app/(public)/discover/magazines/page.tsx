@@ -47,7 +47,7 @@ export default async function DiscoverMagazinesPage() {
                 {cls && <p className="text-xs text-slate-500 mt-0.5">{cls.name} · {cls.school_name}</p>}
                 {m.published_at && (
                   <p className="text-xs text-slate-600 mt-2">
-                    {new Date(m.published_at).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' })}
+                    {new Date(m.published_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul', year: 'numeric', month: 'long' })}
                   </p>
                 )}
               </Link>

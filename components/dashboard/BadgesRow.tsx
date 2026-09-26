@@ -20,7 +20,7 @@ export function BadgesRow({ badges }: Props) {
           return (
             <div
               key={badge.badge_code}
-              title={`${meta.label} — ${meta.desc}\n${new Date(badge.earned_at).toLocaleDateString('tr-TR')}`}
+              title={`${meta.label} — ${meta.desc}\n${new Date(badge.earned_at).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul' })}`}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-white cursor-default"
             >
               <span>{meta.icon}</span>

@@ -88,7 +88,7 @@ export default async function AssignmentPage({ params }: PageProps) {
             {assignment.due_date && (
               <p className={cn('text-xs flex items-center gap-1.5 pt-1', isPast ? 'text-red-400' : 'text-slate-400')}>
                 <Calendar className="w-4 h-4 text-violet-400" />
-                Son Teslim Tarihi: {new Date(assignment.due_date).toLocaleDateString('tr-TR', {
+                Son Teslim Tarihi: {new Date(assignment.due_date).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul',
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
@@ -219,7 +219,7 @@ export default async function AssignmentPage({ params }: PageProps) {
             {assignment.due_date && (
               <p className={cn('text-xs flex items-center gap-1.5', isPast ? 'text-red-400' : 'text-slate-400')}>
                 <Clock className="w-4 h-4 text-sky-400" />
-                Teslim Hedefi: {new Date(assignment.due_date).toLocaleDateString('tr-TR', {
+                Teslim Hedefi: {new Date(assignment.due_date).toLocaleDateString('tr-TR', { timeZone: 'Europe/Istanbul',
                   day: 'numeric',
                   month: 'long',
                   hour: '2-digit',
