@@ -141,7 +141,7 @@ CREATE TABLE IF NOT EXISTS chapters (
   order_index int NOT NULL,
   status      chapter_status NOT NULL DEFAULT 'draft',
   word_count  int NOT NULL DEFAULT 0,
-  created_by  uuid NOT NULL REFERENCES profiles(id),
+  created_by  uuid REFERENCES profiles(id) ON DELETE SET NULL,
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS chapters (
 CREATE TABLE IF NOT EXISTS chapter_versions (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   chapter_id  uuid NOT NULL REFERENCES chapters(id) ON DELETE CASCADE,
-  author_id   uuid NOT NULL REFERENCES profiles(id),
+  author_id   uuid REFERENCES profiles(id) ON DELETE SET NULL,
   content     text NOT NULL,
   word_count  int NOT NULL DEFAULT 0,
   created_at  timestamptz NOT NULL DEFAULT now()
@@ -202,7 +202,7 @@ CREATE TABLE IF NOT EXISTS character_profiles (
   image_url     text,
   relationships jsonb NOT NULL DEFAULT '{}',
   arc_notes     text,
-  created_by    uuid NOT NULL REFERENCES profiles(id),
+  created_by    uuid REFERENCES profiles(id) ON DELETE SET NULL,
   created_at    timestamptz NOT NULL DEFAULT now(),
   updated_at    timestamptz NOT NULL DEFAULT now()
 );
@@ -215,7 +215,7 @@ CREATE TABLE IF NOT EXISTS timeline_events (
   event_date  text,
   arc         text,
   order_index int NOT NULL,
-  created_by  uuid NOT NULL REFERENCES profiles(id),
+  created_by  uuid REFERENCES profiles(id) ON DELETE SET NULL,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 

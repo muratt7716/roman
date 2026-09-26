@@ -39,6 +39,10 @@ Yazarlar için işbirlikli hikaye yazma platformu. Turkish-language collaborativ
 
 ### Profil Upsert Kuralı — HER AUTH GİRİŞ NOKTASINDA OLMALI
 `projects.owner_id → profiles.id` FK bağlantısı nedeniyle profil satırı yoksa her INSERT patlar.
+### Giriş: Google + e-posta/şifre (ikisi de kalıcı — kullanıcı kararı, 26 Eyl 2026)
+- `LoginForm` `?next=` (girişten sonra dönülecek sayfa) ve `?error=` (callback hatası, `access_denied` = Google'da iptal) alır.
+- `lib/safe-next.ts` — `next` doğrulaması (açık yönlendirme: `next=@evil.com` → `site@evil.com`). Test: `tests/lib/safe-next.test.ts`
+
 Bu upsert şu dosyaların HEPSİNDE var olmalı:
 - `components/auth/LoginForm.tsx` — email login sonrası
 - `app/(auth)/auth/callback/route.ts` — OAuth callback sonrası
@@ -213,7 +217,7 @@ app/api/ai/
   suggest/route.ts                    # AI yazma önerisi — generateWithFallback kullanır
   character/route.ts                  # AI karakter derinleştirme — generateWithFallback kullanır
 components/auth/
-  LoginForm.tsx                       # Email login — profil upsert burada
+  LoginForm.tsx                       # Email + Google login — profil upsert, ?next / ?error
   SignupForm.tsx                      # Email signup — session varsa profil upsert
 components/editor/
   TipTapEditor.tsx                    # Ana editör — autosave 30s, versioning (>=20 kelime fark), AI butonu
@@ -691,6 +695,13 @@ Kod hazır ama DB'de tablolar yok — `supabase/schema.sql` Supabase Dashboard >
 - `profiles_insert_own` RLS — profil upsert'leri artık gerçekten çalışıyor
 - `notifications_delete_own` RLS — "Tümünü temizle" çalışıyor
 - Hesap silme uçtan uca: route → `auth.admin.deleteUser` → FK cascade profili siliyor → silinen hesapla giriş reddediliyor
+
+### 🔴 Hesap silme — ortak yazarlar silinemiyor (25 Eyl 2026, canlıda doğrulandı)
+`chapters.created_by`, `chapter_versions.author_id`, `character_profiles.created_by`,
+`timeline_events.created_by` ON DELETE kuralsızdı → başkasının projesine katkı veren
+kullanıcı `deleteUser` ile "Database error deleting user" alıyor. Düzeltme (SET NULL, kısıt
+adları korunur): `supabase/migrations/2026-09-25-account-delete-set-null.sql`.
+**Canlıya uygulandı ✅ (26 Eyl 2026)** — 4 kısıt da `confdeltype = 'n'`.
 
 ### 🔴 LANSMAN ENGELİ: E-posta gönderim limiti (23 Eyl 2026'da ölçüldü)
 Supabase'in **dahili SMTP'si** kullanılıyor (gönderen: "Supabase Auth"). Limiti ölçtüm —

@@ -12,10 +12,24 @@ import { Label } from '@/components/ui/label'
 import { createClient } from '@/lib/supabase/client'
 import { signInSchema, type SignInInput } from '@/lib/validations/auth'
 
-export function LoginForm() {
+// Callback'ten ?error= ile dönen kodlar. Google'da "İptal"e basan kullanıcı
+// access_denied ile geri gelir — bu bir hata değil, sade bir not yeterli.
+const CALLBACK_ERRORS: Record<string, string> = {
+  access_denied: 'Google ile giriş iptal edildi.',
+  auth_callback_failed: 'Giriş tamamlanamadı. Lütfen tekrar dene.',
+}
+
+interface Props {
+  error?: string
+  next?: string
+}
+
+export function LoginForm({ error, next }: Props) {
   const router = useRouter()
   const supabase = createClient()
-  const [serverError, setServerError] = useState<string | null>(null)
+  const [serverError, setServerError] = useState<string | null>(
+    error ? CALLBACK_ERRORS[error] ?? CALLBACK_ERRORS.auth_callback_failed : null
+  )
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
@@ -55,14 +69,16 @@ export function LoginForm() {
         avatar_url: user.user_metadata?.avatar_url ?? null,
       }, { onConflict: 'id', ignoreDuplicates: true })
     }
-    router.push('/dashboard')
+    router.push(next ?? '/dashboard')
     router.refresh()
   }
 
   async function signInWithGoogle() {
+    const callback = new URL('/auth/callback', location.origin)
+    if (next) callback.searchParams.set('next', next)
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${location.origin}/auth/callback` },
+      options: { redirectTo: callback.toString() },
     })
   }
 

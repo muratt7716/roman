@@ -94,7 +94,8 @@ export interface Chapter {
   order_index: number
   status: ChapterStatus
   word_count: number
-  created_by: string
+  // NULL: yazan hesabını sildi (ON DELETE SET NULL) — bölüm projede kalır
+  created_by: string | null
   created_at: string
   updated_at: string
 }
@@ -102,7 +103,7 @@ export interface Chapter {
 export interface ChapterVersion {
   id: string
   chapter_id: string
-  author_id: string
+  author_id: string | null
   content: string
   word_count: number
   created_at: string
@@ -142,7 +143,7 @@ export interface CharacterProfile {
   image_url: string | null
   relationships: Json
   arc_notes: string | null
-  created_by: string
+  created_by: string | null
   created_at: string
   updated_at: string
 }
@@ -155,7 +156,7 @@ export interface TimelineEvent {
   event_date: string | null
   arc: string | null
   order_index: number
-  created_by: string
+  created_by: string | null
   created_at: string
 }
 
