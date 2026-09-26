@@ -43,7 +43,9 @@ export default async function ProjectLayout({ children, params }: Props) {
   if (!hasAccess) redirect(`/projects/${project.slug}`)
 
   return (
-    <div className="flex flex-col md:flex-row min-h-dvh pt-16">
+    // Navbar boşluğunu (app) layout'unun <main pt-16>'sı zaten bırakıyor —
+    // burada bir pt-16 daha her proje sayfasının üstünde 64px boş şerit açıyordu.
+    <div className="flex flex-col md:flex-row min-h-[calc(100dvh-4rem)]">
       
       {/* Mobile Sticky Sub-Nav (only visible on mobile screens below md) */}
       <div className="md:hidden sticky top-16 z-30 w-full overflow-x-auto flex-nowrap shrink-0 bg-background/80 backdrop-blur-md border-b border-white/[0.06] px-4 py-2.5 flex gap-1.5 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -82,7 +84,7 @@ export default async function ProjectLayout({ children, params }: Props) {
             href="/dashboard"
             className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
           >
-            ← Dashboard
+            ← Panelim
           </Link>
         </div>
       </aside>

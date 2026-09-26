@@ -25,7 +25,7 @@ export default async function ProjectOverviewPage({ params }: Props) {
 
   const { data: project } = await supabase
     .from('projects')
-    .select('*, roles:project_roles(*), members:project_members(*, profile:profiles(*), role:project_roles(*))')
+    .select('*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*), members:project_members(*, profile:profiles(*), role:project_roles(*))')
     .eq('id', id)
     .single()
 
@@ -77,6 +77,33 @@ export default async function ProjectOverviewPage({ params }: Props) {
     wordsByMember[author_id] = (wordsByMember[author_id] ?? 0) + word_count
   }
   const totalWords = (chapters ?? []).reduce((s: number, c: any) => s + (c.word_count ?? 0), 0)
+
+  // Katkı listesi: sahip project_members'ta değil — eskiden listede hiç
+  // görünmüyordu, çoğu projede en çok yazan kişi olduğu halde. Hesabını silen
+  // ortak yazarların katkısı (author NULL, bkz. SET NULL migration'ı) ayrı satırda.
+  const contributors: { id: string; username?: string; name: string; avatar?: string | null; role: string; words: number }[] = [
+    {
+      id: project.owner_id,
+      username: project.owner?.username,
+      name: project.owner?.display_name ?? project.owner?.username ?? 'Baş Yazar',
+      avatar: project.owner?.avatar_url,
+      role: 'Baş Yazar',
+      words: wordsByMember[project.owner_id] ?? 0,
+    },
+    ...(project.members ?? [])
+      .filter((m: any) => m.user_id !== project.owner_id)
+      .map((m: any) => ({
+        id: m.id,
+        username: m.profile?.username,
+        name: m.profile?.display_name ?? m.profile?.username ?? 'Üye',
+        avatar: m.profile?.avatar_url,
+        role: m.role?.name ?? 'Üye',
+        words: wordsByMember[m.user_id] ?? 0,
+      })),
+    ...((wordsByMember['null'] ?? 0) > 0
+      ? [{ id: 'departed', name: 'Ayrılan yazar', role: 'Hesabı silindi', words: wordsByMember['null'] }]
+      : []),
+  ].sort((a, b) => b.words - a.words)
 
   async function updateApplication(formData: FormData) {
     'use server'
@@ -253,31 +280,25 @@ export default async function ProjectOverviewPage({ params }: Props) {
             <BarChart2 className="w-5 h-5 text-primary" /> Katkı Analizi
           </h2>
           <div className="glass rounded-xl p-5 space-y-4">
-            {(project.members ?? [])
-              .map((m: any) => ({
-                member: m,
-                words: wordsByMember[m.user_id] ?? 0,
-              }))
-              .sort((a: any, b: any) => b.words - a.words)
-              .map(({ member, words }: any) => {
+            {contributors.map(({ id: key, username, name, avatar, role, words }) => {
                 const pct = totalWords > 0 ? (words / totalWords) * 100 : 0
                 return (
-                  <div key={member.id} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
+                  <div key={key} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3 text-sm">
                       <Link
-                        href={member.profile?.username ? `/u/${member.profile.username}` : '#'}
-                        className="flex items-center gap-2 hover:text-primary transition-colors"
+                        href={username ? `/u/${username}` : '#'}
+                        className="flex items-center gap-2 min-w-0 hover:text-primary transition-colors"
                       >
-                        <Avatar className="w-6 h-6">
-                          <AvatarImage src={member.profile?.avatar_url ?? undefined} />
+                        <Avatar className="w-6 h-6 shrink-0">
+                          <AvatarImage src={avatar ?? undefined} />
                           <AvatarFallback className="text-[10px] bg-primary/20 text-primary">
-                            {member.profile?.display_name?.[0] ?? member.profile?.username?.[0]}
+                            {name[0]}
                           </AvatarFallback>
                         </Avatar>
-                        <span>{member.profile?.display_name ?? member.profile?.username}</span>
-                        <span className="text-xs text-muted-foreground">{member.role?.name}</span>
+                        <span className="truncate">{name}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">{role}</span>
                       </Link>
-                      <span className="text-xs text-muted-foreground">{words.toLocaleString('tr')} kelime · %{pct.toFixed(1)}</span>
+                      <span className="text-xs text-muted-foreground shrink-0 whitespace-nowrap">{words.toLocaleString('tr')} kelime · %{pct.toFixed(1)}</span>
                     </div>
                     <div className="w-full h-1.5 bg-surface-2 rounded-full overflow-hidden">
                       <div

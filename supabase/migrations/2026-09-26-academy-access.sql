@@ -1,5 +1,5 @@
 -- ============================================================
--- Akademi erişim açıkları — 26 Eyl 2026
+-- Akademi erişim açıkları (1–7) + okuyucu metin erişimi (8) — 26/27 Eyl 2026
 -- Supabase Dashboard > SQL Editor'da BU DOSYAYI çalıştır.
 -- Hepsi canlıda gerçek oturumlarla test edilerek bulundu.
 -- ============================================================
@@ -164,9 +164,30 @@ UPDATE projects p SET visibility = 'draft'
 WHERE visibility = 'closed'
   AND EXISTS (SELECT 1 FROM assignment_submissions s WHERE s.project_id = p.id);
 
+-- 8) Okuyucular yayımlanmış bölümün METNİNİ okuyamıyordu (27 Eyl 2026)
+--    chapters_select_member yayımlanmış final bölümü herkese açıyor, ama
+--    versions_select_member yalnızca sahip/üyeye izin veriyordu: okuma sayfası
+--    başlığı gösterip "Bu bölümün içeriği henüz mevcut değil" diyordu. Aynı
+--    koşulu (final + projesi published) versiyonlara da uygula. Taslaklar ve
+--    ödev projeleri (visibility 'draft') kapalı kalır.
+DROP POLICY IF EXISTS "versions_select_member" ON chapter_versions;
+CREATE POLICY "versions_select_member" ON chapter_versions FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM chapters c
+    WHERE c.id = chapter_versions.chapter_id
+      AND (
+        is_project_owner(c.project_id)
+        OR is_project_member(c.project_id)
+        OR (c.status = 'final' AND EXISTS (
+          SELECT 1 FROM projects p WHERE p.id = c.project_id AND p.visibility = 'published'
+        ))
+      )
+  )
+);
+
 NOTIFY pgrst, 'reload schema';
 
--- Doğrulama — 3 satır dönmeli
+-- Doğrulama — 4 satır dönmeli
 SELECT polname, pg_get_expr(polqual, polrelid) AS using_, pg_get_expr(polwithcheck, polrelid) AS check_
 FROM pg_policy
-WHERE polname IN ('cls_members_insert', 'submissions_update_student_draft', 'submissions_select_own_or_teacher');
+WHERE polname IN ('cls_members_insert', 'submissions_update_student_draft', 'submissions_select_own_or_teacher', 'versions_select_member');

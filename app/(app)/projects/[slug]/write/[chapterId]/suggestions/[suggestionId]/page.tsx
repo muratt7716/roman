@@ -51,7 +51,7 @@ export default async function SuggestionReviewPage({ params }: Props) {
   const author = suggestion.author as any
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
+    <div className="flex flex-col h-[calc(100dvh-4rem)]">
       {/* Başlık */}
       <div className="shrink-0 px-6 py-3 border-b border-border bg-surface flex items-center gap-4 flex-wrap">
         <Link

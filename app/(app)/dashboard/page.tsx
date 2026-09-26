@@ -13,7 +13,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import type { ProjectWithOwner, WeeklyStats, UserBadge } from '@/types'
 
-export const metadata: Metadata = { title: 'Dashboard' }
+export const metadata: Metadata = { title: 'Panel' }
 export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-display font-bold">Dashboard</h1>
+          <h1 className="text-3xl font-display font-bold">Panelim</h1>
           <p className="text-muted-foreground mt-1">Projelerini yönet ve ilerlemeyi takip et.</p>
         </div>
         <Link
