@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { toast } from 'sonner'
 import { MessageSquare, Send, CheckCircle, Trash2, CornerDownRight, ChevronDown, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Comment, Profile } from '@/types'
@@ -27,34 +28,39 @@ export function CommentPanel({ chapterId, currentUserId, isOwner = false, hideBo
   const [replyInput, setReplyInput] = useState('')
   const [collapsedThreads, setCollapsedThreads] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from('comments')
-        .select('*, author:profiles!author_id(*)')
-        .eq('chapter_id', chapterId)
-        .eq('resolved', false)
-        .order('created_at')
-      if (data) {
-        const all = data as CommentWithAuthor[]
-        // group: parent comments + attach replies
-        const parents = all.filter(c => !c.parent_id)
-        const replies = all.filter(c => c.parent_id)
-        parents.forEach(p => {
-          p.replies = replies.filter(r => r.parent_id === p.id)
-        })
-        setComments(parents)
-      }
+  const load = useCallback(async () => {
+    const { data } = await supabase
+      .from('comments')
+      .select('*, author:profiles!author_id(*)')
+      .eq('chapter_id', chapterId)
+      .eq('resolved', false)
+      .order('created_at')
+    if (data) {
+      const all = data as CommentWithAuthor[]
+      // group: parent comments + attach replies
+      const parents = all.filter(c => !c.parent_id)
+      const replies = all.filter(c => c.parent_id)
+      parents.forEach(p => {
+        p.replies = replies.filter(r => r.parent_id === p.id)
+      })
+      setComments(parents)
     }
-    load()
+  }, [chapterId, supabase])
 
+  // Realtime yalnızca BAŞKALARININ yorumlarını getirir (ve tablo yayında değilse
+  // hiç getirmez). Kendi ekleme/silme işlemlerimizden sonra listeyi elle
+  // tazeliyoruz — eskiden yazan kişi kendi yorumunu göremiyordu.
+  useEffect(() => {
+    // Veri çekme: setState await'ten sonra çalışır, render döngüsü oluşmaz
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load()
     const channel = supabase
       .channel(`comments:${chapterId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'comments', filter: `chapter_id=eq.${chapterId}` }, load)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comments', filter: `chapter_id=eq.${chapterId}` }, () => { void load() })
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [chapterId, supabase])
+  }, [chapterId, supabase, load])
 
   // Bildirimi tarayıcıdan yazmaya çalışmak RLS'e takılır (kullanıcı yalnızca
   // kendine yazabilir). Alıcıları ve metni sunucu belirler; buradan yalnızca
@@ -70,11 +76,17 @@ export function CommentPanel({ chapterId, currentUserId, isOwner = false, hideBo
   async function send() {
     if (!input.trim() || sending) return
     setSending(true)
-    await supabase.from('comments').insert({
+    const { error } = await supabase.from('comments').insert({
       chapter_id: chapterId,
       author_id: currentUserId,
       content: input.trim(),
     })
+    if (error) {
+      toast.error('Yorum gönderilemedi.')
+      setSending(false)
+      return
+    }
+    await load()
     await notifyMembers(input.trim())
     setInput('')
     setSending(false)
@@ -83,12 +95,18 @@ export function CommentPanel({ chapterId, currentUserId, isOwner = false, hideBo
   async function sendReply(parentId: string) {
     if (!replyInput.trim() || sending) return
     setSending(true)
-    await supabase.from('comments').insert({
+    const { error } = await supabase.from('comments').insert({
       chapter_id: chapterId,
       author_id: currentUserId,
       content: replyInput.trim(),
       parent_id: parentId,
     })
+    if (error) {
+      toast.error('Yanıt gönderilemedi.')
+      setSending(false)
+      return
+    }
+    await load()
     await notifyMembers(replyInput.trim())
     setReplyInput('')
     setReplyingTo(null)
@@ -102,7 +120,9 @@ export function CommentPanel({ chapterId, currentUserId, isOwner = false, hideBo
   }
 
   async function deleteComment(id: string) {
-    await supabase.from('comments').delete().eq('id', id)
+    const { error } = await supabase.from('comments').delete().eq('id', id)
+    if (error) { toast.error('Yorum silinemedi.'); return }
+    await load()
   }
 
   function toggleCollapse(id: string) {

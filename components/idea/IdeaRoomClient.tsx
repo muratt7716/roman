@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Send, Users, Check, X, ChevronLeft, Loader2, Rocket } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -49,7 +50,8 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
           .select('*, author:profiles!idea_messages_user_id_fkey(*)')
           .eq('id', payload.new.id)
           .single()
-        if (msg) setMessages(prev => [...prev, msg as Message])
+        // Kendi mesajımız sendMessage'da zaten eklendi — çift gösterme
+        if (msg) setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg as Message])
       })
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'idea_join_requests',
@@ -61,7 +63,7 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
           .eq('id', payload.new.id)
           .single()
         if (req) {
-          setJoinRequests(prev => [...prev, req as JoinRequest])
+          setJoinRequests(prev => prev.some(r => r.id === req.id) ? prev : [...prev, req as JoinRequest])
           if ((req as JoinRequest).user_id === currentUserId) setMyRequest(req as JoinRequest)
         }
       })
@@ -86,9 +88,19 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
   async function sendMessage() {
     if (!input.trim() || sending) return
     setSending(true)
-    await supabase.from('idea_messages').insert({
-      thread_id: thread.id, user_id: currentUserId, content: input.trim(),
-    })
+    // Kendi mesajımızı realtime'dan beklemiyoruz: olay gelmezse (tablo yayında
+    // değilse) yazan kişi mesajını hiç göremiyordu.
+    const { data: msg, error } = await supabase
+      .from('idea_messages')
+      .insert({ thread_id: thread.id, user_id: currentUserId, content: input.trim() })
+      .select('*, author:profiles!idea_messages_user_id_fkey(*)')
+      .single()
+    if (error || !msg) {
+      toast.error('Mesaj gönderilemedi.')
+      setSending(false)
+      return
+    }
+    setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg as Message])
     setInput('')
     setSending(false)
   }
@@ -152,10 +164,14 @@ export function IdeaRoomClient({ thread, initialMessages, initialJoinRequests, c
   }
 
   async function handleJoinRequest(reqId: string, accept: boolean) {
-    await supabase
+    const status = accept ? 'accepted' : 'rejected'
+    const { error } = await supabase
       .from('idea_join_requests')
-      .update({ status: accept ? 'accepted' : 'rejected' })
+      .update({ status })
       .eq('id', reqId)
+    if (error) { toast.error('İstek güncellenemedi.'); return }
+    // Ekranı hemen güncelle — eskiden yalnızca realtime olayını bekliyordu
+    setJoinRequests(prev => prev.map(r => r.id === reqId ? { ...r, status } : r))
   }
 
   function formatTime(ts: string) {
