@@ -517,7 +517,9 @@ Sayfalar:
 - `app/api/feedback/route.ts` — auth guard, validasyon, DB insert
 - Navbar dropdown'da "Geri Bildirim Gönder" linki → modal açar
 - Modal Navbar içinde `feedbackOpen` state ile yönetilir, dropdown dışında render edilir (dropdown kapanınca state kaybolmaması için)
-- DropdownMenuItem'da `onSelect={e => { e.preventDefault(); setFeedbackOpen(true) }}` — dropdown kapanmadan önce state set edilir
+- DropdownMenuItem'da **`onClick`** kullan, `onSelect` DEĞİL. Bu shadcn sürümü Base UI üzerine
+  kurulu; `onSelect` Radix API'si, burada metin seçimi DOM olayı — TS kabul eder ama tıklamada
+  hiç tetiklenmez. 27 Eyl 2026'ya kadar masaüstünde "Geri Bildirim Gönder" bu yüzden hiç açılmadı.
 
 ### Fikir Odası (`/fikir-odasi`) — IMPLEMENT EDİLDİ ✅
 - **Thread-per-idea modeli**: her kullanıcı bir "tohum fikir" atar (başlık + kısa açıklama)

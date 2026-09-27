@@ -1,5 +1,6 @@
 -- ============================================================
--- Akademi erişim açıkları (1–7) + okuyucu metin erişimi (8) — 26/27 Eyl 2026
+-- Akademi erişim açıkları (1–7) + okuyucu metin erişimi (8) + editör kaydı (9)
+-- + anlık güncellemeler (10) — 26/27 Eyl 2026
 -- Supabase Dashboard > SQL Editor'da BU DOSYAYI çalıştır.
 -- Hepsi canlıda gerçek oturumlarla test edilerek bulundu.
 -- ============================================================
@@ -198,6 +199,23 @@ CREATE POLICY "versions_update_own" ON chapter_versions FOR UPDATE USING (
       AND (is_project_owner(c.project_id) OR is_project_member(c.project_id))
   )
 ) WITH CHECK (author_id = auth.uid());
+
+-- 10) Anlık güncellemeler hiç gelmiyordu (27 Eyl 2026, tarayıcıda test edildi)
+--     Fikir Odası mesajı kaydediliyor ama karşı tarafa ancak sayfa yenilenince
+--     düşüyordu; sprint katılımcı sayacı güncellenmiyordu. Kodun dinlediği
+--     tablolar supabase_realtime yayınında değil. Tekrar çalıştırmak güvenli.
+DO $$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['idea_messages', 'idea_join_requests', 'comments', 'chapter_suggestions', 'sprint_participants'] LOOP
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_publication_tables
+      WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = t
+    ) THEN
+      EXECUTE format('ALTER PUBLICATION supabase_realtime ADD TABLE public.%I', t);
+    END IF;
+  END LOOP;
+END $$;
 
 NOTIFY pgrst, 'reload schema';
 

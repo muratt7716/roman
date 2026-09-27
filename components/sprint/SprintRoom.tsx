@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Zap, PenLine, CheckCircle2, Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
@@ -51,7 +52,16 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [endTime, finished])
 
-  // Realtime participant count
+  const refreshParticipants = useCallback(() => {
+    supabase
+      .from('sprint_participants')
+      .select('*, profile:profiles(id, username, display_name, avatar_url)')
+      .eq('sprint_id', sprint.id)
+      .then(({ data }) => { if (data) setParticipants(data as SprintParticipant[]) })
+  }, [supabase, sprint.id])
+
+  // Realtime katılımcı sayısı — tablo realtime yayınında değilse olay hiç gelmez,
+  // bu yüzden kendi katılımımızdan sonra ayrıca elle tazeliyoruz (handleJoin).
   useEffect(() => {
     const channel = supabase
       .channel(`sprint:${sprint.id}`)
@@ -60,13 +70,7 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
         schema: 'public',
         table: 'sprint_participants',
         filter: `sprint_id=eq.${sprint.id}`,
-      }, () => {
-        supabase
-          .from('sprint_participants')
-          .select('*, profile:profiles(id, username, display_name, avatar_url)')
-          .eq('sprint_id', sprint.id)
-          .then(({ data }) => { if (data) setParticipants(data as SprintParticipant[]) })
-      })
+      }, refreshParticipants)
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,7 +79,13 @@ export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoine
   async function handleJoin() {
     setJoining(true)
     const res = await fetch(`/api/sprint/${sprint.id}/join`, { method: 'POST' })
-    if (res.ok) setJoined(true)
+    if (res.ok) {
+      setJoined(true)
+      refreshParticipants()
+    } else {
+      const body = await res.json().catch(() => null)
+      toast.error(body?.error ?? 'Sprinte katılınamadı.')
+    }
     setJoining(false)
   }
 

@@ -204,7 +204,7 @@ export function Navbar({ profile, unreadCount = 0, isAdmin = false }: NavbarProp
 
                     <DropdownMenuSeparator className="bg-white/[0.04] my-1" />
 
-                    <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]" onSelect={e => { e.preventDefault(); setFeedbackOpen(true) }}>
+                    <DropdownMenuItem className="rounded-xl px-3 py-2 cursor-pointer hover:bg-white/[0.03]" onClick={() => setFeedbackOpen(true)}>
                       <span className="flex w-full items-center gap-2.5 text-[13px] text-muted-foreground hover:text-white font-medium">
                         <MessageSquarePlus className="w-4 h-4 text-sky-400" /> Geri Bildirim Gönder
                       </span>

@@ -57,6 +57,19 @@ const TEXT_COLORS = [
 
 const SAVE_DELAY_MS = 3000
 
+/**
+ * Bekleyen değişiklikleri hemen kaydettirir ve bitince çözülür. Teslim gibi
+ * "şu anki metinle" iş yapan her düğme önce bunu beklemeli — yoksa kayıt
+ * gecikmesi içinde yazılan son cümleler dışarıda kalır.
+ */
+export const EDITOR_FLUSH_EVENT = 'kb-editor-flush'
+export function flushEditor(timeoutMs = 8000): Promise<void> {
+  return new Promise(resolve => {
+    const t = setTimeout(resolve, timeoutMs)
+    window.dispatchEvent(new CustomEvent(EDITOR_FLUSH_EVENT, { detail: { resolve: () => { clearTimeout(t); resolve() } } }))
+  })
+}
+
 // Araç çubuğu parçaları modül seviyesinde: bileşen içinde tanımlanınca her
 // render'da (her tuş vuruşunda) yeni bir bileşen tipi olur ve React tüm
 // düğmeleri söküp yeniden kurar.
@@ -240,11 +253,20 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       e.preventDefault()
       e.returnValue = ''
     }
+    // Dışarıdan "şimdi kaydet" isteği (ör. Teslim Et): beklemeden yaz, bitince haber ver
+    const flushNow = (e: Event) => {
+      const done = (e as CustomEvent<{ resolve?: () => void }>).detail?.resolve
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      const run = dirty() ? save(editor.getHTML(), countWords(editor.getText())) : Promise.resolve()
+      void run.finally(() => done?.())
+    }
     document.addEventListener('visibilitychange', flush)
     window.addEventListener('beforeunload', warn)
+    window.addEventListener(EDITOR_FLUSH_EVENT, flushNow)
     return () => {
       document.removeEventListener('visibilitychange', flush)
       window.removeEventListener('beforeunload', warn)
+      window.removeEventListener(EDITOR_FLUSH_EVENT, flushNow)
     }
   }, [editor, save])
 

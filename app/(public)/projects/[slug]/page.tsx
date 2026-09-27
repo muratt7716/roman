@@ -39,7 +39,21 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   const isOwner = user?.id === project.owner_id
   const isMember = project.members?.some((m: any) => m.user_id === user?.id)
-  const openRoles = project.roles ?? []
+
+  // Açık rol = kontenjanı dolmamış rol, ve yalnızca proje ekip ararken ('open').
+  // Eskiden tüm roller listeleniyordu: proje sahibinin kendi rolü (ProjectForm
+  // sahibi ilk role atar) dahil, yayımlanmış projelerde bile başvuru alınıyordu.
+  const filled: Record<string, number> = {}
+  for (const m of project.members ?? []) filled[m.role_id] = (filled[m.role_id] ?? 0) + 1
+  const openRoles = project.visibility === 'open'
+    ? (project.roles ?? []).filter((r: any) => (filled[r.id] ?? 0) < (r.max_members ?? 1))
+    : []
+
+  // Bekleyen başvurusu olan role tekrar form gösterme
+  const { data: myApplications } = user
+    ? await supabase.from('applications').select('role_id').eq('project_id', project.id).eq('applicant_id', user.id).eq('status', 'pending')
+    : { data: [] }
+  const appliedRoleIds = new Set((myApplications ?? []).map(a => a.role_id as string))
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
@@ -188,13 +202,17 @@ export default async function ProjectDetailPage({ params }: Props) {
                       <p className="font-medium text-sm">{role.name}</p>
                       {role.description && <p className="text-xs text-muted-foreground">{role.description}</p>}
                     </div>
-                    <ApplicationForm projectId={project.id} role={role} userId={user.id} />
+                    {appliedRoleIds.has(role.id) ? (
+                      <p className="text-xs text-emerald-400">Başvurun proje sahibine iletildi — yanıt bekleniyor.</p>
+                    ) : (
+                      <ApplicationForm projectId={project.id} role={role} userId={user.id} />
+                    )}
                   </div>
                 ))
               ) : (
                 <div className="text-center space-y-3 py-2">
                   <p className="text-sm text-muted-foreground">Başvurmak için giriş yapmalısın.</p>
-                  <a href="/login" className="block text-center py-2 px-4 bg-primary text-white rounded-lg text-sm hover:bg-primary/90 transition-colors">
+                  <a href={`/login?next=${encodeURIComponent(`/projects/${project.slug}`)}`} className="block text-center py-2 px-4 bg-primary text-white rounded-lg text-sm hover:bg-primary/90 transition-colors">
                     Giriş Yap
                   </a>
                 </div>

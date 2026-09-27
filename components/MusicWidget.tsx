@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Music, X, Volume2, VolumeX } from 'lucide-react'
 
 // SomaFM — free, public, no auth required
@@ -47,6 +48,7 @@ const CATEGORIES = [
 const STATIONS = CATEGORIES.flatMap(c => c.stations)
 
 export function MusicWidget() {
+  const inWritingRoom = /^\/projects\/[^/]+\/write\/[^/]+/.test(usePathname() ?? '')
   const [open, setOpen] = useState(false)
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
@@ -93,7 +95,9 @@ export function MusicWidget() {
   const playing = activeIdx !== null
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+    // Yazma odasında sağ altta yorum kutusunun gönder düğmesi var — widget onu
+    // örtüyordu. Orada kutunun üstüne kalkar; müzik yazarken kullanılacak şey.
+    <div className={`fixed right-6 z-50 flex flex-col items-end gap-2 ${inWritingRoom ? 'bottom-24' : 'bottom-6'}`}>
       {open && (
         <div className="glass-strong rounded-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-60 animate-in fade-in slide-in-from-bottom-2 duration-150 overflow-hidden">
           {/* Header */}
