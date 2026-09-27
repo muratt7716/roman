@@ -46,3 +46,6 @@ yarn-error.log*
 next-env.d.ts
 *.png
 .claude/worktrees/
+
+# E2E test çıktıları (ekran görüntüleri, rapor)
+scripts/e2e/out/

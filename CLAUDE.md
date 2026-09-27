@@ -685,6 +685,13 @@ app/(app)/dashboard/page.tsx                                        # Akademi Ö
 
 ---
 
+## Uçtan Uca Testler — `scripts/e2e/` (27 Eyl 2026)
+Gerçek tarayıcıda, canlı DB'ye geçici hesaplarla tıklayarak sınar. Her değişiklikten sonra
+ilgili betiği çalıştır; ayrıntı `scripts/e2e/README.md`. Birim testleri ve build'in
+**yakalamadığı** hataları buldu: editörün küçük düzeltmeleri kaybetmesi, erken teslim,
+Base UI `onSelect` menüsü, realtime'a bağlı kalan kendi-işlem güncellemeleri, yalnızca
+Vercel'de çöken jsdom. Kural: kullanıcının KENDİ işleminin sonucu realtime'dan beklenmez.
+
 ## Görsel Test Metodolojisi
 
 Playwright MCP ile visual test adımları:
