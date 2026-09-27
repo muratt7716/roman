@@ -164,10 +164,16 @@ CREATE POLICY "members_insert_owner" ON project_members FOR INSERT WITH CHECK (
 - Kullanıcı butona bastı ama görsel hiçbir şey olmadı diye şikayet eder — önce bunu kontrol et
 - Etkilenen dosya örneği: `app/(app)/projects/[slug]/overview/page.tsx` — updateApplication, publishProject
 
-### Versiyon Şişmesi (TipTap Editor)
-- Autosave debounce: **30 saniye** (eski 2s'ti)
-- Yeni version sadece `wordDiff >= 20` VEYA ilk kayıt ise oluşturuluyor
-- `lastVersionWordCount` ref ile takip ediliyor
+### Editör Kaydı (TipTap) — metin YALNIZCA chapter_versions'ta yaşar
+- **27 Eyl 2026 veri kaybı düzeltildi:** eskiden <20 kelimelik değişikliklerde metin hiçbir yere
+  yazılmıyor, ekranda "Kaydedildi" yazarken yenileyince kayboluyordu (canlıda kanıtlandı).
+- Şimdi: `wordDiff >= 20` veya ilk kayıt → yeni versiyon (geçmişte durak); küçük değişiklik →
+  bu oturumda açtığı kendi versiyonunu (`ownVersionId`) yerinde UPDATE. Güncelleme olmazsa
+  (RLS `versions_update_own` yoksa) yeni versiyon INSERT — **metin asla kaybolmaz**.
+- Debounce 3 sn; sekme gizlenince hemen kaydeder; kaydedilmemiş değişiklikte `beforeunload` uyarısı.
+- `lastSaved` tabanı `onCreate`'te `editor.getHTML()` — TipTap HTML'i normalleştirdiği için
+  DB'deki ham hal kullanılırsa dokunulmamış sayfa "kaydedilmemiş" görünür.
+- Test: scratchpad `editor.mjs` (gerçek tarayıcı, yaz → bekle → yenile → metin duruyor mu).
 
 ### Word Count Şişmesi (Overview Sayfası)
 - Tüm version'ların word count'u toplandığında şişiyor — her bölümün **en son versiyonu** alınmalı

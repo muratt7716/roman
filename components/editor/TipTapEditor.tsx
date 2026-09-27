@@ -55,6 +55,8 @@ const TEXT_COLORS = [
   { label: 'Mor', value: '#a78bfa' },
 ]
 
+const SAVE_DELAY_MS = 3000
+
 // Araç çubuğu parçaları modül seviyesinde: bileşen içinde tanımlanınca her
 // render'da (her tuş vuruşunda) yeni bir bileşen tipi olur ve React tüm
 // düğmeleri söküp yeniden kurar.
@@ -94,51 +96,80 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showFontPicker, setShowFontPicker] = useState(false)
   const lastVersionWordCount = useRef<number>(0)
+  // Bu oturumda bizim yazdığımız en son versiyon — küçük değişiklikler buna yazılır
+  const ownVersionId = useRef<string | null>(null)
+  const saving = useRef(false)
+  const queued = useRef<{ content: string; wordCount: number } | null>(null)
 
+  /**
+   * Metin YALNIZCA chapter_versions'ta yaşar. Eskiden yeni versiyon sadece ilk
+   * kayıtta veya ≥20 kelime farkta açılıyor, aradaki kayıtlarda metin HİÇBİR
+   * YERE yazılmıyordu — yazım düzeltmeleri, yeniden yazılan cümleler yenileyince
+   * kayboluyordu, ekranda "Kaydedildi" yazarken (27 Eyl 2026'da canlıda kanıtlandı).
+   *
+   * Şimdi: ≥20 kelime fark → yeni versiyon (geçmişte bir durak). Küçük değişiklik
+   * → kendi son versiyonumuzu yerinde güncelle. Güncelleme olmazsa (RLS izni
+   * yoksa, başkası yazdıysa) yeni versiyon ekle: metin asla kaybolmaz.
+   */
   const save = useCallback(async (content: string, wordCount: number) => {
     if (content === lastSaved.current) return
-
+    if (saving.current) { queued.current = { content, wordCount }; return }
+    saving.current = true
     setSaveStatus('saving')
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setSaveStatus('error'); return }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setSaveStatus('error'); return }
 
-    // Sadece anlamlı değişikliklerde yeni versiyon yarat (≥20 kelime fark veya ilk kayıt)
-    const wordDiff = Math.abs(wordCount - lastVersionWordCount.current)
-    const shouldCreateVersion = lastVersionWordCount.current === 0 || wordDiff >= 20
+      const wordDiff = Math.abs(wordCount - lastVersionWordCount.current)
+      const milestone = !ownVersionId.current || lastVersionWordCount.current === 0 || wordDiff >= 20
 
-    const chapterUpdate = supabase.from('chapters').update({ word_count: wordCount }).eq('id', chapterId)
+      let written = false
+      if (!milestone) {
+        const { data, error } = await supabase
+          .from('chapter_versions')
+          .update({ content, word_count: wordCount })
+          .eq('id', ownVersionId.current!)
+          .eq('author_id', user.id)
+          .select('id')
+        written = !error && (data?.length ?? 0) > 0
+      }
+      if (!written) {
+        const { data, error } = await supabase
+          .from('chapter_versions')
+          .insert({ chapter_id: chapterId, author_id: user.id, content, word_count: wordCount })
+          .select('id')
+          .single()
+        if (error) {
+          setSaveStatus('error')
+          toast.error('Kayıt başarısız: ' + error.message)
+          return
+        }
+        ownVersionId.current = data.id
+        lastVersionWordCount.current = wordCount
+      }
 
-    let versionError: { message: string } | null = null
-    if (shouldCreateVersion) {
-      const { error } = await supabase.from('chapter_versions').insert({
-        chapter_id: chapterId,
-        author_id: user.id,
-        content,
-        word_count: wordCount,
-      })
-      versionError = error
+      await supabase.from('chapters').update({ word_count: wordCount }).eq('id', chapterId)
+      lastSaved.current = content
+      setSaveStatus('saved')
+
+      const { data: chapters } = await supabase.from('chapters').select('word_count').eq('project_id', projectId)
+      if (chapters) {
+        const total = chapters.reduce((sum, c) => sum + (c.word_count ?? 0), 0)
+        await supabase.from('projects').update({ current_word_count: total }).eq('id', projectId)
+      }
+
+      if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
+      savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 3000)
+    } finally {
+      saving.current = false
+      // Kayıt sürerken gelen istek atlanmıştı — en güncel hali şimdi yaz
+      const next = queued.current
+      queued.current = null
+      if (next && next.content !== lastSaved.current) void saveRef.current(next.content, next.wordCount)
     }
-    await chapterUpdate
-
-    if (versionError) {
-      setSaveStatus('error')
-      toast.error('Kayıt başarısız: ' + versionError.message)
-      return
-    }
-
-    lastSaved.current = content
-    if (shouldCreateVersion) lastVersionWordCount.current = wordCount
-    setSaveStatus('saved')
-
-    const { data: chapters } = await supabase.from('chapters').select('word_count').eq('project_id', projectId)
-    if (chapters) {
-      const total = chapters.reduce((sum, c) => sum + (c.word_count ?? 0), 0)
-      await supabase.from('projects').update({ current_word_count: total }).eq('id', projectId)
-    }
-
-    if (savedTimerRef.current) clearTimeout(savedTimerRef.current)
-    savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 3000)
   }, [chapterId, projectId, supabase])
+  const saveRef = useRef(save)
+  useEffect(() => { saveRef.current = save }, [save])
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -161,6 +192,11 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       Superscript,
     ],
     content: initialContent || '<p></p>',
+    // TipTap yüklerken HTML'i normalleştirir; karşılaştırma tabanı DB'deki ham
+    // hali değil bu olmalı, yoksa dokunulmamış sayfa bile "kaydedilmemiş" görünür.
+    onCreate({ editor }) {
+      lastSaved.current = editor.getHTML()
+    },
     editorProps: {
       attributes: {
         class: 'prose prose-invert max-w-none focus:outline-none min-h-[60vh] font-serif text-lg leading-[1.9] selection:bg-primary/30',
@@ -172,8 +208,10 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       onWordCountChange?.(wc)
       setSaveStatus('saving')
 
+      // Yazmaya ara verince kaydet. Eskiden 30 sn'ydi (versiyon şişmesi yüzünden);
+      // küçük değişiklikler artık yeni satır açmadığı için kısa tutulabilir.
       if (saveTimer.current) clearTimeout(saveTimer.current)
-      saveTimer.current = setTimeout(() => save(editor.getHTML(), wc), 30000)
+      saveTimer.current = setTimeout(() => save(editor.getHTML(), wc), SAVE_DELAY_MS)
     },
   })
 
@@ -184,6 +222,29 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       if (editor && !editor.isDestroyed) {
         save(editor.getHTML(), countWords(editor.getText()))
       }
+    }
+  }, [editor, save])
+
+  // Sekme gizlenince (başka sekme, telefonda uygulama değiştirme, kapatma)
+  // beklemeden kaydet; kaydedilmemiş değişiklik varken kapatılmak istenirse uyar.
+  useEffect(() => {
+    if (!editor) return
+    const dirty = () => !editor.isDestroyed && editor.getHTML() !== lastSaved.current
+    const flush = () => {
+      if (document.visibilityState !== 'hidden' || !dirty()) return
+      if (saveTimer.current) clearTimeout(saveTimer.current)
+      void save(editor.getHTML(), countWords(editor.getText()))
+    }
+    const warn = (e: BeforeUnloadEvent) => {
+      if (!dirty()) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    document.addEventListener('visibilitychange', flush)
+    window.addEventListener('beforeunload', warn)
+    return () => {
+      document.removeEventListener('visibilitychange', flush)
+      window.removeEventListener('beforeunload', warn)
     }
   }, [editor, save])
 

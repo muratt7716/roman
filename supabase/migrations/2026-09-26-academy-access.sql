@@ -185,9 +185,23 @@ CREATE POLICY "versions_select_member" ON chapter_versions FOR SELECT USING (
   )
 );
 
+-- 9) Editör: küçük değişiklikler kendi son versiyonuna yazılabilsin (27 Eyl 2026)
+--    Editör eskiden <20 kelimelik değişikliklerde metni HİÇBİR YERE yazmıyordu
+--    (yenileyince kayboluyordu). Artık kendi son versiyonunu yerinde günceller;
+--    bu izin yoksa her kayıtta yeni versiyon açar — veri kaybolmaz ama geçmiş şişer.
+DROP POLICY IF EXISTS "versions_update_own" ON chapter_versions;
+CREATE POLICY "versions_update_own" ON chapter_versions FOR UPDATE USING (
+  author_id = auth.uid()
+  AND EXISTS (
+    SELECT 1 FROM chapters c
+    WHERE c.id = chapter_versions.chapter_id
+      AND (is_project_owner(c.project_id) OR is_project_member(c.project_id))
+  )
+) WITH CHECK (author_id = auth.uid());
+
 NOTIFY pgrst, 'reload schema';
 
--- Doğrulama — 4 satır dönmeli
+-- Doğrulama — 5 satır dönmeli
 SELECT polname, pg_get_expr(polqual, polrelid) AS using_, pg_get_expr(polwithcheck, polrelid) AS check_
 FROM pg_policy
-WHERE polname IN ('cls_members_insert', 'submissions_update_student_draft', 'submissions_select_own_or_teacher', 'versions_select_member');
+WHERE polname IN ('cls_members_insert', 'submissions_update_student_draft', 'submissions_select_own_or_teacher', 'versions_select_member', 'versions_update_own');
