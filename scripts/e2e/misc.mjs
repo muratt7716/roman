@@ -1,5 +1,5 @@
 // Ayarlar, geri bildirim, fikir odası, sprint, arayüzden hesap silme.
-import { SITE, admin, mkUser, loginPage, step, expect, cleanup, tag } from './lib.mjs'
+import { SITE, admin, mkUser, loginPage, launch, step, expect, cleanup, tag } from './lib.mjs'
 
 const U = await mkUser('mu', 'Deneme Yazar'), V = await mkUser('mv', 'Katkı Yazar')
 try {
@@ -68,6 +68,18 @@ try {
     const part = (await admin.from('sprint_participants').select('user_id').eq('user_id', U.id)).data
     expect(part?.length === 1, 'katılım kaydedilmedi')
     return 'katıldı, sayaç 1 gösteriyor'
+  }, p)
+
+  await step('sprint: tarayıcı saati 1 dk geride olsa da yeni sprint "başlıyor"da donmaz', async () => {
+    const ctx = await (await launch()).newContext({ storageState: await p.context().storageState(), locale: 'tr-TR' })
+    const q = await ctx.newPage()
+    await q.clock.install({ time: Date.now() - 60_000 })
+    await q.goto(`${SITE}/sprint/new?duration=25`)
+    await q.waitForURL(/\/sprint\/[0-9a-f-]{36}/, { timeout: 15000 })
+    await q.clock.runFor(3000)
+    const body = await q.locator('body').innerText()
+    expect(!/tarihinde başlıyor/.test(body), 'sprint "başlıyor" durumunda takıldı')
+    await ctx.close()
   }, p)
 
   await step('hesap silme: ayarlardan, kullanıcı adı yazılarak', async () => {

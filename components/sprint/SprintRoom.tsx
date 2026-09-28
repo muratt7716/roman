@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Zap, PenLine, CheckCircle2, Users } from 'lucide-react'
@@ -14,43 +14,45 @@ interface Props {
   currentUserId: string
   isJoined: boolean
   userProjects: { id: string; title: string; defaultChapterId?: string }[]
+  /** Sunucunun render anı (ms) — bkz. "şimdi" yorumu */
+  serverNow: number
 }
 
-export function SprintRoom({ sprint, initialParticipants, currentUserId, isJoined: isJoinedProp, userProjects }: Props) {
+export function SprintRoom({ sprint, initialParticipants, isJoined: isJoinedProp, userProjects, serverNow }: Props) {
   const router = useRouter()
   const supabase = createClient()
 
   const endTime   = new Date(sprint.ends_at).getTime()
   const startTime = new Date(sprint.starts_at).getTime()
-  // Sayfa açıldığı an — render'da Date.now() çağırmak her render'da farklı sonuç verir
-  const [nowMs] = useState(() => Date.now())
+
+  // "Şimdi" SUNUCU saatine göre ve her saniye ilerler. İlk değer sunucunun
+  // render anı: sunucu ve tarayıcıda aynı → hydration uyuşmazlığı yok.
+  // Sonra tarayıcı, kendi saatiyle sunucununki arasındaki farkı düzelterek
+  // sayar. (29 Eyl 2026: "şimdi" sayfa açılışına sabitlenince, tarayıcı saati
+  // sunucudan 1 sn gerideyse yeni sprint "01:15'te başlıyor" diye donuyordu.)
+  const [nowMs, setNowMs] = useState(serverNow)
   const isActiveNow   = nowMs >= startTime && nowMs < endTime
   const isFinishedNow = nowMs >= endTime
+  const finished      = isFinishedNow
+  const timeLeft      = Math.max(0, Math.ceil((endTime - nowMs) / 1000))
 
-  const [timeLeft, setTimeLeft]         = useState(() => Math.max(0, Math.ceil((endTime - nowMs) / 1000)))
+  useEffect(() => {
+    const skew = serverNow - Date.now()
+    const id = setInterval(() => {
+      const t = Date.now() + skew
+      setNowMs(t)
+      if (t >= endTime) clearInterval(id)
+    }, 1000)
+    return () => clearInterval(id)
+  }, [serverNow, endTime])
+
   const [participants, setParticipants] = useState<SprintParticipant[]>(initialParticipants)
   const [joined, setJoined]             = useState(isJoinedProp)
   const [joining, setJoining]           = useState(false)
-  const [finished, setFinished]         = useState(isFinishedNow)
   const [wordCount, setWordCount]       = useState(0)
   const [submitting, setSubmitting]     = useState(false)
   const [done, setDone]                 = useState(false)
   const [selectedProjectId, setSelectedProjectId] = useState(userProjects[0]?.id ?? '')
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-
-  // Countdown timer
-  useEffect(() => {
-    if (finished) return
-    timerRef.current = setInterval(() => {
-      const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
-      setTimeLeft(remaining)
-      if (remaining === 0) {
-        setFinished(true)
-        clearInterval(timerRef.current!)
-      }
-    }, 1000)
-    return () => { if (timerRef.current) clearInterval(timerRef.current) }
-  }, [endTime, finished])
 
   const refreshParticipants = useCallback(() => {
     supabase

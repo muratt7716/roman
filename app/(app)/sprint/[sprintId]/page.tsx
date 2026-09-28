@@ -65,6 +65,7 @@ export default async function SprintRoomPage({ params }: Props) {
         currentUserId={user.id}
         isJoined={isJoined}
         userProjects={userProjects}
+        serverNow={Date.now()}
       />
     </div>
   )
