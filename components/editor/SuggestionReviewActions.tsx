@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, X, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 
 interface Props {
@@ -22,34 +21,33 @@ export function SuggestionReviewActions({
 }: Props) {
   const [loading, setLoading] = useState<'accept' | 'reject' | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
-  async function accept() {
-    setLoading('accept')
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setLoading(null); return }
-
-    // Yeni versiyon oluştur (orijinal kaybolmaz)
-    await supabase.from('chapter_versions').insert({
-      chapter_id: chapterId,
-      author_id: suggestorId,
-      content: suggestionContent,
-      word_count: wordCount,
+  // Değerlendirme sunucuda (bkz. /api/suggestions/[id]): yeni versiyon önerici
+  // adına yazılmalı, bunu RLS tarayıcıya izin vermez. Eskiden bu hata yutulup
+  // "kabul edildi" deniyordu — hiçbir kabul bölüme yansımadı.
+  async function decide(decision: 'accepted' | 'rejected') {
+    setLoading(decision === 'accepted' ? 'accept' : 'reject')
+    const res = await fetch(`/api/suggestions/${suggestionId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ decision }),
     })
-
-    // Kelime sayısını güncelle
-    await supabase.from('chapters').update({ word_count: wordCount }).eq('id', chapterId)
-
-    // Öneri durumunu güncelle
-    await supabase.from('chapter_suggestions').update({ status: 'accepted' }).eq('id', suggestionId)
-
-    await notifySuggester('accepted')
-
-    toast.success(`${suggestorName}'in önerisi kabul edildi ve yeni versiyon oluşturuldu.`)
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      toast.error(body?.error ?? 'İşlem tamamlanamadı.')
+      setLoading(null)
+      return
+    }
+    await notifySuggester(decision)
+    toast.success(decision === 'accepted'
+      ? `${suggestorName}'in önerisi kabul edildi ve yeni versiyon oluşturuldu.`
+      : 'Öneri reddedildi.')
     setLoading(null)
     router.push(`/projects/${projectId}/write/${chapterId}`)
     router.refresh()
   }
+  const accept = () => decide('accepted')
+  const reject = () => decide('rejected')
 
   // Öneriyi gönderene sonucu bildir. Alıcıyı ve yetkiyi sunucu doğrular:
   // yalnızca proje sahibi değerlendirebilir, alıcı da önerinin sahibidir.
@@ -59,17 +57,6 @@ export function SuggestionReviewActions({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event: 'suggestion_reviewed', suggestion_id: suggestionId, decision }),
     }).catch(() => null)
-  }
-
-  async function reject() {
-    setLoading('reject')
-    await supabase.from('chapter_suggestions').update({ status: 'rejected' }).eq('id', suggestionId)
-    // Eskiden red sessizdi — öneriyi gönderen cevabı hiç öğrenmiyordu
-    await notifySuggester('rejected')
-    toast.success('Öneri reddedildi.')
-    setLoading(null)
-    router.push(`/projects/${projectId}/write/${chapterId}`)
-    router.refresh()
   }
 
   return (

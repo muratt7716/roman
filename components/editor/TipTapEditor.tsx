@@ -137,7 +137,21 @@ export function TipTapEditor({ chapterId, projectId, initialContent, chapterTitl
       const milestone = !ownVersionId.current || lastVersionWordCount.current === 0 || wordDiff >= 20
 
       let written = false
+      // Yerinde güncelleme yalnızca kendi versiyonumuz hâlâ bölümün EN YENİSİYSE.
+      // Arada başkası (ortak yazar, başka sekmede geri alma) yeni versiyon açtıysa,
+      // eskisine yazmak metni "en son hal"in gerisinde bırakır — görünmez olur.
+      let isHead = false
       if (!milestone) {
+        const { data: head } = await supabase
+          .from('chapter_versions')
+          .select('id')
+          .eq('chapter_id', chapterId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        isHead = head?.id === ownVersionId.current
+      }
+      if (!milestone && isHead) {
         const { data, error } = await supabase
           .from('chapter_versions')
           .update({ content, word_count: wordCount })

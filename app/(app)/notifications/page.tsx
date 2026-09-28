@@ -44,15 +44,28 @@ function getNotifDetail(n: any): { title: string; subtitle?: string; link?: stri
         subtitle: p.note ? `"${(p.note as string).slice(0, 80)}${(p.note as string).length > 80 ? '...' : ''}"` : undefined,
         link: p.chapter_id && p.project_id ? `/projects/${p.project_id}/write/${p.chapter_id}/suggestions-list` : undefined,
       }
+    // Öneri değerlendirmesi de acceptance/rejection tipiyle gelir (events.ts,
+    // context alanıyla). Eskiden "projeye kabul edildin / başvurun reddedildi"
+    // yazıyordu — önerisi reddedilen kişi projeden atıldığını sanırdı.
     case 'acceptance':
+    case 'rejection':
+      if (p.context === 'suggestion_accepted' || p.context === 'suggestion_rejected') {
+        return {
+          title: p.context === 'suggestion_accepted'
+            ? `"${p.chapter_title ?? 'bir bölüm'}" için önerin kabul edildi`
+            : `"${p.chapter_title ?? 'bir bölüm'}" için önerin kabul edilmedi`,
+          link: p.project_id && p.chapter_id ? `/projects/${p.project_id}/write/${p.chapter_id}` : undefined,
+        }
+      }
+      if (n.type === 'rejection') {
+        return {
+          title: `"${p.project_title ?? 'Bir proje'}" başvurun reddedildi`,
+          link: p.project_id ? `/projects/${p.project_id}/overview` : undefined,
+        }
+      }
       return {
         title: `"${p.project_title ?? 'Bir proje'}" projesine kabul edildin`,
         subtitle: p.role_name ? `Rol: ${p.role_name}` : undefined,
-        link: p.project_id ? `/projects/${p.project_id}/overview` : undefined,
-      }
-    case 'rejection':
-      return {
-        title: `"${p.project_title ?? 'Bir proje'}" başvurun reddedildi`,
         link: p.project_id ? `/projects/${p.project_id}/overview` : undefined,
       }
     case 'comment':

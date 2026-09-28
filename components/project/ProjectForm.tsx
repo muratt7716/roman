@@ -108,6 +108,23 @@ export function ProjectForm() {
       return
     }
 
+    // Sahibin kendi rolü: her zaman ayrı bir "Baş Yazar". Eskiden sahip,
+    // kullanıcının tanımladığı İLK role oturtuluyordu — o rolün koltuğunu
+    // doldurup ekibe kapatıyordu; hiç rol tanımlanmadıysa sahip ekipte hiç
+    // görünmüyordu (29 Eyl 2026, formdan oluşturulan projede doğrulandı).
+    const { data: leadRole } = await supabase
+      .from('project_roles')
+      .insert({ project_id: project.id, name: 'Baş Yazar', description: 'Proje sahibi', max_members: 1 })
+      .select('id')
+      .single()
+    if (leadRole) {
+      await supabase.from('project_members').insert({
+        project_id: project.id,
+        user_id: user.id,
+        role_id: leadRole.id,
+      })
+    }
+
     if (roles.length > 0) {
       await supabase.from('project_roles').insert(
         roles.map(r => ({
@@ -117,21 +134,6 @@ export function ProjectForm() {
           max_members: r.max_members,
         }))
       )
-    }
-
-    const { data: firstRole } = await supabase
-      .from('project_roles')
-      .select('id')
-      .eq('project_id', project.id)
-      .limit(1)
-      .single()
-
-    if (firstRole) {
-      await supabase.from('project_members').insert({
-        project_id: project.id,
-        user_id: user.id,
-        role_id: firstRole.id,
-      })
     }
 
     router.push(`/projects/${project.id}/overview`)

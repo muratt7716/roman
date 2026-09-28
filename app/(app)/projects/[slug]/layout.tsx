@@ -90,9 +90,11 @@ export default async function ProjectLayout({ children, params }: Props) {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 overflow-auto bg-[hsl(245_25%_4%)] w-full">
+      {/* <main> değil: (app) layout'u zaten bir <main> açıyor; iç içe iki ana
+          bölge ekran okuyucuları "içerik nerede" diye şaşırtır */}
+      <div className="flex-1 overflow-auto bg-[hsl(245_25%_4%)] w-full">
         {children}
-      </main>
+      </div>
     </div>
   )
 }
