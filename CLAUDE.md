@@ -224,7 +224,6 @@ app/(app)/
   layout.tsx                          # Auth guard + profil upsert fallback
   dashboard/page.tsx                  # Dashboard
   notifications/page.tsx              # Bildirimler — tüm tipler linklendi
-  oyun/page.tsx                       # Türkçe Wordle kelime oyunu
   jenerator/page.tsx                  # Karakter jeneratörü sayfası
   fikir-odasi/page.tsx                # Fikir Odası — thread listesi
   fikir-odasi/[id]/page.tsx           # Fikir thread detayı
@@ -242,7 +241,7 @@ components/auth/
   LoginForm.tsx                       # Email + Google login — profil upsert, ?next / ?error
   SignupForm.tsx                      # Email signup — session varsa profil upsert
 components/editor/
-  TipTapEditor.tsx                    # Ana editör — autosave 30s, versioning (>=20 kelime fark), AI butonu
+  TipTapEditor.tsx                    # Ana editör — autosave 3s + yerinde güncelleme (bkz. Editör Kaydı), flushEditor()
   ChapterEditorClient.tsx             # Editör wrapper — responsive, mobil comment toggle
   CommentPanel.tsx                    # Yorum paneli — proje sahibi silebilir, projectId payload'da
   PresenceBar.tsx                     # Realtime presence bar — streak + oturum kelimesi
@@ -486,7 +485,7 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
   4. `gemini-3.5-flash` — 20 RPD
   5. `gemini-3-flash` — 20 RPD
 - Bir model rate limit veya hata verirse otomatik sonraki modele geçer, null dönerse tüm modeller başarısız
-- **Tıkandım? butonu** — TipTap toolbar sağında ⚡, son 5 paragrafı + bölüm başlığını gönderir, 3 yön + 2 cümle başlangıcı döner
+- **Tıkandım? butonu ARAYÜZDE YOK** (29 Eyl 2026) — /api/ai/suggest rotası duruyor ama hiçbir yerden çağrılmıyor
 - **Karakter Derinleştir** — `/jenerator` sayfasında, üretilen profili analiz eder, dramatik potansiyel + ses + ilk sahne önerir
 - **Rate limit:** localStorage günde 5 kullanım per feature (`kb_ai_suggest_uses`, `kb_ai_char_uses`)
 - API key yoksa route sessizce `{ suggestion: null }` döner — uygulama çökmez
@@ -684,6 +683,15 @@ app/(app)/dashboard/page.tsx                                        # Akademi Ö
 - JSX'te aynı attribute iki kez yazma (`aria-hidden` gibi) → TypeScript build'i kırar
 
 ---
+
+## Lansman Doğrulaması — 29 Eyl 2026 (canlıda, hepsi yeşil)
+`scripts/e2e/` 7 akış dosyası 73/73 · Akademi güvenliği 42/42 · tarama 122 görünüm, 0 kırık link.
+**Doğrulanamayan (elle bakılmalı):** admin paneli (yalnızca admin e-postası girer), Google OAuth'un
+Google tarafı, e-posta ile kayıt/şifre sıfırlama e-postaları, gerçek iOS Safari/Android cihaz,
+yük/performans. **Bilinen, lansmanı engellemeyen:** öğrenci teslim sonrası API'den metni
+değiştirebilir; AI günlük 5 sınırı yalnızca tarayıcıda (rotalar artık giriş istiyor); dergi okuma
+sayfası giriş ister; SMTP limiti (e-posta kaydı 3.'de 429); 131 lint uyarısı (0 hata).
+Cron (`/api/sprint/cron`) canlıda doğrulandı: Vercel'in CRON_SECRET'ı ile 200, tekrar çağrıda çift oluşturmaz.
 
 ## Uçtan Uca Testler — `scripts/e2e/` (27 Eyl 2026)
 Gerçek tarayıcıda, canlı DB'ye geçici hesaplarla tıklayarak sınar. Her değişiklikten sonra
