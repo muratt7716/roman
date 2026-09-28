@@ -741,8 +741,13 @@ adları korunur): `supabase/migrations/2026-09-25-account-delete-set-null.sql`.
 Hesap silme ayrıca depodaki `avatars/{userId}.*` ve sahip olunan projelerin `covers/{projectId}.*`
 dosyalarını siler (FK cascade depoya ulaşmaz).
 
-### 🔴 Akademi erişim açıkları (26 Eyl 2026, canlıda test edildi)
-Düzeltme: `supabase/migrations/2026-09-26-academy-access.sql` — **uygulandı mı kontrol et.**
+### ✅ Akademi erişim açıkları (26–28 Eyl 2026) — canlıya uygulandı, 42/42 güvenlik testi geçiyor
+Düzeltme: `supabase/migrations/2026-09-26-academy-access.sql` + `2026-09-28-submission-self-grade.sql`
+(ikisi de canlıya uygulandı 28 Eyl 2026).
+- **RLS tuzağı (28 Eyl):** aynı tabloda birden çok UPDATE politikası varsa yeni satır HERHANGİ
+  birinin WITH CHECK'inden geçerse kabul edilir — USING/WITH CHECK politika bazında EŞLEŞMEZ.
+  Öğrenci kendi satırını öğrenci USING'iyle seçip öğretmen WITH CHECK'iyle `graded` + `grade=100`
+  yazabiliyordu. Kural: her WITH CHECK "kimin için" koşulunu da tekrar etsin.
 - Herkes şifresiz, doğrudan `classroom_members` insert ile istediği sınıfa öğrenci olabiliyordu
 - Ödev projeleri `closed` (= herkese açık) açılıyordu → artık `draft`; eskileri migration düzeltir
 - Öğrenci kendi teslimini `graded` yapabiliyordu; veli RLS dalı kolonu kendisiyle karşılaştırıyordu
