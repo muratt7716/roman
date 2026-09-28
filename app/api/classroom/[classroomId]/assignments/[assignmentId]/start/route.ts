@@ -109,15 +109,10 @@ export async function POST(_req: Request, { params }: Params) {
     return NextResponse.json({ error: subError.message }, { status: 500 })
   }
 
-  // Streak: bugün yazdı olarak işaretle
-  const today = new Date().toISOString().slice(0, 10)
-  await supabase
-    .from('user_writing_goals')
-    .upsert(
-      { user_id: user.id, streak_last_date: today },
-      { onConflict: 'user_id', ignoreDuplicates: false }
-    )
-
+  // Seriye burada dokunulmaz: ödeve başlamak yazmak değil. Eskiden
+  // streak_last_date'i bugüne çekiyordu ama seriyi artırmıyordu; o gün
+  // /api/writing-goal "zaten sayılmış" sanıp seriyi atlıyordu. Öğrenci yazınca
+  // seri lib/streak.ts üzerinden artar.
   return NextResponse.json({
     submission_id: submission.id,
     project_id: project.id,

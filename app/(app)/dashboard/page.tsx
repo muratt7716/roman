@@ -11,6 +11,7 @@ import { WeeklyStatsRow } from '@/components/dashboard/WeeklyStatsRow'
 import { BadgesRow } from '@/components/dashboard/BadgesRow'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { wordsWrittenSince } from '@/lib/wordsWritten'
 import type { ProjectWithOwner, WeeklyStats, UserBadge } from '@/types'
 
 export const metadata: Metadata = { title: 'Panel' }
@@ -26,8 +27,8 @@ export default async function DashboardPage() {
   const [
     { data: ownedProjects },
     { data: membershipData },
-    { data: versionStats },
-    { data: followerData },
+    weekWords,
+    { count: newFollowerCount },
     { data: badgeData },
     { data: academicData },
   ] = await Promise.all([
@@ -42,11 +43,8 @@ export default async function DashboardPage() {
       .select('project:projects(*, owner:profiles!projects_owner_id_fkey(*), roles:project_roles(*))')
       .eq('user_id', user.id)
       .limit(6),
-    supabase
-      .from('chapter_versions')
-      .select('word_count')
-      .eq('author_id', user.id)
-      .gte('created_at', sevenDaysAgo),
+    // Bölüm başına fark — versiyonların toplam kelimeleri toplanınca şişiyordu
+    wordsWrittenSince(supabase, user.id, new Date(sevenDaysAgo)),
     supabase
       .from('follows')
       .select('follower_id', { count: 'exact', head: true })
@@ -108,9 +106,10 @@ export default async function DashboardPage() {
   const totalWords = owned.reduce((s, p) => s + (p.current_word_count ?? 0), 0)
 
   const weeklyStats: WeeklyStats = {
-    wordsWritten: (versionStats ?? []).reduce((s: number, v: { word_count: number }) => s + (v.word_count ?? 0), 0),
+    wordsWritten: weekWords,
     reactionsReceived: reactionCount ?? 0,
-    newFollowers: (followerData as unknown as number) ?? 0,
+    // head:true sorgusu sayıyı `count`ta döndürür; eskiden `data` okunuyordu → hep 0
+    newFollowers: newFollowerCount ?? 0,
     totalViews: totalViewCount,
   }
 

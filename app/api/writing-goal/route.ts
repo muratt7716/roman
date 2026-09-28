@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { checkAllBadges } from '@/lib/badges'
+import { bumpStreak } from '@/lib/streak'
+import { istanbulDate, istanbulDayStart, daysBetween } from '@/lib/time'
+import { wordsWrittenSince } from '@/lib/wordsWritten'
 
 // GET /api/writing-goal
 // Returns: { daily_target, streak_current, streak_best, today_words }
@@ -10,85 +13,33 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Giriş yapman gerekiyor.' }, { status: 401 })
 
-  // Fetch today's words written (UTC day)
-  const todayStart = new Date()
-  todayStart.setUTCHours(0, 0, 0, 0)
-  const todayEnd = new Date()
-  todayEnd.setUTCHours(23, 59, 59, 999)
+  // Bugün (İstanbul günü) yazılan kelime — bölüm başına fark, toplam değil
+  const today = istanbulDate()
+  const todayWords = await wordsWrittenSince(supabase, user.id, istanbulDayStart(today))
 
-  const { data: versions } = await supabase
-    .from('chapter_versions')
-    .select('word_count')
-    .eq('author_id', user.id)
-    .gte('created_at', todayStart.toISOString())
-    .lte('created_at', todayEnd.toISOString())
-
-  const todayWords = (versions ?? []).reduce(
-    (s: number, v: { word_count: number }) => s + (v.word_count ?? 0),
-    0
-  )
-
-  // Fetch or create goal row
   const { data: existing } = await supabase
     .from('user_writing_goals')
-    .select('*')
+    .select('daily_target, streak_current, streak_best, streak_last_date')
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
-  const goal = existing ?? {
-    user_id: user.id,
-    daily_target: 500,
-    streak_current: 0,
-    streak_best: 0,
-    streak_last_date: null,
-  }
+  let goal = existing ?? { daily_target: 500, streak_current: 0, streak_best: 0, streak_last_date: null }
 
-  const todayStr = new Date().toISOString().slice(0, 10)
-  let { streak_current, streak_best, streak_last_date } = goal
-  let streakUpdated = false
-
-  if (todayWords > 0 && streak_last_date !== todayStr) {
-    // User wrote today — update streak
-    if (!streak_last_date) {
-      streak_current = 1
-    } else {
-      const last = new Date(streak_last_date)
-      const now = new Date(todayStr)
-      const diffDays = Math.round((now.getTime() - last.getTime()) / 86400000)
-      streak_current = diffDays <= 1 ? streak_current + 1 : 1
-    }
-    streak_best = Math.max(streak_current, streak_best)
-    streak_last_date = todayStr
-    streakUpdated = true
-  } else if (streak_last_date && streak_last_date !== todayStr) {
-    // Check for streak break (more than 1 day gap)
-    const last = new Date(streak_last_date)
-    const now = new Date(todayStr)
-    const diffDays = Math.round((now.getTime() - last.getTime()) / 86400000)
-    if (diffDays > 1 && streak_current > 0) {
-      streak_current = 0
-      streakUpdated = true
-    }
-  }
-
-  if (streakUpdated || !existing) {
-    await supabase.from('user_writing_goals').upsert({
-      user_id: user.id,
-      daily_target: goal.daily_target,
-      streak_current,
-      streak_best,
-      streak_last_date,
-      updated_at: new Date().toISOString(),
-    })
-
-    // Check streak-related badges after update
+  if (todayWords > 0 && goal.streak_last_date !== today) {
+    goal = await bumpStreak(supabase, user.id)
     await checkAllBadges(supabase, user.id)
+  } else if (goal.streak_last_date && daysBetween(goal.streak_last_date, today) > 1 && goal.streak_current > 0) {
+    // Dün yazmadı → seri koptu
+    goal = { ...goal, streak_current: 0 }
+    await supabase.from('user_writing_goals').update({ streak_current: 0, updated_at: new Date().toISOString() }).eq('user_id', user.id)
+  } else if (!existing) {
+    await supabase.from('user_writing_goals').upsert({ user_id: user.id, daily_target: 500 })
   }
 
   return NextResponse.json({
     daily_target: goal.daily_target,
-    streak_current,
-    streak_best,
+    streak_current: goal.streak_current,
+    streak_best: goal.streak_best,
     today_words: todayWords,
   })
 }

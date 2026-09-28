@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Shuffle, Copy, Check, User, Zap } from 'lucide-react'
 import { generateCharacter, type GeneratedCharacter } from '@/lib/characterData'
+import { istanbulDate } from '@/lib/time'
 import { pick, MALE_NAMES, FEMALE_NAMES, SURNAMES, AGES, PERSONALITIES, BACKGROUNDS, MOTIVATIONS, FLAWS, APPEARANCES } from '@/lib/characterData'
 
 interface Props {
@@ -70,7 +71,7 @@ export function CharacterGenerator({ onUseCharacter }: Props) {
     setAiLoading(true)
 
     const usageKey = 'kb_ai_char_uses'
-    const todayKey = new Date().toISOString().slice(0, 10)
+    const todayKey = istanbulDate()
     const raw = localStorage.getItem(usageKey)
     const usage = raw ? JSON.parse(raw) : {}
     const todayCount = usage[todayKey] ?? 0

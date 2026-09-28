@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ magazin
 
   const { data: magazine } = await supabase
     .from('class_magazines')
-    .select('status, classroom:classrooms(owner_id)')
+    .select('status, classroom_id, classroom:classrooms(owner_id)')
     .eq('id', magazineId)
     .single()
 
@@ -20,6 +20,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ magazin
 
   const { submission_id, display_name, sort_order } = await req.json()
   if (!submission_id) return NextResponse.json({ error: 'submission_id zorunlu.' }, { status: 400 })
+
+  // Teslim bu sınıfın bir ödevine ait mi, bölüm bu dergiye mi? Kontrol edilmezse
+  // başka bir sınıfın öğrenci metni yayımlanan (herkese açık) dergiye taşınabilir.
+  const [{ data: sub }, { data: section }] = await Promise.all([
+    supabase.from('assignment_submissions').select('assignment:classroom_assignments(classroom_id)').eq('id', submission_id).maybeSingle(),
+    supabase.from('magazine_sections').select('id').eq('id', sectionId).eq('magazine_id', magazineId).maybeSingle(),
+  ])
+  const subClassroom = (sub?.assignment as unknown as { classroom_id: string } | null)?.classroom_id
+  if (!section || subClassroom !== magazine.classroom_id)
+    return NextResponse.json({ error: 'Bu teslim bu sınıfa ait değil.' }, { status: 403 })
 
   const { data, error } = await supabase
     .from('magazine_entries')
