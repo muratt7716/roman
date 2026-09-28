@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { MagazineReader } from '@/components/magazine/MagazineReader'
+import { publicClassroomInfo } from '@/lib/classroom-public'
 import type { MagazineSection } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -13,11 +14,16 @@ export default async function MagazineReaderPage({
   const { classroomId, magazineId } = await params
   const supabase = await createClient()
 
-  const { data: magazine } = await supabase.from('class_magazines').select('*').eq('id', magazineId).single()
+  // Dergiyi görüp göremeyeceğine magazines_select karar verir (yayımlanmışsa
+  // herkes, taslaksa yalnızca sınıf). Künye sınıf dışındakiler için RLS'e
+  // takılır — eskiden bu yüzden yayımlanmış dergi dışarıya 404 veriyordu.
+  const { data: magazine } = await supabase.from('class_magazines').select('*').eq('id', magazineId).eq('classroom_id', classroomId).single()
   if (!magazine) notFound()
 
-  const { data: classroom } = await supabase.from('classrooms').select('name, school_name').eq('id', classroomId).single()
-  if (!classroom) notFound()
+  const { data: memberView } = await supabase.from('classrooms').select('name, school_name').eq('id', classroomId).maybeSingle()
+  const classroom = memberView
+    ?? (magazine.status === 'published' ? (await publicClassroomInfo([classroomId])).get(classroomId) : null)
+    ?? { name: 'Sınıf dergisi', school_name: '' }
 
   const { data: sections } = await supabase
     .from('magazine_sections')

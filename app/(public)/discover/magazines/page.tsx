@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { BookOpen } from 'lucide-react'
+import { publicClassroomInfo } from '@/lib/classroom-public'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,10 +10,13 @@ export default async function DiscoverMagazinesPage() {
 
   const { data: magazines } = await supabase
     .from('class_magazines')
-    .select('id, title, issue_number, published_at, classroom_id, classroom:classrooms(name, school_name)')
+    .select('id, title, issue_number, published_at, classroom_id')
     .eq('status', 'published')
     .order('published_at', { ascending: false })
     .limit(24)
+
+  // Künye: classrooms RLS'i yalnızca üyelere açık — ziyaretçide boş kalıyordu
+  const classrooms = await publicClassroomInfo((magazines ?? []).map(m => m.classroom_id as string))
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12 space-y-8">
@@ -31,8 +35,8 @@ export default async function DiscoverMagazinesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(magazines ?? []).map((m: any) => {
-            const cls = m.classroom as unknown as { name: string; school_name: string } | null
+          {(magazines ?? []).map(m => {
+            const cls = classrooms.get(m.classroom_id as string)
             return (
               <Link
                 key={m.id}

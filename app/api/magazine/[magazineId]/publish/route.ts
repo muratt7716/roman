@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { insertNotificationsSafe } from '@/lib/notifications'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function POST(_: Request, { params }: { params: Promise<{ magazineId: string }> }) {
   const { magazineId } = await params
@@ -20,12 +21,21 @@ export async function POST(_: Request, { params }: { params: Promise<{ magazineI
   if (magazine.status === 'published')
     return NextResponse.json({ error: 'Dergi zaten yayımlandı.' }, { status: 400 })
 
-  const { error } = await supabase
+  // Yazma service-role ile — yetki yukarıda kontrol edildi (yalnızca sınıf sahibi).
+  // magazines_update politikasının USING'i `status = 'draft'` ve ayrı WITH CHECK'i
+  // yok; Postgres USING'i yeni satıra da uygular, yani 'published'a geçiş RLS'e
+  // takılıyordu: hiçbir dergi yayımlanamadı (29 Eyl 2026, tarayıcıda kanıtlandı).
+  let admin
+  try { admin = createAdminClient() } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 500 })
+  }
+  const { error } = await admin
     .from('class_magazines')
     .update({ status: 'published', published_at: new Date().toISOString() })
     .eq('id', magazineId)
+    .eq('status', 'draft')
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Dergi yayımlanamadı.' }, { status: 500 })
 
   // Öğrencilere bildirim gönder
   const { data: members } = await supabase
