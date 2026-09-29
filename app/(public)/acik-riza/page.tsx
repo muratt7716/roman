@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 // metnine ya da sözleşmeye gömülü alınmasını geçersiz sayıyor.
 const ITEMS = [
   ['Aktarılan veriler', 'Hesap ve profil bilgileriniz (e-posta, kullanıcı adı, görünen ad, profil fotoğrafı), Platform\'da oluşturduğunuz içerikler ve etkileşimler, Akademi modülündeki ödev ve not kayıtları, oturum ve IP kayıtları.'],
-  ['Alıcılar ve ülkeler', 'Supabase Inc. (veritabanı, depolama, kimlik doğrulama) ve Vercel Inc. (barındırma) — sunucular ABD ve/veya Avrupa Birliği\'nde. Yalnızca ilgili özelliği kullanırsanız: Google LLC (Google ile giriş, Gemini yapay zekâ önerileri) ve SomaFM (müzik yayını, yalnızca IP adresi) — ABD.'],
+  ['Alıcılar ve ülkeler', 'Supabase Inc. (veritabanı, depolama, kimlik doğrulama) ve Vercel Inc. (barındırma) — sunucular ABD ve/veya Avrupa Birliği\'nde. Yalnızca ilgili özelliği kullanırsanız: Google LLC (Google ile giriş) ve SomaFM (müzik yayını, yalnızca IP adresi) — ABD.'],
   ['Amaç', 'Platform\'un çalışması: verilerinizin saklanması, oturum açmanız, içeriklerinizin size ve paylaştığınız kişilere sunulması. Platform\'un tüm altyapısı bu sağlayıcılar üzerinde çalıştığı için aktarım olmadan hizmet sunulamaz.'],
   ['Geri alma', `Rızanızı dilediğiniz zaman geri alabilirsiniz. Bunun için Ayarlar sayfasından hesabınızı silmeniz ya da ${DATA_CONTROLLER.channel} üzerinden talepte bulunmanız yeterlidir. Geri alma, o tarihe kadar yapılan aktarımların hukuka uygunluğunu etkilemez.`],
 ]

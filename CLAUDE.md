@@ -211,7 +211,6 @@ lib/supabase/
 lib/validations/
   project.ts                          # Zod şemaları — synopsis max 1000 karakter
   auth.ts                             # Auth zod şemaları
-lib/gemini.ts                         # generateWithFallback() — çok model retry (RPD öncelikli)
 lib/legal.ts                          # TERMS_VERSION + requiresConsent() — KVKK rıza politikası
 lib/supabase/admin.ts                 # service-role client (RLS baypas) — yalnızca auth.admin.* için
 lib/characterData.ts                  # Türkçe karakter üretimi için veri listeleri
@@ -234,9 +233,6 @@ app/(app)/
 app/(public)/
   layout.tsx                          # Public layout + profil upsert fallback (try/catch)
   page.tsx                            # Anasayfa — stats grid-cols-2 mobilde, footer pb-24
-app/api/ai/
-  suggest/route.ts                    # AI yazma önerisi — generateWithFallback kullanır
-  character/route.ts                  # AI karakter derinleştirme — generateWithFallback kullanır
 components/auth/
   LoginForm.tsx                       # Email + Google login — profil upsert, ?next / ?error
   SignupForm.tsx                      # Email signup — session varsa profil upsert
@@ -256,7 +252,7 @@ components/project/
   RoleForm.tsx                        # Ekip rolü oluşturma formu
 components/
   MusicWidget.tsx                     # SomaFM lofi widget — root layout'ta, fixed bottom-6 right-6
-  CharacterGenerator.tsx              # Per-field shuffle, Gemini derinleştirme, markdown kopyala
+  CharacterGenerator.tsx              # Per-field shuffle, markdown kopyala (yapay zekâ yok)
 components/games/
   WordleGame.tsx                      # Türkçe Wordle — [...str].length ile doğru Unicode sayımı
 components/idea/
@@ -475,26 +471,17 @@ rm -r -fo .next      # Cache temizle (PowerShell — && çalışmaz)
 - Türkçe klavye (Ğ, Ü, Ş, İ, Ö, Ç dahil)
 - Navbar dropdown menüsünde "Kelime Oyunu" linki
 
-### Gemini Free Tier (`/api/ai/suggest` + `/api/ai/character`)
-- `GEMINI_API_KEY` `.env.local`'da — client'a kesinlikle açılmaz, sadece server route'larda kullanılır
-- **Model sistemi:** `lib/gemini.ts` → `generateWithFallback(prompt)` fonksiyonu — tüm AI route'ları bunu kullanır
-- Fallback sırası (RPD'ye göre, yüksekten düşüğe):
-  1. `gemini-3.1-flash-lite` — 500 RPD (öncelikli)
-  2. `gemini-2.5-flash-lite` — 20 RPD
-  3. `gemini-2.5-flash` — 20 RPD
-  4. `gemini-3.5-flash` — 20 RPD
-  5. `gemini-3-flash` — 20 RPD
-- Bir model rate limit veya hata verirse otomatik sonraki modele geçer, null dönerse tüm modeller başarısız
-- **Tıkandım? butonu ARAYÜZDE YOK** (29 Eyl 2026) — /api/ai/suggest rotası duruyor ama hiçbir yerden çağrılmıyor
-- **Karakter Derinleştir** — `/jenerator` sayfasında, üretilen profili analiz eder, dramatik potansiyel + ses + ilk sahne önerir
-- **Rate limit:** localStorage günde 5 kullanım per feature (`kb_ai_suggest_uses`, `kb_ai_char_uses`)
-- API key yoksa route sessizce `{ suggestion: null }` döner — uygulama çökmez
+### Yapay Zekâ YOK — ürün kararı (29 Eyl 2026)
+Platformda hiçbir yapay zekâ özelliği yok ve eklenmemeli (kullanıcı kararı). Gemini rotaları
+(`/api/ai/*`), `lib/gemini.ts`, `@google/generative-ai` ve "Derinleştir" düğmesi kaldırıldı.
+Gerekçe: Akademi'de öğrencinin yazısı öğrencinin olsun; kullanıcı metni yurt dışındaki bir
+yapay zekâ servisine gitmesin (KVKK metinleri buna göre: "hiçbir yapay zekâ servisine göndermez");
+paylaşılan ücretsiz kota tek kullanıcıyla tükenebiliyordu. Vercel'deki `GEMINI_API_KEY` silinebilir.
 
 ### Karakter Jeneratörü (`/jenerator` + `components/CharacterGenerator.tsx`)
 - Sıfır maliyet: `lib/characterData.ts` içindeki Türkçe veri listeleriyle `Math.random()` tabanlı üretim
 - Her alan (kişilik, görünüş, geçmiş, motivasyon, kusur) üzerinde hover → 🔀 ile tek tek yenilenebilir
 - "Kopyala" → Markdown formatında panoya
-- "Derinleştir" → Gemini API (günde 5 limit)
 - Navbar dropdown → "Karakter Jeneratörü"
 
 ### Admin Paneli (`/admin`) — IMPLEMENT EDİLDİ ✅
@@ -689,7 +676,7 @@ app/(app)/dashboard/page.tsx                                        # Akademi Ö
 **Doğrulanamayan (elle bakılmalı):** admin paneli (yalnızca admin e-postası girer), Google OAuth'un
 Google tarafı, e-posta ile kayıt/şifre sıfırlama e-postaları, gerçek iOS Safari/Android cihaz,
 yük/performans. **Bilinen, lansmanı engellemeyen:** öğrenci teslim sonrası API'den metni
-değiştirebilir; AI günlük 5 sınırı yalnızca tarayıcıda (rotalar artık giriş istiyor); dergi okuma
+değiştirebilir; dergi okuma
 sayfası giriş ister; SMTP limiti (e-posta kaydı 3.'de 429); 131 lint uyarısı (0 hata).
 Cron (`/api/sprint/cron`) canlıda doğrulandı: Vercel'in CRON_SECRET'ı ile 200, tekrar çağrıda çift oluşturmaz.
 

@@ -117,12 +117,14 @@ try {
     await po.getByText(/sis çöktü/).first().waitFor({ timeout: 20000 })
   }, po)
 
-  await step('jeneratör: karakter üretilir, Gemini derinleştirir', async () => {
+  await step('jeneratör: karakter üretilir, alan yenilenir; yapay zekâ yok', async () => {
     await po.goto(`${SITE}/jenerator`)
     await po.getByRole('button', { name: /Rastgele Karakter Üret/ }).click()
-    await po.getByTitle(/Gemini ile derinleştir/).click()
-    await po.getByText(/Gemini.nin yorumu/).waitFor({ timeout: 40000 })
-    return 'Gemini yanıt verdi'
+    await po.getByText('Kişilik').first().waitFor()
+    await po.getByTitle('Yeniden üret').first().click({ force: true })
+    expect(await po.getByText(/Derinleştir|Gemini/).count() === 0, 'yapay zekâ izi kaldı')
+    const ai = await fetch(`${SITE}/api/ai/character`, { method: 'POST' })
+    expect(ai.status === 404 || ai.status === 405, 'AI rotası hâlâ açık: ' + ai.status)
   }, po)
 
   await step('proje silme: onayla silinir', async () => {

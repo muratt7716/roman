@@ -28,7 +28,7 @@ const SECTIONS = [
   },
   {
     title: '5. Verilerin Aktarıldığı Taraflar',
-    body: `Verileriniz satılmaz ve reklam amacıyla kimseyle paylaşılmaz. Hizmetin çalışması için şu altyapı sağlayıcılarına aktarılır: Supabase (veritabanı, dosya depolama, kimlik doğrulama) ve Vercel (barındırma). Google ile giriş yaparsanız Google, yapay zekâ yazma önerisi veya karakter derinleştirme özelliğini kullanırsanız gönderdiğiniz metin parçası Google (Gemini API), müzik çaları başlatırsanız IP adresiniz yayını sağlayan SomaFM tarafından işlenir. Bu sağlayıcıların sunucuları Türkiye dışında (ABD ve/veya Avrupa Birliği) bulunur. Yurt dışına aktarım KVKK m.9 uyarınca açık rızanıza dayanır ve kayıt sırasında ayrı bir onay kutusuyla alınır; ayrıntılar Açık Rıza Metni'ndedir. Kamuya açık yaptığınız içerikler (yayımlanmış bölümler, profiliniz) herkes tarafından görülebilir.`,
+    body: `Verileriniz satılmaz ve reklam amacıyla kimseyle paylaşılmaz. Hizmetin çalışması için şu altyapı sağlayıcılarına aktarılır: Supabase (veritabanı, dosya depolama, kimlik doğrulama) ve Vercel (barındırma). Google ile giriş yaparsanız Google, müzik çaları başlatırsanız IP adresiniz yayını sağlayan SomaFM tarafından işlenir. Platform yazdığınız metinleri hiçbir yapay zekâ servisine göndermez. Bu sağlayıcıların sunucuları Türkiye dışında (ABD ve/veya Avrupa Birliği) bulunur. Yurt dışına aktarım KVKK m.9 uyarınca açık rızanıza dayanır ve kayıt sırasında ayrı bir onay kutusuyla alınır; ayrıntılar Açık Rıza Metni'ndedir. Kamuya açık yaptığınız içerikler (yayımlanmış bölümler, profiliniz) herkes tarafından görülebilir.`,
   },
   {
     title: '6. Toplama Yöntemi',
@@ -36,7 +36,7 @@ const SECTIONS = [
   },
   {
     title: '7. Çerezler ve Yerel Depolama',
-    body: `Platform yalnızca oturumunuzu sürdürmek için zorunlu kimlik doğrulama çerezleri kullanır. Reklam, analiz veya izleme çerezi kullanılmaz. Yazma serisi ve günlük yapay zekâ kullanım sayacı gibi bazı veriler yalnızca kendi cihazınızın yerel depolamasında tutulur ve bize iletilmez.`,
+    body: `Platform yalnızca oturumunuzu sürdürmek için zorunlu kimlik doğrulama çerezleri kullanır. Reklam, analiz veya izleme çerezi kullanılmaz. Yazma serisi gibi bazı veriler yalnızca kendi cihazınızın yerel depolamasında tutulur ve bize iletilmez.`,
   },
   {
     title: '8. Saklama Süresi ve Silme',

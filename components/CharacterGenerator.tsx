@@ -1,9 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Shuffle, Copy, Check, User, Zap } from 'lucide-react'
+import { Shuffle, Copy, Check, User } from 'lucide-react'
 import { generateCharacter, type GeneratedCharacter } from '@/lib/characterData'
-import { istanbulDate } from '@/lib/time'
 import { pick, MALE_NAMES, FEMALE_NAMES, SURNAMES, AGES, PERSONALITIES, BACKGROUNDS, MOTIVATIONS, FLAWS, APPEARANCES } from '@/lib/characterData'
 
 interface Props {
@@ -14,12 +13,9 @@ export function CharacterGenerator({ onUseCharacter }: Props) {
   const [char, setChar] = useState<GeneratedCharacter | null>(null)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null)
-  const [aiLoading, setAiLoading] = useState(false)
 
   function generate() {
     setLoading(true)
-    setAiSuggestion(null)
     setTimeout(() => {
       setChar(generateCharacter())
       setLoading(false)
@@ -28,7 +24,6 @@ export function CharacterGenerator({ onUseCharacter }: Props) {
 
   function regenerateField(field: keyof GeneratedCharacter) {
     if (!char) return
-    setAiSuggestion(null)
     setChar(prev => {
       if (!prev) return prev
       switch (field) {
@@ -66,39 +61,6 @@ export function CharacterGenerator({ onUseCharacter }: Props) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  async function getAiDepth() {
-    if (!char) return
-    setAiLoading(true)
-
-    const usageKey = 'kb_ai_char_uses'
-    const todayKey = istanbulDate()
-    const raw = localStorage.getItem(usageKey)
-    const usage = raw ? JSON.parse(raw) : {}
-    const todayCount = usage[todayKey] ?? 0
-
-    if (todayCount >= 5) {
-      setAiSuggestion('Günlük AI limiti doldu (5 kullanım). Yarın tekrar dene.')
-      setAiLoading(false)
-      return
-    }
-
-    try {
-      const res = await fetch('/api/ai/character', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ character: toText(char) }),
-      })
-      const data = await res.json()
-      if (data.suggestion) {
-        setAiSuggestion(data.suggestion)
-        localStorage.setItem(usageKey, JSON.stringify({ ...usage, [todayKey]: todayCount + 1 }))
-      }
-    } catch {
-      setAiSuggestion('Şu an bağlanamadım. Biraz sonra tekrar dene.')
-    }
-    setAiLoading(false)
-  }
-
   return (
     <div className="space-y-4">
       {/* Generate button */}
@@ -122,15 +84,6 @@ export function CharacterGenerator({ onUseCharacter }: Props) {
               <p className="text-muted-foreground text-sm">{char.age} yaşında</p>
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={getAiDepth}
-                disabled={aiLoading}
-                title="Gemini ile derinleştir (günde 5 kullanım)"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 hover:bg-amber-500/25 text-xs font-medium transition-colors"
-              >
-                <Zap className="w-3.5 h-3.5" />
-                {aiLoading ? '…' : 'Derinleştir'}
-              </button>
               <button
                 onClick={copy}
                 title="Kopyala"
@@ -158,16 +111,6 @@ export function CharacterGenerator({ onUseCharacter }: Props) {
             <Field label="Motivasyon" value={char.motivation} onReroll={() => regenerateField('motivation')} />
             <Field label="Kusur" value={char.flaw} onReroll={() => regenerateField('flaw')} className="sm:col-span-2" />
           </div>
-
-          {/* AI suggestion */}
-          {aiSuggestion && (
-            <div className="glass rounded-xl p-4 border border-amber-500/20 space-y-2">
-              <p className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5" /> Gemini&apos;nin yorumu
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{aiSuggestion}</p>
-            </div>
-          )}
 
           {/* Use in wiki hint */}
           {onUseCharacter && (

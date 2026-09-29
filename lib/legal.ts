@@ -9,7 +9,9 @@ import type { Profile } from '@/types'
  * bir sonraki girişte /onay kapısına düşer (bkz. requiresConsent).
  */
 export const TERMS_VERSION = '2026-09-26'
-export const TERMS_UPDATED_LABEL = '26 Eylül 2026'
+// Etiket, sürümden bağımsız güncellenebilir: 29 Eyl'de yalnızca bir veri işleyen
+// (Gemini) ÇIKARILDI — işleme daraldığı için yeniden rıza gerekmez, sürüm aynı kalır.
+export const TERMS_UPDATED_LABEL = '29 Eylül 2026'
 
 /**
  * KVKK m.10 — aydınlatma metninde veri sorumlusunun kimliği yer almalı.

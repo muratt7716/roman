@@ -40,7 +40,7 @@ const FEATURES = [
   {
     icon: BookOpen,
     title: 'Karakter Jeneratörü + AI',
-    desc: 'Tek tıkla Türkçe karakter profilleri üretin, yapay zekâ ile derinleştirin. Tıkandığınızda editördeki AI asistanı yön önerir.',
+    desc: 'Tek tıkla Türkçe karakter profilleri üretin; beğenmediğiniz özelliği tek başına yenileyin, profili kopyalayıp hikâyenize taşıyın.',
     color: 'from-sky-500/10 to-blue-500/5',
     iconColor: 'text-sky-400',
   },

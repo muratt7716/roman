@@ -11,7 +11,7 @@ export default function GeneratorPage() {
           <h1 className="text-2xl font-bold font-display">Karakter Jeneratörü</h1>
           <p className="text-muted-foreground text-sm">
             Boş sayfayla baş başa kaldıysan burası seni kurtarır. Bir karakter üret,
-            beğenmediğin özellikleri yenile, Gemini&apos;ye derinleştir.
+            beğenmediğin özellikleri tek tek yenile.
           </p>
         </div>
         <CharacterGenerator />
